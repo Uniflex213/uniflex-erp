@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#fafaf9" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Uniflex" />
+    <meta name="application-name" content="Uniflex" />
+    <meta name="msapplication-TileColor" content="#111111" />
+    <meta name="description" content="Uniflex Distribution — Plateforme ERP/CRM" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/webp" href="/UNIFLEX_Inverted_Col.png.webp" />
+    <link rel="apple-touch-icon" href="/UNIFLEX_Inverted_Col.png.webp" />
+    <title>UNIFLEX Distribution</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+    </script>
+  </body>
+</html>
