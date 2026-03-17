@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabaseClient';
 import { T } from '../theme';
 import { useAnimatedNumber } from '../hooks/useAnimatedNumber';
@@ -6,8 +6,6 @@ import { useStaggerReveal } from '../hooks/useStaggerReveal';
 import GlassCard from '../components/GlassCard';
 import PeriodToggle from '../components/PeriodToggle';
 import type { PeriodOption } from '../components/PeriodToggle';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
 
 const fmt = (n: number) => new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 const fmtShort = (n: number) => n >= 1000000 ? `$${(n / 1000000).toFixed(1)}M` : n >= 1000 ? `$${(n / 1000).toFixed(0)}k` : `$${n}`;
@@ -42,83 +40,124 @@ function KpiCard({ label, value, isMonetary, index, reveal }: {
   );
 }
 
-// ── Canada Mapbox Map ──
+// ── Canada Dotted Map SVG ──
+// Real Canada outline approximated as dot grid with province boundaries
 function CanadaMap({ agents }: { agents: AgentSales[] }) {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
-
-  const warehouses: { name: string; lng: number; lat: number }[] = [
-    { name: 'Boisbriand', lng: -73.84, lat: 45.61 },
-    { name: 'Toronto', lng: -79.38, lat: 43.65 },
-    { name: 'Vancouver', lng: -123.12, lat: 49.28 },
+  const provinces: { code: string; name: string; x: number; y: number }[] = [
+    { code: 'QC', name: 'Québec', x: 355, y: 168 },
+    { code: 'ON', name: 'Ontario', x: 300, y: 175 },
+    { code: 'BC', name: 'C.-B.', x: 68, y: 148 },
+    { code: 'AB', name: 'Alberta', x: 110, y: 138 },
+    { code: 'MB', name: 'Manitoba', x: 210, y: 148 },
+    { code: 'SK', name: 'Saskatchewan', x: 160, y: 140 },
+    { code: 'NB', name: 'N.-B.', x: 388, y: 170 },
+    { code: 'NS', name: 'N.-É.', x: 403, y: 178 },
   ];
 
-  const provinces: { code: string; name: string; lng: number; lat: number }[] = [
-    { code: 'QC', name: 'Québec', lng: -71.21, lat: 46.81 },
-    { code: 'ON', name: 'Ontario', lng: -85.32, lat: 51.25 },
-    { code: 'BC', name: 'C.-B.', lng: -125.65, lat: 53.73 },
-    { code: 'AB', name: 'Alberta', lng: -114.37, lat: 53.93 },
-    { code: 'MB', name: 'Manitoba', lng: -98.81, lat: 53.76 },
-    { code: 'SK', name: 'Saskatchewan', lng: -106.35, lat: 52.94 },
-    { code: 'NB', name: 'N.-B.', lng: -66.46, lat: 46.56 },
-    { code: 'NS', name: 'N.-É.', lng: -63.57, lat: 44.68 },
+  const warehouses = [
+    { name: 'Boisbriand', x: 353, y: 172 },
+    { name: 'Toronto', x: 305, y: 180 },
+    { name: 'Vancouver', x: 65, y: 155 },
   ];
 
-  useEffect(() => {
-    if (!mapContainer.current || mapRef.current) return;
-    const token = import.meta.env.VITE_MAPBOX_TOKEN;
-    if (!token) return;
+  // Canada shape mask — point-in-polygon check per region
+  const inCanada = (x: number, y: number): boolean => {
+    // Main body
+    if (y < 70 || y > 200) return false;
+    // West coast taper
+    if (x < 60) return false;
+    // East coast
+    if (x > 420) return false;
+    // Hudson Bay cutout
+    if (x > 230 && x < 300 && y > 100 && y < 150) return false;
+    // Southern border curve
+    if (y > 170 && x > 100 && x < 280) return false;
+    if (y > 185 && x > 280 && x < 340) return false;
+    // Great Lakes
+    if (x > 280 && x < 320 && y > 170 && y < 185) return false;
+    // Northern thin
+    if (y < 90 && (x < 80 || x > 380)) return false;
+    if (y < 80 && (x < 100 || x > 360)) return false;
+    // BC coast indent
+    if (x < 75 && y > 155) return false;
+    // Maritime detail
+    if (x > 370 && y > 185) return false;
+    if (x > 390 && y < 155) return false;
+    return true;
+  };
 
-    mapboxgl.accessToken = token;
-    const map = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/light-v11',
-      center: [-96, 56],
-      zoom: 2.8,
-      interactive: false,
-      attributionControl: false,
-    });
-
-    map.on('load', () => {
-      // Warehouse markers
-      warehouses.forEach(w => {
-        const el = document.createElement('div');
-        el.style.cssText = `width:10px;height:10px;background:#111;border-radius:2px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.3);`;
-        new mapboxgl.Marker({ element: el }).setLngLat([w.lng, w.lat])
-          .setPopup(new mapboxgl.Popup({ offset: 8, closeButton: false }).setHTML(
-            `<div style="font:600 11px Inter,sans-serif;color:#111;padding:2px 4px">▲ ${w.name}</div>`
-          )).addTo(map);
-      });
-
-      // Province pulsing dots
-      provinces.forEach((p, i) => {
-        const color = AGENT_COLORS[i % AGENT_COLORS.length];
-        const el = document.createElement('div');
-        el.style.cssText = `width:12px;height:12px;border-radius:50%;background:${color};opacity:0.85;box-shadow:0 0 6px ${color};`;
-        el.animate([
-          { boxShadow: `0 0 4px ${color}`, transform: 'scale(1)' },
-          { boxShadow: `0 0 12px ${color}`, transform: 'scale(1.3)' },
-          { boxShadow: `0 0 4px ${color}`, transform: 'scale(1)' },
-        ], { duration: 2000, iterations: Infinity, delay: i * 300 });
-        new mapboxgl.Marker({ element: el }).setLngLat([p.lng, p.lat]).addTo(map);
-      });
-    });
-
-    mapRef.current = map;
-    return () => { map.remove(); mapRef.current = null; };
+  // Generate dots deterministically
+  const dots = React.useMemo(() => {
+    const result: { x: number; y: number; brightness: number }[] = [];
+    let seed = 42;
+    const rand = () => { seed = (seed * 16807 + 0) % 2147483647; return seed / 2147483647; };
+    for (let x = 55; x < 425; x += 6) {
+      for (let y = 68; y < 205; y += 6) {
+        if (inCanada(x, y) && rand() > 0.15) {
+          result.push({ x: x + rand() * 2 - 1, y: y + rand() * 2 - 1, brightness: 0.12 + rand() * 0.18 });
+        }
+      }
+    }
+    return result;
   }, []);
 
-  const token = import.meta.env.VITE_MAPBOX_TOKEN;
-  if (!token) {
-    return (
-      <div style={{ height: 220, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.textLight, fontSize: 12, background: T.glassMid, borderRadius: 8 }}>
-        Map — VITE_MAPBOX_TOKEN manquant
-      </div>
-    );
-  }
+  // Connection lines between warehouses
+  const connections = [
+    { from: warehouses[0], to: warehouses[1] },
+    { from: warehouses[1], to: warehouses[2] },
+  ];
 
   return (
-    <div ref={mapContainer} style={{ width: '100%', height: 220, borderRadius: 8, overflow: 'hidden' }} />
+    <svg viewBox="0 0 460 230" style={{ width: '100%', height: 'auto' }}>
+      <defs>
+        <radialGradient id="glow-pulse">
+          <stop offset="0%" stopColor="#111" stopOpacity="0.15" />
+          <stop offset="100%" stopColor="#111" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+
+      {/* Dot grid */}
+      {dots.map((d, i) => (
+        <circle key={i} cx={d.x} cy={d.y} r={1.3} fill="#111" opacity={d.brightness} />
+      ))}
+
+      {/* Connection lines */}
+      {connections.map((c, i) => (
+        <line key={i} x1={c.from.x} y1={c.from.y} x2={c.to.x} y2={c.to.y}
+          stroke="#111" strokeWidth={0.5} opacity={0.08} strokeDasharray="3 3" />
+      ))}
+
+      {/* Province hotspots */}
+      {provinces.map((p, i) => {
+        const color = AGENT_COLORS[i % AGENT_COLORS.length];
+        return (
+          <g key={p.code}>
+            {/* Pulse ring */}
+            <circle cx={p.x} cy={p.y} r={4} fill="none" stroke={color} strokeWidth={1} opacity={0.4}>
+              <animate attributeName="r" values="4;10;4" dur="2.5s" repeatCount="indefinite" begin={`${i * 0.3}s`} />
+              <animate attributeName="opacity" values="0.4;0;0.4" dur="2.5s" repeatCount="indefinite" begin={`${i * 0.3}s`} />
+            </circle>
+            {/* Solid dot */}
+            <circle cx={p.x} cy={p.y} r={3} fill={color} opacity={0.85} />
+            {/* Label */}
+            <text x={p.x} y={p.y - 8} textAnchor="middle" fill="#111" fontSize={6} fontFamily="Inter, system-ui, sans-serif"
+              fontWeight={600} opacity={0.5}>{p.code}</text>
+          </g>
+        );
+      })}
+
+      {/* Warehouse markers */}
+      {warehouses.map(w => (
+        <g key={w.name}>
+          <rect x={w.x - 3} y={w.y - 3} width={6} height={6} rx={1.5} fill="#111" />
+          <rect x={w.x - 2} y={w.y - 2} width={4} height={4} rx={1} fill="#fff" />
+          <text x={w.x} y={w.y + 14} textAnchor="middle" fill="#111" fontSize={6.5}
+            fontFamily="Inter, system-ui, sans-serif" fontWeight={600} opacity={0.6}>
+            {w.name}
+          </text>
+        </g>
+      ))}
+    </svg>
   );
 }
 
