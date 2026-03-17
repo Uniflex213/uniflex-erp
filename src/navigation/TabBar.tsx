@@ -235,7 +235,7 @@ export default function TabBar({ pageLabels }: TabBarProps) {
             left: 0,
             right: 0,
             bottom: 0,
-            background: "rgba(0,0,0,0.3)",
+            background: "rgba(0,0,0,0.6)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",

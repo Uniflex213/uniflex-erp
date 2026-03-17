@@ -231,7 +231,7 @@ export default function CRMKanban({ leads, samples = [], onLeadClick, onStageCha
       )}
 
       {deleteConfirm && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div style={{ background: T.bgCard, borderRadius: 16, padding: 28, maxWidth: 380, textAlign: "center" }}>
             <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, color: T.text }}>Supprimer ce lead?</div>
             <div style={{ fontSize: 14, color: T.textMid, marginBottom: 24 }}>Cette action est irréversible.</div>

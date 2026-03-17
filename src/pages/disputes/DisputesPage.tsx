@@ -313,7 +313,7 @@ export default function DisputesPage() {
 
       {/* Modal nouvelle dispute */}
       {showNew && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000 }}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000 }}>
           <div style={{ background: T.card, borderRadius: 12, padding: 28, width: 520, maxWidth: "95vw", maxHeight: "90vh", overflowY: "auto" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
               <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800 }}>Nouvelle dispute</h3>

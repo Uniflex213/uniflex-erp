@@ -126,7 +126,7 @@ export default function ToInvoiceKpiBar({ docs }: Props) {
       </div>
 
       {modal && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 9000, display: "flex", justifyContent: "center", overflowY: "auto", padding: 20 }} onClick={() => setModal(null)}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9000, display: "flex", justifyContent: "center", overflowY: "auto", padding: 20 }} onClick={() => setModal(null)}>
           <div style={{ background: T.card, borderRadius: 16, width: "100%", maxWidth: 700, margin: "auto", padding: 28, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
               <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: T.text }}>{modal.title}</h3>

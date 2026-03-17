@@ -271,7 +271,7 @@ export default function CreateUserModal({ teams, onClose, onCreated, prefill }: 
   // Step 4 content is rendered inline in the form (no early return needed)
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
       <div style={{ background: T.bgCard, borderRadius: 16, width: step === 2 ? 680 : step === 3 ? 560 : 480, maxHeight: "90vh", overflow: "hidden", display: "flex", flexDirection: "column", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
         <div style={{ padding: "20px 24px 16px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <h2 style={{ fontSize: 18, fontWeight: 700, color: T.text, margin: 0 }}>Créer un utilisateur</h2>

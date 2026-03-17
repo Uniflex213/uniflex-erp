@@ -43,7 +43,7 @@ export default function EventDetailModal({ event, customLabels = [], onEdit, onD
 
   return (
     <div
-      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px", overflow: "auto" }}
+      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px", overflow: "auto" }}
       onClick={onClose}
     >
       <div

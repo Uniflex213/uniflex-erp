@@ -599,7 +599,7 @@ export default function TicketDetailModal({ ticket: initialTicket, onBack, onSta
       )}
 
       {showCodWarning && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div style={{ background: T.bgCard, borderRadius: 16, padding: "32px 36px", maxWidth: 420, width: "90%", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
               <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#fff3d4", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>

@@ -347,7 +347,7 @@ export default function AdminOrdersPage({ orders, onUpdateOrder }: Props) {
       </div>
 
       {viewOrder && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, overflowY: "auto", padding: "16px" }}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, overflowY: "auto", padding: "16px" }}>
           <div style={{ background: "#f4f5f9", borderRadius: 16, width: "80%", maxWidth: 1100, boxShadow: "0 32px 80px rgba(0,0,0,0.25)", position: "relative" }}>
             <div style={{ background: T.card, borderRadius: "16px 16px 0 0", padding: "24px 28px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", gap: 16 }}>
               <div style={{ flex: 1 }}>
@@ -569,7 +569,7 @@ export default function AdminOrdersPage({ orders, onUpdateOrder }: Props) {
       )}
 
       {showDelayInput && selectedOrder && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }}>
           <div style={{ background: T.bgCard, borderRadius: 16, padding: 28, maxWidth: 400, width: "90%", boxShadow: "0 24px 64px rgba(0,0,0,0.2)" }}>
             <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 6 }}>Signaler un délai</div>
             <div style={{ color: T.textMid, fontSize: 13, marginBottom: 16 }}>{selectedOrder.id} · {selectedOrder.client}</div>
@@ -584,7 +584,7 @@ export default function AdminOrdersPage({ orders, onUpdateOrder }: Props) {
       )}
 
       {modalType === "shipping" && selectedOrder && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }}>
           <div style={{ background: T.bgCard, borderRadius: 16, padding: 28, maxWidth: 520, width: "90%", boxShadow: "0 24px 64px rgba(0,0,0,0.2)" }}>
             <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 6 }}>Informations de shipping</div>
             <div style={{ color: T.textMid, fontSize: 13, marginBottom: 20 }}>{selectedOrder.id} · {selectedOrder.client}</div>

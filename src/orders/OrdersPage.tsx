@@ -73,7 +73,7 @@ const SECTION_CONFIG: {
 
 function WithdrawModal({ orderId, orderClient, onConfirm, onCancel }: { orderId: string; orderClient: string; onConfirm: () => void; onCancel: () => void }) {
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
       <div style={{ background: T.bgCard, borderRadius: 14, padding: 28, maxWidth: 420, width: "100%", boxShadow: "0 24px 64px rgba(0,0,0,0.25)" }}>
         <div style={{ fontSize: 16, fontWeight: 800, color: T.text, marginBottom: 10 }}>Retirer la demande</div>
         <p style={{ fontSize: 13, color: T.textMid, lineHeight: 1.6, marginBottom: 24 }}>

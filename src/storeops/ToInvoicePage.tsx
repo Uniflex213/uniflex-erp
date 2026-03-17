@@ -87,7 +87,7 @@ function DocDetailModal({ doc, onClose }: { doc: InvoiceDoc; onClose: () => void
   const payColors = PAYMENT_COLORS[doc.payment_status] || PAYMENT_COLORS["En attente"];
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 9000, display: "flex", justifyContent: "center", overflowY: "auto", padding: 20 }}>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9000, display: "flex", justifyContent: "center", overflowY: "auto", padding: 20 }}>
       <div style={{ background: T.card, borderRadius: 16, width: "100%", maxWidth: 600, margin: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", fontFamily: "'Outfit', sans-serif" }}>
         <div style={{ padding: "18px 22px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>

@@ -359,7 +359,7 @@ export default function LoginPage({ onBack }: Props) {
 
       {/* Request access modal */}
       {showRequest && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.3)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000, padding: 20 }}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000, padding: 20 }}>
           <div style={{ background: L.card, borderRadius: 20, width: "100%", maxWidth: 480, padding: 32, boxShadow: "0 24px 60px rgba(0,0,0,0.12)", border: `1px solid ${L.cardBorder}` }}>
             {reqSuccess ? (
               <div style={{ textAlign: "center", padding: "20px 0" }}>
