@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { ComposableMap, Geographies, Geography, Marker, Line } from 'react-simple-maps';
 import { supabase } from '../supabaseClient';
 import { T } from '../theme';
 import { useAnimatedNumber } from '../hooks/useAnimatedNumber';
@@ -40,148 +41,146 @@ function KpiCard({ label, value, isMonetary, index, reveal }: {
   );
 }
 
-// ── Canada + Northern US Flat Vector Map ──
+// ── Canada + US Geographic Map (react-simple-maps) ──
+const CANADA_TOPO = '/canada-provinces-topo.json';
+const US_TOPO = '/us-states-simple.json';
+
+// Province centroid coords [lng, lat] for dot markers
+const PROVINCE_MARKERS: { code: string; coords: [number, number] }[] = [
+  { code: 'BC', coords: [-124, 54] },
+  { code: 'AB', coords: [-114.5, 53.5] },
+  { code: 'SK', coords: [-105.5, 52.5] },
+  { code: 'MB', coords: [-97.5, 52] },
+  { code: 'ON', coords: [-84, 49] },
+  { code: 'QC', coords: [-71, 49] },
+  { code: 'NB', coords: [-66.5, 46.8] },
+  { code: 'NS', coords: [-63.5, 44.8] },
+];
+
+const WAREHOUSE_MARKERS: { name: string; coords: [number, number] }[] = [
+  { name: 'Boisbriand', coords: [-73.84, 45.62] },
+  { name: 'Toronto', coords: [-79.38, 43.65] },
+  { name: 'Vancouver', coords: [-123.12, 49.28] },
+];
+
 function CanadaMap({ agents }: { agents: AgentSales[] }) {
-  // Simplified SVG path data for Canada mainland + major features
-  const canadaPath = `M 52,118 L 54,112 58,108 62,105 60,100 58,94 60,88 64,84 66,80 70,76 74,73
-    78,70 82,68 86,66 92,64 98,62 104,60 110,58 116,56 122,54 128,52 134,50
-    140,48 146,47 152,46 158,46 164,46 170,47 176,48 182,50 188,50 194,48
-    200,46 206,44 212,42 218,40 224,38 230,36 236,35 242,34 248,34 254,34
-    260,34 266,35 272,36 278,38 284,40 290,42 296,44 302,46 308,48 314,50
-    320,50 326,48 332,46 336,44 340,42 344,42 348,44 352,48 356,52 358,56
-    360,60 362,64 366,66 370,64 374,62 378,60 382,58 386,56 390,56 394,58
-    396,62 398,68 400,74 402,80 404,86 406,92 404,98 400,102 396,106
-    392,110 388,114 386,118 388,122 392,124 396,126 400,128 404,130
-    408,134 410,138 412,142 414,146 416,148 418,150 420,154 418,158
-    414,160 410,162 406,164 402,166 400,170 398,174 394,176 390,174
-    386,172 382,170 378,168 374,170 370,174 368,178 366,180 362,178
-    358,176 354,178 350,182 346,186 342,188 338,186 334,184 330,186
-    326,188 322,190 318,192 314,194 310,192 306,190 302,192 298,196
-    294,198 290,196 286,194 282,192 278,190 274,188 270,190 266,192
-    262,190 258,188 254,186 250,188 246,190 242,188 238,186 234,188
-    230,190 226,188 222,186 218,184 214,182 210,180 206,178 202,176
-    198,174 194,172 190,170 186,172 182,174 178,176 174,178 170,180
-    166,182 162,180 158,178 154,176 150,174 146,172 142,170 138,168
-    134,170 130,172 126,174 122,172 118,170 114,168 110,166 106,164
-    102,162 98,160 94,158 90,156 86,154 82,152 78,150 74,148 70,146
-    66,144 62,142 58,140 56,136 54,132 52,128 52,124 52,118 Z`;
-
-  // Simplified US northern portion (visible below Canada)
-  const usPath = `M 52,168 L 56,166 60,164 64,162 68,160 72,158 76,156 80,154 84,152
-    88,154 92,158 96,160 100,162 104,164 108,166 112,168 116,170
-    120,172 124,174 128,176 132,174 136,172 140,170 144,172 148,174
-    152,176 156,178 160,180 164,182 168,184 172,182 176,180 180,178
-    184,176 188,174 192,172 196,174 200,176 204,178 208,180 212,182
-    216,184 220,186 224,188 228,190 232,188 236,186 240,188 244,190
-    248,192 252,190 256,188 260,190 264,192 268,194 272,196 276,198
-    280,200 284,202 288,204 292,206 296,208 300,206 304,204 308,202
-    312,200 316,198 320,200 324,202 328,204 332,206 336,204 340,202
-    344,200 348,202 352,204 356,206 360,208 364,210 368,212 372,214
-    376,216 380,218 384,220 388,222 392,224 396,226 400,228
-    400,240 52,240 Z`;
-
-  // Canadian Arctic islands (simplified)
-  const arcticIslands = [
-    `M 220,20 L 230,18 240,20 248,24 250,30 246,34 238,36 228,34 222,28 220,20 Z`,
-    `M 260,16 L 270,14 280,16 286,22 284,28 276,30 266,28 260,22 260,16 Z`,
-    `M 300,22 L 310,18 322,20 328,26 326,32 318,36 308,34 300,28 300,22 Z`,
-    `M 340,30 L 348,26 358,28 364,34 362,40 354,44 344,42 340,36 340,30 Z`,
-    `M 180,28 L 190,24 200,26 206,32 204,38 196,40 186,38 180,32 180,28 Z`,
-    `M 280,8 L 292,6 304,10 308,16 304,22 294,24 282,20 278,14 280,8 Z`,
-  ];
-
-  // Vancouver Island
-  const vanIsland = `M 42,130 L 46,124 50,120 54,122 56,128 54,134 50,140 46,142 42,138 42,130 Z`;
-
-  // Maritimes detail shapes
-  const novaScotia = `M 404,168 L 410,164 416,166 420,170 424,174 422,178 418,180 412,178 408,174 404,168 Z`;
-  const pei = `M 400,160 L 406,158 412,160 410,164 404,162 400,160 Z`;
-  const newfoundland = `M 420,140 L 428,136 436,138 440,144 438,150 432,154 424,152 420,146 420,140 Z`;
-
-  const provinces: { code: string; x: number; y: number }[] = [
-    { code: 'QC', x: 370, y: 158 },
-    { code: 'ON', x: 310, y: 172 },
-    { code: 'BC', x: 68, y: 120 },
-    { code: 'AB', x: 108, y: 112 },
-    { code: 'MB', x: 210, y: 148 },
-    { code: 'SK', x: 160, y: 130 },
-    { code: 'NB', x: 396, y: 166 },
-    { code: 'NS', x: 416, y: 172 },
-  ];
-
-  const warehouses = [
-    { name: 'Boisbriand', x: 372, y: 168 },
-    { name: 'Toronto', x: 316, y: 182 },
-    { name: 'Vancouver', x: 56, y: 134 },
-  ];
-
   return (
-    <svg viewBox="0 0 460 250" style={{ width: '100%', height: 'auto' }}>
-      <defs>
-        <style>{`
-          @keyframes mapPulse {
-            0%, 100% { r: 3; opacity: 0.4; }
-            50% { r: 8; opacity: 0; }
+    <div style={{ position: 'relative' }}>
+      <style>{`
+        @keyframes dotPulse0 { 0%,100%{r:5;opacity:0.4} 50%{r:14;opacity:0} }
+        @keyframes dotPulse1 { 0%,100%{r:5;opacity:0.4} 50%{r:14;opacity:0} }
+        @keyframes dotPulse2 { 0%,100%{r:5;opacity:0.4} 50%{r:14;opacity:0} }
+        @keyframes dotPulse3 { 0%,100%{r:5;opacity:0.4} 50%{r:14;opacity:0} }
+        @keyframes dotPulse4 { 0%,100%{r:5;opacity:0.4} 50%{r:14;opacity:0} }
+        @keyframes dotPulse5 { 0%,100%{r:5;opacity:0.4} 50%{r:14;opacity:0} }
+        @keyframes dotPulse6 { 0%,100%{r:5;opacity:0.4} 50%{r:14;opacity:0} }
+        @keyframes dotPulse7 { 0%,100%{r:5;opacity:0.4} 50%{r:14;opacity:0} }
+      `}</style>
+      <ComposableMap
+        projection="geoAzimuthalEqualArea"
+        projectionConfig={{
+          center: [0, 0],
+          rotate: [92, -42, 0],
+          scale: 350,
+        }}
+        style={{ width: '100%', height: 'auto' }}
+        viewBox="160 40 500 460"
+      >
+        <defs>
+          {/* Dot pattern for Canada fill */}
+          <pattern id="canadaDots" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
+            <circle cx="4" cy="4" r="1.2" fill="#bbbfc6" />
+          </pattern>
+          {/* Lighter dot pattern for US fill */}
+          <pattern id="usDots" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+            <circle cx="5" cy="5" r="0.9" fill="#d0d3d8" />
+          </pattern>
+        </defs>
+
+        {/* US states — subtle dot background */}
+        <Geographies geography={US_TOPO}>
+          {({ geographies }: { geographies: any[] }) =>
+            geographies
+              .filter((geo: any) => !['02', '15'].includes(geo.id))
+              .map((geo: any) => (
+              <Geography
+                key={geo.rsmKey}
+                geography={geo}
+                fill="url(#usDots)"
+                stroke="#c0c4ca"
+                strokeWidth={0.4}
+                style={{ default: { outline: 'none' }, hover: { outline: 'none' }, pressed: { outline: 'none' } }}
+              />
+            ))
           }
-        `}</style>
-      </defs>
+        </Geographies>
 
-      {/* US shape — very subtle background */}
-      <path d={usPath} fill="#e5e7eb" stroke="#d1d5db" strokeWidth={0.5} opacity={0.5} />
+        {/* Canada provinces — denser dot fill with visible outline */}
+        <Geographies geography={CANADA_TOPO}>
+          {({ geographies }: { geographies: any[] }) =>
+            geographies.map((geo: any) => (
+              <Geography
+                key={geo.rsmKey}
+                geography={geo}
+                fill="url(#canadaDots)"
+                stroke="#c8ccd2"
+                strokeWidth={0.5}
+                style={{ default: { outline: 'none' }, hover: { outline: 'none' }, pressed: { outline: 'none' } }}
+              />
+            ))
+          }
+        </Geographies>
 
-      {/* Canada mainland */}
-      <path d={canadaPath} fill="#e8eaed" stroke="#c9cdd2" strokeWidth={0.6} />
+        {/* Dashed connection lines between warehouses */}
+        <Line
+          from={WAREHOUSE_MARKERS[0].coords}
+          to={WAREHOUSE_MARKERS[1].coords}
+          stroke="#111"
+          strokeWidth={1}
+          strokeOpacity={0.08}
+          strokeDasharray="6 4"
+        />
+        <Line
+          from={WAREHOUSE_MARKERS[1].coords}
+          to={WAREHOUSE_MARKERS[2].coords}
+          stroke="#111"
+          strokeWidth={1}
+          strokeOpacity={0.08}
+          strokeDasharray="6 4"
+        />
 
-      {/* Arctic islands */}
-      {arcticIslands.map((d, i) => (
-        <path key={`arctic-${i}`} d={d} fill="#ebedef" stroke="#c9cdd2" strokeWidth={0.4} />
-      ))}
+        {/* Province dots with pulse animation */}
+        {PROVINCE_MARKERS.map((p, i) => {
+          const color = AGENT_COLORS[i % AGENT_COLORS.length];
+          return (
+            <Marker key={p.code} coordinates={p.coords}>
+              {/* Pulse ring — animates r attribute, no transform */}
+              <circle cx={0} cy={0} r={5} fill="none" stroke={color} strokeWidth={1.5}
+                style={{ animation: `dotPulse${i} 3s ease-in-out ${i * 0.4}s infinite` }} />
+              {/* Solid dot */}
+              <circle r={5} fill={color} opacity={0.85} />
+              <circle r={2} fill="#fff" opacity={0.7} />
+              {/* Label */}
+              <text y={-12} textAnchor="middle" fill="#111" fontSize={10}
+                fontFamily="Inter, system-ui, sans-serif" fontWeight={700} opacity={0.5}
+                letterSpacing={0.8}>{p.code}</text>
+            </Marker>
+          );
+        })}
 
-      {/* Vancouver Island */}
-      <path d={vanIsland} fill="#e8eaed" stroke="#c9cdd2" strokeWidth={0.5} />
-
-      {/* Maritimes */}
-      <path d={novaScotia} fill="#e8eaed" stroke="#c9cdd2" strokeWidth={0.5} />
-      <path d={pei} fill="#e8eaed" stroke="#c9cdd2" strokeWidth={0.4} />
-      <path d={newfoundland} fill="#e8eaed" stroke="#c9cdd2" strokeWidth={0.5} />
-
-      {/* Dashed connection lines between warehouses */}
-      <line x1={warehouses[0].x} y1={warehouses[0].y} x2={warehouses[1].x} y2={warehouses[1].y}
-        stroke="#111" strokeWidth={0.8} opacity={0.12} strokeDasharray="4 3" />
-      <line x1={warehouses[1].x} y1={warehouses[1].y} x2={warehouses[2].x} y2={warehouses[2].y}
-        stroke="#111" strokeWidth={0.8} opacity={0.12} strokeDasharray="4 3" />
-
-      {/* Province dots with pulse animation */}
-      {provinces.map((p, i) => {
-        const color = AGENT_COLORS[i % AGENT_COLORS.length];
-        return (
-          <g key={p.code}>
-            {/* Pulse ring */}
-            <circle cx={p.x} cy={p.y} r={3} fill="none" stroke={color} strokeWidth={1.2}
-              opacity={0.4} style={{ animation: `mapPulse 2.8s ease-in-out ${i * 0.35}s infinite` }} />
-            {/* Solid dot */}
-            <circle cx={p.x} cy={p.y} r={3.5} fill={color} opacity={0.9} />
-            <circle cx={p.x} cy={p.y} r={1.5} fill="#fff" opacity={0.6} />
-            {/* Label */}
-            <text x={p.x} y={p.y - 8} textAnchor="middle" fill="#111" fontSize={6.5}
-              fontFamily="Inter, system-ui, sans-serif" fontWeight={700} opacity={0.55}
-              letterSpacing={0.5}>{p.code}</text>
-          </g>
-        );
-      })}
-
-      {/* Warehouse square markers */}
-      {warehouses.map(w => (
-        <g key={w.name}>
-          <rect x={w.x - 4} y={w.y - 4} width={8} height={8} rx={2} fill="#111" opacity={0.85} />
-          <rect x={w.x - 2.5} y={w.y - 2.5} width={5} height={5} rx={1} fill="#fff" />
-          <text x={w.x} y={w.y + 15} textAnchor="middle" fill="#111" fontSize={7}
-            fontFamily="Inter, system-ui, sans-serif" fontWeight={600} opacity={0.55}>
-            {w.name}
-          </text>
-        </g>
-      ))}
-    </svg>
+        {/* Warehouse square markers */}
+        {WAREHOUSE_MARKERS.map(w => (
+          <Marker key={w.name} coordinates={w.coords}>
+            <rect x={-5} y={-5} width={10} height={10} rx={2.5} fill="#111" opacity={0.85} />
+            <rect x={-3} y={-3} width={6} height={6} rx={1.5} fill="#fff" />
+            <text y={18} textAnchor="middle" fill="#111" fontSize={9}
+              fontFamily="Inter, system-ui, sans-serif" fontWeight={600} opacity={0.5}>
+              {w.name}
+            </text>
+          </Marker>
+        ))}
+      </ComposableMap>
+    </div>
   );
 }
 
@@ -427,63 +426,70 @@ export default function DashCompany() {
   // ── Main Render ──
   return (
     <div style={{ fontFamily: "'Inter', system-ui, sans-serif", maxWidth: 1400, margin: '0 auto' }}>
-      {/* ── HEADER ── */}
-      <div style={{ marginBottom: 24, ...reveal(0) }}>
-        <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: T.textLight, marginBottom: 4 }}>
-          Dashboard Compagnie
-        </div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
-          <h2 style={{ margin: 0, fontSize: 28, fontWeight: 800, color: T.text, letterSpacing: -1 }}>
-            Uniflex Distribution
-          </h2>
-          <span style={{ fontSize: 12, color: T.textMid }}>
-            [{new Date().toLocaleDateString('fr-CA')}]
-          </span>
-        </div>
-      </div>
-
-      {/* ── TOP SECTION: Stats + Map ── */}
-      <div style={{ display: 'flex', gap: 16, marginBottom: 16, flexWrap: 'wrap' }}>
-
-        {/* Left: Big Counter + Top Agents */}
-        <div style={{ flex: '0 0 340px', display: 'flex', flexDirection: 'column', gap: 16, ...reveal(1) }}>
-          {/* Big animated counter */}
-          <div>
-            <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: T.textLight, marginBottom: 8 }}>
-              Ventes totales YTD
-            </div>
-            <div style={{ fontSize: 48, fontWeight: 800, letterSpacing: -2, color: T.text, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
-              {fmt(animatedGrossYtd)}
-            </div>
-            <div style={{ fontSize: 12, color: T.textMid, marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>
-              ~{fmtShort(Math.round(kpis.salesMonth / Math.max(new Date().getDate(), 1)))}/jour
-            </div>
-          </div>
-
-          {/* Top Agents list */}
-          <div>
-            <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: T.textLight, marginBottom: 8 }}>
-              Top vendeurs
-            </div>
-            {leaders.slice(0, 5).map((a, i) => (
-              <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, fontSize: 12 }}>
-                <span style={{ color: a.color, fontSize: 10 }}>■</span>
-                <span style={{ color: a.color, minWidth: 24 }}>{a.initials}</span>
-                <span style={{ color: T.text, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name}</span>
-                <span style={{ color: T.text, fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>{fmt(a.total)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Right: Canada Map */}
-        <div style={{ flex: 1, minWidth: 300, ...reveal(2) }}>
+      {/* ── HERO MAP LANDING ── */}
+      <div style={{ position: 'relative', marginBottom: 0, ...reveal(0) }}>
+        {/* Full-width map */}
+        <div style={{ position: 'relative', marginLeft: -16, marginRight: -16 }}>
           <CanadaMap agents={leaders} />
+          {/* Scroll fade gradient at bottom */}
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0, height: 140,
+            background: 'linear-gradient(to bottom, transparent 0%, rgba(245,244,240,0.5) 40%, rgba(245,244,240,0.9) 70%, #f5f4f0 100%)',
+            pointerEvents: 'none',
+          }} />
+        </div>
+
+        {/* Overlay: Header + Stats on top of map */}
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, padding: '16px 16px 0',
+          pointerEvents: 'none',
+        }}>
+          <div style={{ pointerEvents: 'auto' }}>
+            <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: T.textLight, marginBottom: 4 }}>
+              Dashboard Compagnie
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 16 }}>
+              <h2 style={{ margin: 0, fontSize: 28, fontWeight: 800, color: T.text, letterSpacing: -1 }}>
+                Uniflex Distribution
+              </h2>
+              <span style={{ fontSize: 12, color: T.textMid }}>
+                [{new Date().toLocaleDateString('fr-CA')}]
+              </span>
+            </div>
+
+            {/* Big animated counter */}
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: T.textLight, marginBottom: 8 }}>
+                Ventes totales YTD
+              </div>
+              <div style={{ fontSize: 48, fontWeight: 800, letterSpacing: -2, color: T.text, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+                {fmt(animatedGrossYtd)}
+              </div>
+              <div style={{ fontSize: 12, color: T.textMid, marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>
+                ~{fmtShort(Math.round(kpis.salesMonth / Math.max(new Date().getDate(), 1)))}/jour
+              </div>
+            </div>
+
+            {/* Top Agents list */}
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: T.textLight, marginBottom: 8 }}>
+                Top vendeurs
+              </div>
+              {leaders.slice(0, 5).map((a, i) => (
+                <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, fontSize: 12 }}>
+                  <span style={{ color: a.color, fontSize: 10 }}>■</span>
+                  <span style={{ color: a.color, minWidth: 24 }}>{a.initials}</span>
+                  <span style={{ color: T.text, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 160 }}>{a.name}</span>
+                  <span style={{ color: T.text, fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>{fmt(a.total)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
       {/* ── KPI ROW ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 8, marginBottom: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 8, marginBottom: 16, marginTop: -100, position: 'relative', zIndex: 2 }}>
         <KpiCard label="Ventes ce mois" value={kpis.salesMonth} isMonetary index={3} reveal={reveal} />
         <KpiCard label="Commandes actives" value={kpis.activeOrders} isMonetary={false} index={4} reveal={reveal} />
         <KpiCard label="Clients fermés" value={kpis.clientsClosed} isMonetary={false} index={5} reveal={reveal} />
