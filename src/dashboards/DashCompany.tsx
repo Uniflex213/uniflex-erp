@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../supabaseClient';
 import { T } from '../theme';
 import { useAnimatedNumber } from '../hooks/useAnimatedNumber';
@@ -6,6 +6,8 @@ import { useStaggerReveal } from '../hooks/useStaggerReveal';
 import GlassCard from '../components/GlassCard';
 import PeriodToggle from '../components/PeriodToggle';
 import type { PeriodOption } from '../components/PeriodToggle';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 const fmt = (n: number) => new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 const fmtShort = (n: number) => n >= 1000000 ? `$${(n / 1000000).toFixed(1)}M` : n >= 1000 ? `$${(n / 1000).toFixed(0)}k` : `$${n}`;
@@ -40,70 +42,83 @@ function KpiCard({ label, value, isMonetary, index, reveal }: {
   );
 }
 
-// ── Canada Dotted Map SVG ──
+// ── Canada Mapbox Map ──
 function CanadaMap({ agents }: { agents: AgentSales[] }) {
-  // Simplified Canada province centers (lon, lat) → projected to SVG coords
-  const provinces = [
-    { code: 'QC', name: 'Québec', x: 320, y: 140 },
-    { code: 'ON', name: 'Ontario', x: 270, y: 155 },
-    { code: 'BC', name: 'C.-B.', x: 80, y: 140 },
-    { code: 'AB', name: 'Alberta', x: 120, y: 130 },
-    { code: 'MB', name: 'Manitoba', x: 200, y: 135 },
-    { code: 'SK', name: 'Saskatchewan', x: 165, y: 130 },
-    { code: 'NB', name: 'N.-B.', x: 350, y: 145 },
-    { code: 'NS', name: 'N.-É.', x: 365, y: 150 },
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+
+  const warehouses: { name: string; lng: number; lat: number }[] = [
+    { name: 'Boisbriand', lng: -73.84, lat: 45.61 },
+    { name: 'Toronto', lng: -79.38, lat: 43.65 },
+    { name: 'Vancouver', lng: -123.12, lat: 49.28 },
   ];
 
-  // Warehouses / Vercel-style region markers
-  const warehouses = [
-    { name: 'Boisbriand', x: 318, y: 138 },
-    { name: 'Toronto', x: 275, y: 158 },
-    { name: 'Vancouver', x: 78, y: 142 },
+  const provinces: { code: string; name: string; lng: number; lat: number }[] = [
+    { code: 'QC', name: 'Québec', lng: -71.21, lat: 46.81 },
+    { code: 'ON', name: 'Ontario', lng: -85.32, lat: 51.25 },
+    { code: 'BC', name: 'C.-B.', lng: -125.65, lat: 53.73 },
+    { code: 'AB', name: 'Alberta', lng: -114.37, lat: 53.93 },
+    { code: 'MB', name: 'Manitoba', lng: -98.81, lat: 53.76 },
+    { code: 'SK', name: 'Saskatchewan', lng: -106.35, lat: 52.94 },
+    { code: 'NB', name: 'N.-B.', lng: -66.46, lat: 46.56 },
+    { code: 'NS', name: 'N.-É.', lng: -63.57, lat: 44.68 },
   ];
 
-  // Generate dot grid once (deterministic seeded pseudo-random)
-  const dots = React.useMemo(() => {
-    const result: { x: number; y: number }[] = [];
-    let seed = 42;
-    const rand = () => { seed = (seed * 16807 + 0) % 2147483647; return seed / 2147483647; };
-    for (let x = 50; x < 400; x += 8) {
-      for (let y = 80; y < 200; y += 8) {
-        const inCanada =
-          (x > 60 && x < 390 && y > 90 && y < 190) &&
-          !(x > 230 && x < 260 && y > 160) &&
-          !(x > 140 && x < 220 && y > 165);
-        if (inCanada && rand() > 0.3) result.push({ x, y });
-      }
-    }
-    return result;
+  useEffect(() => {
+    if (!mapContainer.current || mapRef.current) return;
+    const token = import.meta.env.VITE_MAPBOX_TOKEN;
+    if (!token) return;
+
+    mapboxgl.accessToken = token;
+    const map = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: 'mapbox://styles/mapbox/light-v11',
+      center: [-96, 56],
+      zoom: 2.8,
+      interactive: false,
+      attributionControl: false,
+    });
+
+    map.on('load', () => {
+      // Warehouse markers
+      warehouses.forEach(w => {
+        const el = document.createElement('div');
+        el.style.cssText = `width:10px;height:10px;background:#111;border-radius:2px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.3);`;
+        new mapboxgl.Marker({ element: el }).setLngLat([w.lng, w.lat])
+          .setPopup(new mapboxgl.Popup({ offset: 8, closeButton: false }).setHTML(
+            `<div style="font:600 11px Inter,sans-serif;color:#111;padding:2px 4px">▲ ${w.name}</div>`
+          )).addTo(map);
+      });
+
+      // Province pulsing dots
+      provinces.forEach((p, i) => {
+        const color = AGENT_COLORS[i % AGENT_COLORS.length];
+        const el = document.createElement('div');
+        el.style.cssText = `width:12px;height:12px;border-radius:50%;background:${color};opacity:0.85;box-shadow:0 0 6px ${color};`;
+        el.animate([
+          { boxShadow: `0 0 4px ${color}`, transform: 'scale(1)' },
+          { boxShadow: `0 0 12px ${color}`, transform: 'scale(1.3)' },
+          { boxShadow: `0 0 4px ${color}`, transform: 'scale(1)' },
+        ], { duration: 2000, iterations: Infinity, delay: i * 300 });
+        new mapboxgl.Marker({ element: el }).setLngLat([p.lng, p.lat]).addTo(map);
+      });
+    });
+
+    mapRef.current = map;
+    return () => { map.remove(); mapRef.current = null; };
   }, []);
 
+  const token = import.meta.env.VITE_MAPBOX_TOKEN;
+  if (!token) {
+    return (
+      <div style={{ height: 220, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.textLight, fontSize: 12, background: T.glassMid, borderRadius: 8 }}>
+        Map — VITE_MAPBOX_TOKEN manquant
+      </div>
+    );
+  }
+
   return (
-    <svg viewBox="0 0 430 240" style={{ width: '100%', height: 'auto' }}>
-      {/* Static dots */}
-      {dots.map((d, i) => (
-        <rect key={i} x={d.x} y={d.y} width={2.5} height={2.5} rx={0.5} fill={T.textLight} opacity={0.3} />
-      ))}
-      {/* Province hotspots — pulsing */}
-      {provinces.map((p, i) => (
-        <g key={p.code}>
-          <circle cx={p.x} cy={p.y} r={4} fill={AGENT_COLORS[i % AGENT_COLORS.length]} opacity={0.8}>
-            <animate attributeName="r" values="4;7;4" dur="2s" repeatCount="indefinite" begin={`${i * 0.3}s`} />
-            <animate attributeName="opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite" begin={`${i * 0.3}s`} />
-          </circle>
-          <circle cx={p.x} cy={p.y} r={2.5} fill={AGENT_COLORS[i % AGENT_COLORS.length]} />
-        </g>
-      ))}
-      {/* Warehouse markers ▲ */}
-      {warehouses.map(w => (
-        <g key={w.name}>
-          <polygon points={`${w.x},${w.y - 5} ${w.x - 3},${w.y + 1} ${w.x + 3},${w.y + 1}`} fill={T.text} />
-          <text x={w.x} y={w.y + 12} textAnchor="middle" fill={T.textMid} fontSize={7} fontFamily="Inter, system-ui, sans-serif" fontWeight={500}>
-            ▲ {w.name}
-          </text>
-        </g>
-      ))}
-    </svg>
+    <div ref={mapContainer} style={{ width: '100%', height: 220, borderRadius: 8, overflow: 'hidden' }} />
   );
 }
 
