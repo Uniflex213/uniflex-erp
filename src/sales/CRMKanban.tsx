@@ -175,6 +175,8 @@ export default function CRMKanban({ leads, samples = [], onLeadClick, onStageCha
       })}
 
       {contextMenu && ctxLead && (
+        <>
+        <div onClick={closeContext} style={{ position: "fixed", inset: 0, zIndex: 9998 }} />
         <div
           style={{
             position: "fixed", left: contextMenu.x, top: contextMenu.y,
@@ -228,6 +230,7 @@ export default function CRMKanban({ leads, samples = [], onLeadClick, onStageCha
             </>
           )}
         </div>
+        </>
       )}
 
       {deleteConfirm && (
