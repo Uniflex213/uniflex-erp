@@ -20,7 +20,7 @@ function ModalBase({ title, subtitle, onClose, children, color = T.main }: {
   return createPortal(
     <div
       style={{
-        position: "fixed", inset: 0, background: "rgba(230,228,224,0.85)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 10000,
+        position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 10000,
         display: "flex", alignItems: "center", justifyContent: "center", padding: 24,
         animation: "kpiFadeIn 0.2s ease",
       }}

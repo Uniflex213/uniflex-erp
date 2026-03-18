@@ -235,7 +235,7 @@ export default function TabBar({ pageLabels }: TabBarProps) {
             left: 0,
             right: 0,
             bottom: 0,
-            background: "rgba(230,228,224,0.85)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
+            background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",

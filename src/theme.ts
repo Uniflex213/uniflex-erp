@@ -39,7 +39,7 @@ export const T = {
   cyanBg: "rgba(8,145,178,0.08)",
 
   // Card aliases
-  card: "rgba(230,228,224,0.55)",
+  card: "rgba(230,228,224,0.35)",
   cardAlt: "rgba(220,218,214,0.4)",
   silver: "#6b6b6b",
   silverLight: "#999999",
@@ -58,7 +58,7 @@ export const T = {
   glassMid: "rgba(220,218,214,0.4)",
   glassHover: "rgba(240,238,234,0.6)",
   glassBorder: "rgba(255,255,255,0.4)",
-  glassCard: "rgba(230,228,224,0.55)",
+  glassCard: "rgba(230,228,224,0.35)",
   glassCardBorder: "rgba(255,255,255,0.4)",
   glassBlur: "blur(24px)",
 
@@ -72,7 +72,7 @@ export const T = {
 
   // Legacy aliases
   textMuted: "#a0a0a0",
-  matteCard: "rgba(230,228,224,0.55)",
+  matteCard: "rgba(230,228,224,0.35)",
   gold: "#d97706",
   mainBg: "#111111",
   hover: "rgba(0,0,0,0.04)",
@@ -81,7 +81,7 @@ export const T = {
   input: "rgba(255,255,255,0.5)",
   inputBorder: "rgba(255,255,255,0.6)",
   overlay: "rgba(0,0,0,0.4)",
-  teamBg: "rgba(230,228,224,0.55)",
+  teamBg: "rgba(230,228,224,0.35)",
   active: "#111111",
   unreadBg: "rgba(17,17,17,0.05)",
   divider: "rgba(0,0,0,0.06)",

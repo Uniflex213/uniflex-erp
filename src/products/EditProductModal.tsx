@@ -162,7 +162,7 @@ export default function EditProductModal({
   const renderDeleteConfirm = () => {
     if (deleteStep === "confirm1") {
       return (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.85)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 1100, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 1100, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
           <div style={{ background: T.bgCard, borderRadius: 12, maxWidth: 420, width: "100%", padding: "28px 28px 24px", boxShadow: "0 24px 64px rgba(0,0,0,0.35)" }}>
             <div style={{ fontSize: 15, fontWeight: 800, color: T.text, marginBottom: 10 }}>Supprimer "{product.name}" ?</div>
             <div style={{ fontSize: 13, color: T.textMid, marginBottom: 24, lineHeight: 1.5 }}>Cette action est irréversible. Le produit sera définitivement supprimé du catalogue.</div>
@@ -176,7 +176,7 @@ export default function EditProductModal({
     }
     if (deleteStep === "confirm2") {
       return (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.85)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 1100, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 1100, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
           <div style={{ background: T.bgCard, borderRadius: 12, maxWidth: 440, width: "100%", padding: "28px 28px 24px", boxShadow: "0 24px 64px rgba(0,0,0,0.35)" }}>
             <div style={{ fontSize: 15, fontWeight: 800, color: T.red, marginBottom: 10 }}>Derniere confirmation requise</div>
             <div style={{ fontSize: 13, color: T.textMid, marginBottom: 24, lineHeight: 1.5 }}>Ce produit pourrait être référencé dans des commandes ou pricelists existantes. Les références existantes garderont le nom du produit en texte, mais il n'apparaîtra plus dans les menus déroulants pour les nouvelles créations.</div>
@@ -195,7 +195,7 @@ export default function EditProductModal({
     <>
       <div
         onClick={e => { if (e.target === e.currentTarget) onClose(); }}
-        style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.85)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "32px 16px", overflowY: "auto" }}
+        style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "32px 16px", overflowY: "auto" }}
       >
         <div style={{ background: T.card, borderRadius: 14, width: "100%", maxWidth: 560, boxShadow: "0 24px 64px rgba(0,0,0,0.3)", display: "flex", flexDirection: "column", maxHeight: "calc(100vh - 64px)" }}>
           <div style={{ padding: "18px 24px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>

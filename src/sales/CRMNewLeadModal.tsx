@@ -108,7 +108,7 @@ export default function CRMNewLeadModal({ onSave, onClose, isAdmin = true }: Pro
   const tempLabels: Record<Temperature, string> = { Hot: "🔥 Hot", Warm: "⚡ Warm", Cold: "❄️ Cold" };
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.85)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", overflow: "auto", padding: "16px" }}>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", overflow: "auto", padding: "16px" }}>
       <div style={{ background: T.bgCard, borderRadius: 16, width: "100%", maxWidth: 720, boxShadow: "0 24px 80px rgba(0,0,0,0.25)" }}>
         <div style={{ padding: "20px 28px", borderBottom: "1px solid rgba(0,0,0,0.07)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <h2 style={{ margin: 0, fontSize: 19, fontWeight: 800, color: T.text }}>Nouveau Lead</h2>

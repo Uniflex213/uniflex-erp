@@ -279,7 +279,7 @@ export default function StoresManagementPage() {
       {/* Create / Edit Modal */}
       {isFormOpen && (
         <div style={{
-          position: "fixed", inset: 0, background: "rgba(230,228,224,0.85)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
+          position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
           display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999,
         }}>
           <div style={{

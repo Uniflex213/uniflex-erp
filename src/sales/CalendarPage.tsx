@@ -36,7 +36,7 @@ function GoogleConnectModal({ onConnect, onClose }: { onConnect: () => void; onC
 
   return (
     <div
-      style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.85)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}
+      style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}
       onClick={step === "prompt" ? onClose : undefined}
     >
       <div

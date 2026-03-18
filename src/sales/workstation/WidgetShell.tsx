@@ -113,7 +113,7 @@ export function ExpandModal({ title, icon, onClose, children, width = "92%", hei
     <div
       style={{
         position: "fixed", inset: 0,
-        background: "rgba(230,228,224,0.85)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
+        background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
         zIndex: 9999,
         display: "flex",
         alignItems: "center",

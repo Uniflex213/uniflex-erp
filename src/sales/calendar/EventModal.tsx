@@ -109,7 +109,7 @@ export default function EventModal({ defaultDate, defaultHour, editEvent, custom
 
   return (
     <div
-      style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.85)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px", overflow: "auto" }}
+      style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px", overflow: "auto" }}
       onClick={onClose}
     >
       <div

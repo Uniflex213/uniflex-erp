@@ -275,7 +275,7 @@ function ComparePanel({
 
   return (
     <div style={{
-      position: "fixed", inset: 0, background: "rgba(230,228,224,0.85)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999,
+      position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999,
       display: "flex", alignItems: "center", justifyContent: "center", padding: 16, overflowY: "auto",
     }}>
       <div style={{ background: T.card, borderRadius: 16, width: "min(96vw, 900px)", maxHeight: "90vh", overflowY: "auto", padding: 32, position: "relative" }}>
@@ -610,7 +610,7 @@ export default function MarginCalculatorPage() {
       )}
 
       {showHistory && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.85)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div style={{ background: T.card, borderRadius: 16, width: "min(90vw, 700px)", maxHeight: "80vh", overflow: "hidden", display: "flex", flexDirection: "column" }}>
             <div style={{ padding: "20px 24px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div style={{ fontWeight: 800, fontSize: 16 }}>Analyses sauvegardées</div>

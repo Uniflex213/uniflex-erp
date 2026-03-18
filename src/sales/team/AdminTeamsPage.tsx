@@ -19,7 +19,7 @@ function ApproveModal({ request, onApprove, onClose }: {
   };
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.85)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={onClose}>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={onClose}>
       <div onClick={e => e.stopPropagation()} style={{ background: T.bgCard, borderRadius: 16, width: "100%", maxWidth: 400, boxShadow: "0 24px 80px rgba(0,0,0,0.2)", textAlign: "center", padding: 32 }}>
         <div style={{ fontSize: 36, marginBottom: 14 }}>✅</div>
         <h3 style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 800, color: T.text }}>Équipe approuvée !</h3>

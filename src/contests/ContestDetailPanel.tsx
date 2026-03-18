@@ -270,7 +270,7 @@ export default function ContestDetailPanel({ contest, onBack, onUpdate }: Props)
       )}
 
       {showAddPoints && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 10001, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(230,228,224,0.85)' }}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 10001, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(230,228,224,0.35)' }}>
           <div style={{ background: T.card, borderRadius: 14, padding: 24, width: 400, maxWidth: '90vw' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
               <div style={{ fontWeight: 800, fontSize: 16 }}>Ajouter des points</div>
@@ -300,7 +300,7 @@ export default function ContestDetailPanel({ contest, onBack, onUpdate }: Props)
       )}
 
       {showAddParticipant && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 10001, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(230,228,224,0.85)' }}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 10001, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(230,228,224,0.35)' }}>
           <div style={{ background: T.card, borderRadius: 14, padding: 24, width: 400, maxWidth: '90vw' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
               <div style={{ fontWeight: 800, fontSize: 16 }}>Ajouter un participant</div>

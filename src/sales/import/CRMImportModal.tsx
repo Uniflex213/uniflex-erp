@@ -272,7 +272,7 @@ export default function CRMImportModal({ isOpen, onClose, onImported }: Props) {
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 9999,
-      background: 'rgba(230,228,224,0.85)', backdropFilter: 'blur(4px)',
+      background: 'rgba(230,228,224,0.35)', backdropFilter: 'blur(4px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>
       <div style={{
