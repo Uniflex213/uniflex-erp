@@ -90,7 +90,11 @@ export default function UserManagement() {
       const { data, error } = await supabase.functions.invoke("admin-delete-user", {
         body: { userId: u.id },
       });
-      if (error) throw new Error(`[${error.message}]`);
+      if (error) {
+        // data contains the response body even on error
+        const detail = typeof data === 'object' && data?.error ? data.error : (typeof data === 'string' ? data : error.message);
+        throw new Error(detail);
+      }
       if (data?.error) throw new Error(data.error);
       if (user) await logActivity(supabase, user.id, "user_deleted", "admin", { target_id: u.id });
     } catch (e) {
