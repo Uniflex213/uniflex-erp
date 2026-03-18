@@ -1,9 +1,10 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { CRMLead } from "../crmTypes";
 import { SampleRequest } from "../sampleTypes";
 import { T, fmt, daysSince } from "./workstationTypes";
 import { useCurrentAgent } from "../../hooks/useCurrentAgent";
 import { useTeamAgents } from "../../hooks/useAgents";
+import { useUserPreferences } from "../../hooks/useUserPreferences";
 import PersonalSamplesModal from "./PersonalSamplesModal";
 
 interface Props {
@@ -12,25 +13,28 @@ interface Props {
   allSamples?: SampleRequest[];
 }
 
-const STORAGE_KEY = "uniflex_workstation_goals";
 type Goals = { sales: number; newLeads: number; activities: number };
 const DEFAULT_GOALS: Goals = { sales: 150000, newLeads: 8, activities: 60 };
-
-function loadGoals(): Goals {
-  try {
-    const s = localStorage.getItem(STORAGE_KEY);
-    if (s) return { ...DEFAULT_GOALS, ...JSON.parse(s) };
-  } catch {}
-  return DEFAULT_GOALS;
-}
 
 export default function WidgetKpis({ leads, samples = [], allSamples = [] }: Props) {
   const agent = useCurrentAgent();
   const agents = useTeamAgents();
+  const { prefs, loaded: prefsLoaded, updatePref } = useUserPreferences();
   const myLeads = useMemo(() => leads.filter(l => l.assigned_agent_id === agent.id), [leads, agent.id]);
-  const [goals, setGoals] = useState<Goals>(loadGoals);
+  const [goals, setGoals] = useState<Goals>(DEFAULT_GOALS);
   const [editingGoals, setEditingGoals] = useState(false);
-  const [draftGoals, setDraftGoals] = useState<Goals>(loadGoals);
+  const [draftGoals, setDraftGoals] = useState<Goals>(DEFAULT_GOALS);
+
+  // Load goals from Supabase
+  useEffect(() => {
+    if (!prefsLoaded) return;
+    const g = prefs.workstation_personal_goals;
+    if (g && Object.keys(g).length > 0) {
+      const loaded = { ...DEFAULT_GOALS, ...g } as Goals;
+      setGoals(loaded);
+      setDraftGoals(loaded);
+    }
+  }, [prefsLoaded]);
   const [showSamplesModal, setShowSamplesModal] = useState(false);
 
   const now = new Date();
@@ -81,7 +85,7 @@ export default function WidgetKpis({ leads, samples = [], allSamples = [] }: Pro
 
   const saveGoals = () => {
     setGoals(draftGoals);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(draftGoals));
+    updatePref('workstation_personal_goals', draftGoals as any);
     setEditingGoals(false);
   };
 

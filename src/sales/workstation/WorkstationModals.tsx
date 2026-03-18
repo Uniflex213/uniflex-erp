@@ -1,8 +1,9 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { CRMLead, STAGE_COLORS, TEMP_COLORS, STAGES } from "../crmTypes";
 import { useTeamAgents } from "../../hooks/useAgents";
 import { SampleRequest } from "../sampleTypes";
 import { T, fmt, daysSince, timeAgo, isToday, isPast, mkId } from "./workstationTypes";
+import { useUserPreferences } from "../../hooks/useUserPreferences";
 import { useCurrentAgent } from "../../hooks/useCurrentAgent";
 import { ExpandModal } from "./WidgetShell";
 import { useApp } from "../../AppContext";
@@ -439,25 +440,30 @@ export function KpisModal({ leads, onClose }: { leads: CRMLead[]; onClose: () =>
 }
 
 export function NotesModal({ onClose }: { onClose: () => void }) {
-  const agent = useCurrentAgent();
-  const NOTES_KEY = `uniflex_notes_extended_${agent.id}`;
+  const { prefs, loaded: prefsLoaded, updatePref } = useUserPreferences();
   type NotePage = { id: string; title: string; content: string; updatedAt: string };
 
-  const loadPages = (): NotePage[] => {
-    try { const s = localStorage.getItem(NOTES_KEY); if (s) return JSON.parse(s); } catch {}
-    return [{ id: "general", title: "Notes générales", content: "", updatedAt: new Date().toISOString() }];
-  };
+  const defaultPages: NotePage[] = [{ id: "general", title: "Notes générales", content: "", updatedAt: new Date().toISOString() }];
 
-  const [pages, setPages] = useState<NotePage[]>(loadPages);
-  const [activePageId, setActivePageId] = useState(pages[0]?.id || "general");
+  const [pages, setPages] = useState<NotePage[]>(defaultPages);
+  const [activePageId, setActivePageId] = useState("general");
   const [newPageTitle, setNewPageTitle] = useState("");
   const [addingPage, setAddingPage] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Load from Supabase
+  useEffect(() => {
+    if (!prefsLoaded) return;
+    if (prefs.workstation_sticky_notes?.length > 0) {
+      setPages(prefs.workstation_sticky_notes);
+      setActivePageId(prefs.workstation_sticky_notes[0]?.id || "general");
+    }
+  }, [prefsLoaded]);
+
   const activePage = pages.find(p => p.id === activePageId) || pages[0];
   const savePages = (updated: NotePage[]) => {
     setPages(updated);
-    try { localStorage.setItem(NOTES_KEY, JSON.stringify(updated)); } catch {}
+    updatePref('workstation_sticky_notes', updated);
   };
 
   const updateContent = (content: string) => {

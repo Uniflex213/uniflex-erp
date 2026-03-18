@@ -1,29 +1,32 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { T } from "./workstationTypes";
-import { useCurrentAgent } from "../../hooks/useCurrentAgent";
+import { useUserPreferences } from "../../hooks/useUserPreferences";
 
 export default function WidgetNotes() {
-  const agent = useCurrentAgent();
-  const STORAGE_KEY = `uniflex_workstation_notes_${agent.id}`;
-  const [content, setContent] = useState(() => {
-    try { return localStorage.getItem(`uniflex_workstation_notes_${agent.id}`) || ""; } catch { return ""; }
-  });
+  const { prefs, loaded, updatePref } = useUserPreferences();
+  const [content, setContent] = useState("");
   const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Load from Supabase prefs
+  useEffect(() => {
+    if (loaded && prefs.workstation_notes) setContent(prefs.workstation_notes);
+  }, [loaded]);
+
   const save = useCallback((text: string) => {
     setSaveStatus("saving");
-    try { localStorage.setItem(STORAGE_KEY, text); } catch {}
+    updatePref('workstation_notes', text);
     setSaveStatus("saved");
-  }, [STORAGE_KEY]);
+  }, [updatePref]);
 
   useEffect(() => {
+    if (!loaded) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     setSaveStatus("unsaved");
     debounceRef.current = setTimeout(() => save(content), 2000);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [content, save]);
+  }, [content, save, loaded]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Tab") {

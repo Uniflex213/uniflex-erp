@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useApp } from "../AppContext";
 import {
   WidgetId, WidgetVisibility, DEFAULT_WIDGET_VISIBILITY,
   DEFAULT_WIDGET_ORDER, WIDGET_LABELS, WIDGET_ICONS, T,
 } from "./workstation/workstationTypes";
 import { useCurrentAgent } from "../hooks/useCurrentAgent";
+import { useUserPreferences } from "../hooks/useUserPreferences";
 
 import WidgetShell, { ExpandModal } from "./workstation/WidgetShell";
 import WidgetMaJournee from "./workstation/WidgetMaJournee";
@@ -32,48 +33,43 @@ import {
   ScoreModal,
 } from "./workstation/WorkstationModals";
 
-function loadVisibility(prefKey: string): WidgetVisibility {
-  try {
-    const s = localStorage.getItem(prefKey);
-    if (s) return { ...DEFAULT_WIDGET_VISIBILITY, ...JSON.parse(s) };
-  } catch {}
-  return { ...DEFAULT_WIDGET_VISIBILITY };
-}
-
-function loadOrder(orderKey: string): WidgetId[] {
-  try {
-    const s = localStorage.getItem(orderKey);
-    if (s) {
-      const parsed: WidgetId[] = JSON.parse(s);
-      const allIds = new Set(DEFAULT_WIDGET_ORDER);
-      const valid = parsed.filter(id => allIds.has(id));
-      const missing = DEFAULT_WIDGET_ORDER.filter(id => !valid.includes(id));
-      return [...valid, ...missing];
-    }
-  } catch {}
-  return [...DEFAULT_WIDGET_ORDER];
-}
-
 export default function PersonalWorkstationPage() {
   const agent = useCurrentAgent();
   const { leads, navigate, samples } = useApp();
-  const PREF_KEY = `uniflex_workstation_widgets_${agent.id}`;
-  const ORDER_KEY = `uniflex_workstation_order_${agent.id}`;
+  const { prefs, loaded: prefsLoaded, updatePref } = useUserPreferences();
   const mySamples = samples.filter(s => s.agent_id === agent.id);
-  const [visibility, setVisibility] = useState<WidgetVisibility>(() => loadVisibility(PREF_KEY));
-  const [widgetOrder, setWidgetOrder] = useState<WidgetId[]>(() => loadOrder(ORDER_KEY));
+  const [visibility, setVisibility] = useState<WidgetVisibility>({ ...DEFAULT_WIDGET_VISIBILITY });
+  const [widgetOrder, setWidgetOrder] = useState<WidgetId[]>([...DEFAULT_WIDGET_ORDER]);
   const [showPersonalize, setShowPersonalize] = useState(false);
   const [expandedWidget, setExpandedWidget] = useState<WidgetId | null>(null);
 
   const [dragId, setDragId] = useState<WidgetId | null>(null);
   const [dragOverId, setDragOverId] = useState<WidgetId | null>(null);
 
+  // Sync from Supabase prefs
+  useEffect(() => {
+    if (!prefsLoaded) return;
+    if (prefs.workstation_widgets.length > 0) {
+      const vis: WidgetVisibility = { ...DEFAULT_WIDGET_VISIBILITY };
+      prefs.workstation_widgets.forEach((id: string) => { (vis as any)[id] = true; });
+      setVisibility(vis);
+    }
+    if (prefs.workstation_widget_order.length > 0) {
+      const allIds = new Set(DEFAULT_WIDGET_ORDER);
+      const valid = (prefs.workstation_widget_order as WidgetId[]).filter(id => allIds.has(id));
+      const missing = DEFAULT_WIDGET_ORDER.filter(id => !valid.includes(id));
+      setWidgetOrder([...valid, ...missing]);
+    }
+  }, [prefsLoaded]);
+
   const handleOpenLead = (_leadId: string) => { navigate("crm_pipeline"); };
 
   const toggleWidget = (id: WidgetId) => {
     setVisibility(prev => {
       const next = { ...prev, [id]: !prev[id] };
-      try { localStorage.setItem(PREF_KEY, JSON.stringify(next)); } catch {}
+      // Save visible widget IDs to Supabase
+      const activeIds = Object.entries(next).filter(([, v]) => v).map(([k]) => k);
+      updatePref('workstation_widgets', activeIds);
       return next;
     });
   };
@@ -97,7 +93,7 @@ export default function PersonalWorkstationPage() {
       next.splice(fromIdx, 1);
       next.splice(toIdx, 0, dragId);
       setWidgetOrder(next);
-      try { localStorage.setItem(ORDER_KEY, JSON.stringify(next)); } catch {}
+      updatePref('workstation_widget_order', next);
     }
     setDragId(null);
     setDragOverId(null);

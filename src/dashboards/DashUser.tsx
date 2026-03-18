@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
+import { useUserPreferences } from '../hooks/useUserPreferences';
 import { Info } from 'lucide-react';
 import { T } from '../theme';
 import PeriodToggle from '../components/PeriodToggle';
@@ -21,26 +22,25 @@ const WIDGET_DEFS = [
 export default function DashUser() {
   const { profile, user } = useAuth();
   const userId = user?.id;
-  const WIDGETS_KEY = `uniflex_dashuser_widgets_${userId}`;
-  const PERIOD_KEY = `uniflex_dashuser_period_${userId}`;
-  const NOTES_KEY = `uniflex_dashuser_notes_${userId}`;
-  const ORDER_KEY = `uniflex_dashuser_order_${userId}`;
+  const { prefs, loaded: prefsLoaded, updatePref } = useUserPreferences();
 
-  const [activeWidgets, setActiveWidgets] = useState<string[]>(() => {
-    try { const s = localStorage.getItem(WIDGETS_KEY); if (s) return JSON.parse(s); } catch {}
-    return WIDGET_DEFS.filter(w => w.default).map(w => w.id);
-  });
-  const [widgetOrder, setWidgetOrder] = useState<string[]>(() => {
-    try { const s = localStorage.getItem(ORDER_KEY); if (s) return JSON.parse(s); } catch {}
-    return WIDGET_DEFS.map(w => w.id);
-  });
+  const defaultWidgetIds = WIDGET_DEFS.filter(w => w.default).map(w => w.id);
+  const defaultWidgetOrder = WIDGET_DEFS.map(w => w.id);
+
+  const [activeWidgets, setActiveWidgets] = useState<string[]>(defaultWidgetIds);
+  const [widgetOrder, setWidgetOrder] = useState<string[]>(defaultWidgetOrder);
   const [showConfig, setShowConfig] = useState(false);
-  const [salesP, setSalesP] = useState(() => {
-    try { return localStorage.getItem(PERIOD_KEY) || 'monthly'; } catch { return 'monthly'; }
-  });
-  const [personalNotes, setPersonalNotes] = useState(() => {
-    try { return localStorage.getItem(NOTES_KEY) || ''; } catch { return ''; }
-  });
+  const [salesP, setSalesP] = useState('monthly');
+  const [personalNotes, setPersonalNotes] = useState('');
+
+  // Sync from Supabase prefs once loaded
+  useEffect(() => {
+    if (!prefsLoaded) return;
+    if (prefs.dashboard_widgets.length > 0) setActiveWidgets(prefs.dashboard_widgets);
+    if (prefs.dashboard_widget_order.length > 0) setWidgetOrder(prefs.dashboard_widget_order);
+    if (prefs.dashboard_sales_period) setSalesP(prefs.dashboard_sales_period);
+    if (prefs.personal_notes) setPersonalNotes(prefs.personal_notes);
+  }, [prefsLoaded]);
   const [loading, setLoading] = useState(true);
   const [dragId, setDragId] = useState<string | null>(null);
 
@@ -136,19 +136,19 @@ export default function DashUser() {
   const toggle = (id: string) => {
     setActiveWidgets(prev => {
       const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id];
-      try { localStorage.setItem(WIDGETS_KEY, JSON.stringify(next)); } catch {}
+      updatePref('dashboard_widgets', next);
       return next;
     });
   };
 
   const updateSalesP = (p: string) => {
     setSalesP(p);
-    try { localStorage.setItem(PERIOD_KEY, p); } catch {}
+    updatePref('dashboard_sales_period', p);
   };
 
   const updateNotes = (v: string) => {
     setPersonalNotes(v);
-    try { localStorage.setItem(NOTES_KEY, v); } catch {}
+    updatePref('personal_notes', v);
   };
 
   const handleDragStart = (id: string) => setDragId(id);
@@ -162,7 +162,7 @@ export default function DashUser() {
       if (from < 0 || to < 0) return prev;
       arr.splice(from, 1);
       arr.splice(to, 0, dragId);
-      try { localStorage.setItem(ORDER_KEY, JSON.stringify(arr)); } catch {}
+      updatePref('dashboard_widget_order', arr);
       return arr;
     });
     setDragId(null);
