@@ -95,11 +95,13 @@ export default function UserManagement() {
           body: JSON.stringify({ userId: u.id }),
         }
       );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Erreur lors de la suppression.");
+      const text = await res.text();
+      let data: any;
+      try { data = JSON.parse(text); } catch { data = { error: text }; }
+      if (!res.ok) throw new Error(`[${res.status}] ${data.error || text}`);
       if (user) await logActivity(supabase, user.id, "user_deleted", "admin", { target_id: u.id });
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Erreur inconnue.");
+      alert(e instanceof Error ? e.message : String(e));
     }
     load();
   };
