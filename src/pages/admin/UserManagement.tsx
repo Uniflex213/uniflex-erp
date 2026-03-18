@@ -97,8 +97,9 @@ export default function UserManagement() {
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || `Erreur ${res.status}`);
-      if (user) await logActivity(supabase, user.id, "user_deleted", "admin", { target_id: u.id });
+      try { if (user) await logActivity(supabase, user.id, "user_deleted", "admin", { target_id: u.id }); } catch {}
       alert(`${u.full_name} supprimé avec succès.`);
+      return;
     } catch (e) {
       alert(e instanceof Error ? e.message : String(e));
     }
