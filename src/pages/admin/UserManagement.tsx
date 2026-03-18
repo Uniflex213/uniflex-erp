@@ -87,20 +87,11 @@ export default function UserManagement() {
   const handleDelete = async (u: AdminProfile) => {
     if (!confirm(`Supprimer ${u.full_name}? Son compte auth sera supprimé et son courriel sera libéré.`)) return;
     try {
-      const { data: { session: freshSession } } = await supabase.auth.getSession();
-      if (!freshSession?.access_token) throw new Error("Session expirée. Reconnectez-vous.");
-      const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-delete-user`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${freshSession.access_token}` },
-          body: JSON.stringify({ userId: u.id }),
-        }
-      );
-      const text = await res.text();
-      let data: any;
-      try { data = JSON.parse(text); } catch { data = { error: text }; }
-      if (!res.ok) throw new Error(`[${res.status}] ${data.error || text}`);
+      const { data, error } = await supabase.functions.invoke("admin-delete-user", {
+        body: { userId: u.id },
+      });
+      if (error) throw new Error(`[${error.message}]`);
+      if (data?.error) throw new Error(data.error);
       if (user) await logActivity(supabase, user.id, "user_deleted", "admin", { target_id: u.id });
     } catch (e) {
       alert(e instanceof Error ? e.message : String(e));
