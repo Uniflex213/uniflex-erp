@@ -190,7 +190,7 @@ export default function LoginPage({ onBack }: Props) {
           {/* Logo + title */}
           <div style={{ marginBottom: 28 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
-              <img src="/UNIFLEX_Inverted_Col.png.webp" alt="Uniflex" style={{ width: 28, height: "auto" }} />
+              <img src="/icons/icon-96x96.png" alt="Uniflex" style={{ width: 28, height: 28, borderRadius: 6 }} />
               <span style={{ fontSize: 14, fontWeight: 700, letterSpacing: -0.3, color: L.text }}>Uniflex</span>
             </div>
             {step === "vendeur_code" && (

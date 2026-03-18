@@ -37,10 +37,17 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 html, body {
+  height: 100dvh;
+  overflow: hidden;
   overscroll-behavior: none;
   -webkit-text-size-adjust: 100%;
   background: #f5f4f0;
   color: #111111;
+}
+
+@keyframes logoSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 button, [role="button"] {

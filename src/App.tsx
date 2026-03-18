@@ -72,7 +72,7 @@ const PageLoader = () => (
 );
 
 const I = {
-  logo:()=><svg viewBox="0 0 32 32" fill="none" width="28" height="28"><rect width="32" height="32" rx="8" fill="#111"/><path d="M8 10h6l4 6-4 6H8l4-6-4-6z" fill="#fff"/><path d="M16 10h6l4 6-4 6h-6l4-6-4-6z" fill="rgba(255,255,255,0.4)"/></svg>,
+  logo:()=><img src="/icons/icon-96x96.png" alt="Uniflex" width="28" height="28" style={{borderRadius:6}} />,
   dash:()=><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>,
   order:()=><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
   box:()=><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>,
@@ -344,8 +344,8 @@ function AppRoot() {
       <div style={{height:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#fafaf9",fontFamily:"'Inter', system-ui, sans-serif"}}>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
         <div style={{textAlign:"center"}}>
-          <div style={{width:44,height:44,borderRadius:12,background:"#111",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 20px"}}>
-            <svg viewBox="0 0 32 32" fill="none" width="24" height="24"><path d="M8 10h6l4 6-4 6H8l4-6-4-6z" fill="#fff"/><path d="M16 10h6l4 6-4 6h-6l4-6-4-6z" fill="rgba(255,255,255,0.4)"/></svg>
+          <div style={{margin:"0 auto 20px"}}>
+            <img src="/icons/icon-96x96.png" alt="Uniflex" width="44" height="44" style={{borderRadius:12}} />
           </div>
           <div style={{width:20,height:20,border:"2px solid #e5e5e5",borderTop:"2px solid #111",borderRadius:"50%",animation:"spin 0.8s linear infinite",margin:"0 auto 12px"}}/>
           <div style={{color:"#a0a0a0",fontSize:12,letterSpacing:"0.02em",fontWeight:500}}>Chargement</div>
@@ -406,6 +406,9 @@ function AppShell({ page, onLogout }: { page: string; navigate: (key: string, pr
   const [emailUnread, setEmailUnread] = useState(0);
   const [userSmtpEmail, setUserSmtpEmail] = useState<string | undefined>();
   const [notifUnread, setNotifUnread] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileMenuIndex, setMobileMenuIndex] = useState(0);
+  const [logoSpin, setLogoSpin] = useState(false);
 
   // Fetch unread notification count + realtime subscription
   useEffect(() => {
@@ -528,7 +531,8 @@ function AppShell({ page, onLogout }: { page: string; navigate: (key: string, pr
       <SimulationBanner />
 
       <header style={{
-        height: isMobile ? 48 : T.headerH,
+        height: isMobile ? `calc(48px + var(--sat))` : T.headerH,
+        paddingTop: isMobile ? "var(--sat)" : 0,
         background:"rgba(255,255,255,0.45)",
         backdropFilter:"blur(24px)",
         WebkitBackdropFilter:"blur(24px)",
@@ -544,9 +548,7 @@ function AppShell({ page, onLogout }: { page: string; navigate: (key: string, pr
       }}>
         <div style={{display:"flex",alignItems:"center",gap: isMobile ? 8 : 16}}>
           <div style={{display:"flex",alignItems:"center",gap: isMobile ? 6 : 10}}>
-            <div style={{width: isMobile ? 24 : 28,height: isMobile ? 24 : 28,borderRadius:7,background:"#111",display:"flex",alignItems:"center",justifyContent:"center"}}>
-              <svg viewBox="0 0 32 32" fill="none" width={isMobile ? 14 : 16} height={isMobile ? 14 : 16}><path d="M8 10h6l4 6-4 6H8l4-6-4-6z" fill="#fff"/><path d="M16 10h6l4 6-4 6h-6l4-6-4-6z" fill="rgba(255,255,255,0.4)"/></svg>
-            </div>
+            <img src="/icons/icon-96x96.png" alt="Uniflex" style={{width: isMobile ? 24 : 28, height: isMobile ? 24 : 28, borderRadius:7}} />
             <span style={{fontSize: isMobile ? 13 : 14,fontWeight:700,letterSpacing:"-0.02em",color:"#111"}}>Uniflex</span>
           </div>
           {!isMobile && (
@@ -627,87 +629,172 @@ function AppShell({ page, onLogout }: { page: string; navigate: (key: string, pr
       {!isMobile && <FloatingNavOrb menu={filteredMenu} onLogout={onLogout} pageLabels={PAGE_LABELS} />}
       {!isMobile && <TabOverflowToast />}
 
+      {/* ── MOBILE: Floating Logo Nav ── */}
       {isMobile && (
-        <nav style={{
-          position:"fixed",
-          bottom:0, left:0, right:0,
-          height: `calc(54px + var(--sab))`,
-          paddingBottom: "var(--sab)",
-          background: "rgba(255,255,255,0.88)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-          borderTop: `1px solid ${T.border}`,
-          display:"flex",
-          alignItems:"stretch",
-          zIndex:1000,
-        }}>
-          {mobileNavItems.map(item => {
-            const isActive = page === item.key;
-            return (
+        <>
+          {/* Backdrop overlay when menu is open */}
+          {mobileMenuOpen && (
+            <div
+              onClick={() => setMobileMenuOpen(false)}
+              style={{
+                position:"fixed", inset:0, zIndex:998,
+                background:"rgba(0,0,0,0.4)",
+                backdropFilter:"blur(6px)",
+                WebkitBackdropFilter:"blur(6px)",
+                transition:"opacity 0.2s",
+              }}
+            />
+          )}
+
+          {/* Carousel menu above the logo button */}
+          {mobileMenuOpen && (
+            <div style={{
+              position:"fixed",
+              bottom: `calc(88px + var(--sab))`,
+              left:0, right:0,
+              zIndex:1001,
+              display:"flex",
+              alignItems:"center",
+              justifyContent:"center",
+              gap:12,
+              padding:"0 20px",
+            }}>
+              {/* Left arrow */}
               <button
-                key={item.key}
-                onClick={() => navigate(item.key)}
+                onClick={() => setMobileMenuIndex(i => (i - 1 + mobileNavItems.length) % mobileNavItems.length)}
                 style={{
-                  flex:1,
-                  display:"flex",
-                  flexDirection:"column",
-                  alignItems:"center",
-                  justifyContent:"center",
-                  gap:3,
-                  background:"none",
-                  border:"none",
-                  cursor:"pointer",
-                  color: isActive ? T.text : T.textLight,
-                  padding:"8px 4px",
-                  transition:"color 0.15s",
-                  minHeight:44,
-                  position:"relative",
+                  width:44, height:44, borderRadius:"50%",
+                  background:"rgba(255,255,255,0.15)",
+                  backdropFilter:"blur(12px)",
+                  WebkitBackdropFilter:"blur(12px)",
+                  border:"1px solid rgba(255,255,255,0.2)",
+                  color:"#fff", fontSize:20, fontWeight:600,
+                  display:"flex", alignItems:"center", justifyContent:"center",
+                  cursor:"pointer", flexShrink:0,
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+
+              {/* Current item display */}
+              <button
+                onClick={() => {
+                  const item = mobileNavItems[mobileMenuIndex];
+                  navigate(item.key);
+                  setLogoSpin(true);
+                  setMobileMenuOpen(false);
+                }}
+                style={{
+                  display:"flex", flexDirection:"column", alignItems:"center", gap:8,
+                  background:"rgba(255,255,255,0.12)",
+                  backdropFilter:"blur(16px)",
+                  WebkitBackdropFilter:"blur(16px)",
+                  border:"1px solid rgba(255,255,255,0.2)",
+                  borderRadius:20, padding:"16px 32px",
+                  cursor:"pointer", minWidth:160,
+                  transition:"all 0.2s ease",
                 }}
               >
                 <div style={{
-                  width:40, height:40,
-                  borderRadius: "50%",
-                  display:"flex",
-                  alignItems:"center",
-                  justifyContent:"center",
-                  background: isActive ? "#111" : "transparent",
-                  color: isActive ? "#fff" : T.textMid,
+                  width:48, height:48, borderRadius:"50%",
+                  background: page === mobileNavItems[mobileMenuIndex]?.key ? "#fff" : "rgba(255,255,255,0.15)",
+                  color: page === mobileNavItems[mobileMenuIndex]?.key ? "#111" : "#fff",
+                  display:"flex", alignItems:"center", justifyContent:"center",
                   transition:"all 0.2s ease",
                 }}>
-                  {item.icon}
+                  {mobileNavItems[mobileMenuIndex]?.icon}
                 </div>
+                <span style={{
+                  color:"#fff", fontSize:13, fontWeight:600,
+                  letterSpacing:"-0.01em", textAlign:"center",
+                  whiteSpace:"nowrap",
+                }}>
+                  {PAGE_LABELS[mobileNavItems[mobileMenuIndex]?.key] || mobileNavItems[mobileMenuIndex]?.key}
+                </span>
+                {page === mobileNavItems[mobileMenuIndex]?.key && (
+                  <span style={{ fontSize:10, color:"rgba(255,255,255,0.5)", fontWeight:500 }}>actif</span>
+                )}
               </button>
-            );
-          })}
+
+              {/* Right arrow */}
+              <button
+                onClick={() => setMobileMenuIndex(i => (i + 1) % mobileNavItems.length)}
+                style={{
+                  width:44, height:44, borderRadius:"50%",
+                  background:"rgba(255,255,255,0.15)",
+                  backdropFilter:"blur(12px)",
+                  WebkitBackdropFilter:"blur(12px)",
+                  border:"1px solid rgba(255,255,255,0.2)",
+                  color:"#fff", fontSize:20, fontWeight:600,
+                  display:"flex", alignItems:"center", justifyContent:"center",
+                  cursor:"pointer", flexShrink:0,
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          )}
+
+          {/* Dot indicators */}
+          {mobileMenuOpen && (
+            <div style={{
+              position:"fixed",
+              bottom: `calc(72px + var(--sab))`,
+              left:0, right:0,
+              zIndex:1001,
+              display:"flex", justifyContent:"center", gap:6,
+            }}>
+              {mobileNavItems.map((_, i) => (
+                <div key={i} style={{
+                  width: i === mobileMenuIndex ? 16 : 6, height:6, borderRadius:3,
+                  background: i === mobileMenuIndex ? "#fff" : "rgba(255,255,255,0.3)",
+                  transition:"all 0.2s ease",
+                }} />
+              ))}
+            </div>
+          )}
+
+          {/* Floating logo button */}
           <button
             onClick={() => {
-              setShowMessaging(false);
+              if (mobileMenuOpen) {
+                const item = mobileNavItems[mobileMenuIndex];
+                navigate(item.key);
+                setLogoSpin(true);
+                setMobileMenuOpen(false);
+              } else {
+                setMobileMenuIndex(mobileNavItems.findIndex(i => i.key === page) >= 0 ? mobileNavItems.findIndex(i => i.key === page) : 0);
+                setMobileMenuOpen(true);
+              }
             }}
+            onAnimationEnd={() => setLogoSpin(false)}
             style={{
-              flex:1,
-              display:"flex",
-              flexDirection:"column",
-              alignItems:"center",
-              justifyContent:"center",
-              gap:3,
-              background:"none",
-              border:"none",
+              position:"fixed",
+              bottom: `calc(16px + var(--sab))`,
+              left:"50%",
+              transform:"translateX(-50%)",
+              zIndex:1002,
+              width:56, height:56,
+              borderRadius:"50%",
+              background:"#111",
+              border:"2px solid rgba(255,255,255,0.15)",
+              boxShadow: mobileMenuOpen
+                ? "0 0 0 4px rgba(17,17,17,0.15), 0 8px 32px rgba(0,0,0,0.4)"
+                : "0 4px 20px rgba(0,0,0,0.3)",
+              display:"flex", alignItems:"center", justifyContent:"center",
               cursor:"pointer",
-              color:T.textLight,
-              padding:"8px 4px",
-              minHeight:44,
+              animation: logoSpin ? "logoSpin 0.4s ease-in-out" : "none",
+              transition:"box-shadow 0.2s ease",
             }}
           >
-            <div style={{width:40,height:40,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",background:"transparent",color:T.textLight}}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
-              </svg>
-            </div>
+            <img src="/icons/icon-96x96.png" alt="Uniflex" style={{ width:32, height:32, borderRadius:6 }} />
           </button>
+
+          {/* Hidden FloatingNavOrb for menu data */}
           <div style={{position:"fixed",bottom:-200,right:-200,opacity:0,pointerEvents:"none"}}>
             <FloatingNavOrb menu={filteredMenu} onLogout={onLogout} pageLabels={PAGE_LABELS} />
           </div>
-        </nav>
+        </>
       )}
 
       {profile && (
