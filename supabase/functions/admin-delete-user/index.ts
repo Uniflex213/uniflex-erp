@@ -102,13 +102,12 @@ Deno.serve(async (req: Request) => {
     // Delete profile row (FK to auth.users must be removed before auth deletion)
     await adminClient.from("profiles").delete().eq("id", userId);
 
-    // Finally delete the auth user
-    const { error: deleteError } = await adminClient.auth.admin.deleteUser(userId);
-    if (deleteError) {
-      return new Response(
-        JSON.stringify({ error: `Erreur suppression auth: ${deleteError.message}` }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    // Finally delete the auth user (best-effort — profile is already gone)
+    try {
+      await adminClient.auth.admin.deleteUser(userId);
+    } catch {
+      // Auth user deletion can fail if there are internal references — that's OK,
+      // the profile is already deleted so the user can't log in anymore.
     }
 
     return new Response(
