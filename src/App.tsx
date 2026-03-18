@@ -438,21 +438,6 @@ function AppShell({ page, onLogout }: { page: string; navigate: (key: string, pr
     return () => window.removeEventListener('resize', fn);
   }, []);
 
-  const mobileNavItems = React.useMemo(() => {
-    const items: { key: string; icon: React.ReactNode; label: string }[] = [];
-    const seen = new Set<string>();
-    for (const item of filteredMenu) {
-      if (item.subs) {
-        for (const sub of item.subs) {
-          if (!seen.has(sub.key)) { seen.add(sub.key); items.push({ key: sub.key, icon: sub.icon || item.icon, label: sub.label }); }
-        }
-      } else if (item.key && PAGES[item.key] && !seen.has(item.key)) {
-        seen.add(item.key); items.push({ key: item.key, icon: item.icon, label: item.label });
-      }
-    }
-    return items;
-  }, [filteredMenu]);
-
   useEffect(() => {
     if (!profile) return;
     supabase.from("user_smtp_configs").select("from_email").eq("user_id", profile.id).maybeSingle().then(({ data }) => {
@@ -477,6 +462,21 @@ function AppShell({ page, onLogout }: { page: string; navigate: (key: string, pr
     if (item.permission && !can(item.permission)) return null;
     return item;
   }).filter((item): item is MenuItem => item !== null);
+
+  const mobileNavItems = React.useMemo(() => {
+    const items: { key: string; icon: React.ReactNode; label: string }[] = [];
+    const seen = new Set<string>();
+    for (const item of filteredMenu) {
+      if (item.subs) {
+        for (const sub of item.subs) {
+          if (!seen.has(sub.key)) { seen.add(sub.key); items.push({ key: sub.key, icon: sub.icon || item.icon, label: sub.label }); }
+        }
+      } else if (item.key && PAGES[item.key] && !seen.has(item.key)) {
+        seen.add(item.key); items.push({ key: item.key, icon: item.icon, label: item.label });
+      }
+    }
+    return items;
+  }, [filteredMenu]);
 
   const defaultPage = (() => {
     const role = profile?.role;
