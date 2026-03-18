@@ -210,7 +210,7 @@ export default function InventaireStorePage() {
       )}
 
       {modal === "history" && selectedProduct && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", display: "flex", alignItems: "flex-start", justifyContent: "center", zIndex: 1500, padding: 20, overflowY: "auto" }} onClick={() => { setModal(null); setSelectedProduct(null); }}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.85)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", display: "flex", alignItems: "flex-start", justifyContent: "center", zIndex: 1500, padding: 20, overflowY: "auto" }} onClick={() => { setModal(null); setSelectedProduct(null); }}>
           <div style={{ width: "100%", maxWidth: 880, marginBottom: 20 }} onClick={e => e.stopPropagation()}>
             <StockMovementsView
               movements={movements.filter(m => m.product_id === selectedProduct.id)}
@@ -227,7 +227,7 @@ function AdjustmentProductPicker({ products, onSelect, onClose }: { products: In
   const [search, setSearch] = useState("");
   const filtered = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || p.sku.toLowerCase().includes(search.toLowerCase()));
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1500, padding: 20 }} onClick={onClose}>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.85)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1500, padding: 20 }} onClick={onClose}>
       <div style={{ background: T.card, borderRadius: 16, padding: 28, width: "100%", maxWidth: 440, boxShadow: "0 24px 60px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
           <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>Choisir un produit</h3>

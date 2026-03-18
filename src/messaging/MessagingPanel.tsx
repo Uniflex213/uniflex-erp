@@ -175,7 +175,7 @@ export default function MessagingPanel({ isOpen, onClose, currentUser, onUnreadC
 
   return (
     <>
-      <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", zIndex: 9400, backdropFilter: "blur(2px)" }} />
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.85)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9400, backdropFilter: "blur(2px)" }} />
 
       <div style={{
         position: "fixed", top: 0, right: 0, height: "100vh", width: PANEL_W,

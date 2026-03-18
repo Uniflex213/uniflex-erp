@@ -313,7 +313,7 @@ export default function EmailInboxPanel({ isOpen, onClose, onOpenFullPage, userE
   return (
     <>
       <div
-        style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", zIndex: 9000, opacity: isOpen ? 1 : 0, pointerEvents: isOpen ? "all" : "none", transition: "opacity 0.25s ease" }}
+        style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.85)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9000, opacity: isOpen ? 1 : 0, pointerEvents: isOpen ? "all" : "none", transition: "opacity 0.25s ease" }}
         onClick={onClose}
       />
       <div
@@ -501,7 +501,7 @@ export default function EmailInboxPanel({ isOpen, onClose, onOpenFullPage, userE
       </div>
 
       {showNewFolder && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", zIndex: 10000, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setShowNewFolder(false)}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.85)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 10000, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setShowNewFolder(false)}>
           <div style={{ background: T.bgCard, borderRadius: 12, padding: 24, width: 340, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
             <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 16, color: T.text }}>Nouveau dossier</div>
             <input

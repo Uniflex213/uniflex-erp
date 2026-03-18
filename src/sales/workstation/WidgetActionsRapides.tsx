@@ -244,7 +244,7 @@ function ModalWrapper({ title, onClose, children, onSave, onSaveAndAdd, saveLabe
 }) {
   return createPortal(
     <div
-      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}
+      style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.85)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div style={{ background: T.card, borderRadius: 16, width: "min(90vw, 480px)", padding: 28, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>

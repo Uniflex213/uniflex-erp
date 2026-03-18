@@ -17,7 +17,7 @@ export default function ProfitDetailModal({ doc, onClose }: Props) {
 
   return (
     <div
-      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", zIndex: 9000, display: "flex", justifyContent: "center", overflowY: "auto", padding: 20 }}
+      style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.85)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9000, display: "flex", justifyContent: "center", overflowY: "auto", padding: 20 }}
       onClick={onClose}
     >
       <div

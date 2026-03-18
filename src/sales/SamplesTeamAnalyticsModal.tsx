@@ -133,7 +133,7 @@ export default function SamplesTeamAnalyticsModal({ samples, leads, onClose, onL
   const periodLabels: Record<Period, string> = { month: "Ce mois", quarter: "Ce trimestre", year: "Cette année" };
 
   return createPortal(
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", zIndex: 10000, display: "flex", alignItems: "center", justifyContent: "center", overflow: "auto", padding: "16px" }}>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.85)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 10000, display: "flex", alignItems: "center", justifyContent: "center", overflow: "auto", padding: "16px" }}>
       <div style={{ background: T.bgCard, borderRadius: 16, width: "100%", maxWidth: 1000, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 24px 80px rgba(0,0,0,0.3)" }}>
         <div style={{ padding: "16px 24px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center", background: "linear-gradient(135deg, #fffbea 0%, #fff 100%)", borderRadius: "16px 16px 0 0" }}>
           <div>

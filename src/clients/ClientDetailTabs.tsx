@@ -264,7 +264,7 @@ function DisputeDetailModal({ dispute, onClose }: { dispute: ClientDispute; onCl
 
   return (
     <>
-      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", zIndex: 9999 }} onClick={onClose} />
+      <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.85)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999 }} onClick={onClose} />
       <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 520, maxHeight: "80vh", background: T.bgCard, borderRadius: 16, display: "flex", flexDirection: "column", zIndex: 10000, boxShadow: "0 24px 80px rgba(0,0,0,0.22)", fontFamily: "'Outfit', sans-serif", overflow: "hidden" }}>
         <div style={{ padding: "20px 24px 14px", borderBottom: `1px solid ${T.border}` }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>

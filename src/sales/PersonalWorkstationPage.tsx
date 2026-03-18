@@ -255,7 +255,7 @@ function PersonalizePanel({
   return (
     <>
       <div
-        style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", zIndex: 9999 }}
+        style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.85)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999 }}
         onClick={onClose}
       />
       <div style={{
