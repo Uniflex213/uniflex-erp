@@ -72,6 +72,10 @@ Deno.serve(async (req: Request) => {
     // Delete related data first (FK constraints)
     await adminClient.from("user_permissions").delete().eq("user_id", userId);
     await adminClient.from("user_smtp_configs").delete().eq("user_id", userId);
+    await adminClient.from("calendar_events").delete().eq("owner_id", userId);
+    await adminClient.from("notifications").delete().eq("user_id", userId);
+    await adminClient.from("conversations").delete().or(`user1_id.eq.${userId},user2_id.eq.${userId}`);
+    await adminClient.from("account_requests").delete().eq("reviewed_by", userId);
 
     // Delete profile row (FK to auth.users must be removed before auth deletion)
     await adminClient.from("profiles").delete().eq("id", userId);

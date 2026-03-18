@@ -483,6 +483,15 @@ function CoutantsTab() {
               placeholder="Rechercher par nom ou SKU..."
               style={{ border: "none", background: "transparent", outline: "none", fontSize: 13, width: "100%", fontFamily: "inherit" }} />
           </div>
+          {withoutCost > 0 && (
+            <button
+              onClick={() => { setSearch(""); const first = products.find(p => !p.cost_price || p.cost_price <= 0); if (first) { setEditingId(first.id); setEditValue(""); } }}
+              style={{ display: "flex", alignItems: "center", gap: 7, background: T.main, color: "#fff", border: "none", borderRadius: 8, padding: "9px 18px", cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "inherit", whiteSpace: "nowrap" }}
+            >
+              <Plus size={15} />
+              Ajouter un prix ({withoutCost})
+            </button>
+          )}
         </div>
 
         {loading ? (

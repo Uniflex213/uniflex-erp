@@ -15,14 +15,34 @@ const WIDGET_DEFS = [
   { id: 'w_orders', title: 'Mes Commandes Recentes', default: true },
   { id: 'w_goals', title: 'Objectifs', default: true },
   { id: 'w_contests', title: 'Concours', default: false },
+  { id: 'w_notes', title: 'Notes personnelles', default: true },
 ];
 
 export default function DashUser() {
   const { profile, user } = useAuth();
-  const [activeWidgets, setActiveWidgets] = useState(WIDGET_DEFS.filter(w => w.default).map(w => w.id));
+  const userId = user?.id;
+  const WIDGETS_KEY = `uniflex_dashuser_widgets_${userId}`;
+  const PERIOD_KEY = `uniflex_dashuser_period_${userId}`;
+  const NOTES_KEY = `uniflex_dashuser_notes_${userId}`;
+  const ORDER_KEY = `uniflex_dashuser_order_${userId}`;
+
+  const [activeWidgets, setActiveWidgets] = useState<string[]>(() => {
+    try { const s = localStorage.getItem(WIDGETS_KEY); if (s) return JSON.parse(s); } catch {}
+    return WIDGET_DEFS.filter(w => w.default).map(w => w.id);
+  });
+  const [widgetOrder, setWidgetOrder] = useState<string[]>(() => {
+    try { const s = localStorage.getItem(ORDER_KEY); if (s) return JSON.parse(s); } catch {}
+    return WIDGET_DEFS.map(w => w.id);
+  });
   const [showConfig, setShowConfig] = useState(false);
-  const [salesP, setSalesP] = useState('monthly');
+  const [salesP, setSalesP] = useState(() => {
+    try { return localStorage.getItem(PERIOD_KEY) || 'monthly'; } catch { return 'monthly'; }
+  });
+  const [personalNotes, setPersonalNotes] = useState(() => {
+    try { return localStorage.getItem(NOTES_KEY) || ''; } catch { return ''; }
+  });
   const [loading, setLoading] = useState(true);
+  const [dragId, setDragId] = useState<string | null>(null);
 
   const [mySales, setMySales] = useState({ annual: 0, monthly: 0, weekly: 0 });
   const [salesChart, setSalesChart] = useState<{ label: string; value: number }[]>([]);
@@ -34,8 +54,6 @@ export default function DashUser() {
   const [recentOrders, setRecentOrders] = useState<{ id: string; orderNum: string; client: string; date: string; total: number; status: string }[]>([]);
   const [goals, setGoals] = useState({ target: 0, current: 0 });
   const [contestData, setContestData] = useState<{ rank: number; pts: number; title: string; prize: string; endDate: string } | null>(null);
-
-  const userId = user?.id;
 
   useEffect(() => { if (userId) loadAll(); }, [userId]);
 
@@ -116,7 +134,38 @@ export default function DashUser() {
   };
 
   const toggle = (id: string) => {
-    setActiveWidgets(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+    setActiveWidgets(prev => {
+      const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id];
+      try { localStorage.setItem(WIDGETS_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  };
+
+  const updateSalesP = (p: string) => {
+    setSalesP(p);
+    try { localStorage.setItem(PERIOD_KEY, p); } catch {}
+  };
+
+  const updateNotes = (v: string) => {
+    setPersonalNotes(v);
+    try { localStorage.setItem(NOTES_KEY, v); } catch {}
+  };
+
+  const handleDragStart = (id: string) => setDragId(id);
+  const handleDragOver = (e: React.DragEvent) => e.preventDefault();
+  const handleDrop = (targetId: string) => {
+    if (!dragId || dragId === targetId) return;
+    setWidgetOrder(prev => {
+      const arr = [...prev];
+      const from = arr.indexOf(dragId);
+      const to = arr.indexOf(targetId);
+      if (from < 0 || to < 0) return prev;
+      arr.splice(from, 1);
+      arr.splice(to, 0, dragId);
+      try { localStorage.setItem(ORDER_KEY, JSON.stringify(arr)); } catch {}
+      return arr;
+    });
+    setDragId(null);
   };
 
   const count = activeWidgets.length;
@@ -137,7 +186,7 @@ export default function DashUser() {
       case 'w_sales': return wrap(<>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
           <div style={{ fontWeight: 800, fontSize: 15 }}>Mes Ventes</div>
-          <PeriodToggle value={salesP} onChange={setSalesP} options={[{ key: 'annual', label: 'An.' }, { key: 'monthly', label: 'Mois' }, { key: 'weekly', label: 'Sem.' }]} />
+          <PeriodToggle value={salesP} onChange={updateSalesP} options={[{ key: 'annual', label: 'An.' }, { key: 'monthly', label: 'Mois' }, { key: 'weekly', label: 'Sem.' }]} />
         </div>
         <div style={{ fontSize: 32, fontWeight: 800, color: T.main, marginBottom: 4 }}>{fmt(salesValue)}</div>
         <div style={{ fontSize: 12, color: T.textLight, marginBottom: 16 }}>
@@ -271,6 +320,20 @@ export default function DashUser() {
         )}
       </>);
 
+      case 'w_notes': return wrap(<>
+        <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 10 }}>Notes personnelles</div>
+        <textarea
+          value={personalNotes}
+          onChange={e => updateNotes(e.target.value)}
+          placeholder="Écrivez vos notes ici..."
+          style={{
+            flex: 1, width: '100%', minHeight: 120, border: `1px solid ${T.border}`, borderRadius: 8,
+            padding: 12, fontSize: 13, fontFamily: 'inherit', resize: 'vertical',
+            background: T.cardAlt, color: T.text, outline: 'none',
+          }}
+        />
+      </>);
+
       default: return null;
     }
   };
@@ -315,8 +378,20 @@ export default function DashUser() {
       )}
 
       <div style={{ display: 'grid', gridTemplateColumns: gridCols, gap: 16 }}>
-        {activeWidgets.map(wid => (
-          <div key={wid} style={count <= 2 ? { minHeight: 320 } : {}}>
+        {widgetOrder.filter(wid => activeWidgets.includes(wid)).map(wid => (
+          <div
+            key={wid}
+            draggable
+            onDragStart={() => handleDragStart(wid)}
+            onDragOver={handleDragOver}
+            onDrop={() => handleDrop(wid)}
+            style={{
+              ...(count <= 2 ? { minHeight: 320 } : {}),
+              opacity: dragId === wid ? 0.5 : 1,
+              cursor: 'grab',
+              transition: 'opacity 0.15s',
+            }}
+          >
             {renderWidget(wid)}
           </div>
         ))}

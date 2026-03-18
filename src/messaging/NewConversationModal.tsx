@@ -49,7 +49,7 @@ export default function NewConversationModal({ currentUser, allowedRoles, onStar
       .select("id, full_name, email, role, avatar_url, job_title, team_id")
       .neq("id", currentUser.id)
       .eq("is_active", true)
-      .in("role", allowedRoles)
+      .in("role", ["admin", "god_admin"])
       .order("full_name")
       .then(({ data }) => {
         setRoleUsers((data as UserProfile[]) ?? []);

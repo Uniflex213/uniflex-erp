@@ -11,8 +11,8 @@ import EditProductModal from "./products/EditProductModal";
 
 export default function ProductsPage() {
   const { products, addProduct, updateProduct, deleteProduct } = useApp();
-  const { permissions } = useAuth();
-  const canCreate = canPerm(permissions, "ventes.products.create");
+  const { permissions, profile } = useAuth();
+  const canCreate = profile?.role === "god_admin";
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editProduct, setEditProduct] = useState<SaleProduct | null>(null);

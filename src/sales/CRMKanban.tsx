@@ -322,7 +322,7 @@ function LeadCard({ lead, sampleStatus, isDragging, onClick, onDragStart, onDrag
       )}
 
       <button
-        onClick={e => onDotsClick(e, lead.id)}
+        onClick={e => { e.stopPropagation(); onDotsClick(e, lead.id); }}
         style={{
           position: "absolute", top: 6, right: 6, background: "none", border: "none",
           cursor: "pointer", color: T.textLight, fontSize: 14, padding: "2px 4px",

@@ -439,36 +439,19 @@ function AppShell({ page, onLogout }: { page: string; navigate: (key: string, pr
   }, []);
 
   const mobileNavItems = React.useMemo(() => {
-    const role = profile?.role;
-    if (role === 'manuf') return [
-      { key: 'manuf_dashboard', icon: <I.dash /> },
-      { key: 'manuf_inventory', icon: <I.box /> },
-      { key: 'manuf_orders', icon: <I.order /> },
-      { key: 'manuf_samples', icon: <I.sample /> },
-      { key: 'settings', icon: <I.gear /> },
-    ];
-    if (role === 'magasin') return [
-      { key: 'pickup_tickets', icon: <I.ticketIcon /> },
-      { key: 'inventaire_store', icon: <I.box /> },
-      { key: 'to_invoice', icon: <I.invoiceIcon /> },
-      { key: 'benefice_magasin', icon: <I.profitIcon /> },
-      { key: 'settings', icon: <I.gear /> },
-    ];
-    if (role === 'admin' || role === 'god_admin') return [
-      { key: 'dash_company', icon: <I.dash /> },
-      { key: 'admin_orders', icon: <I.order /> },
-      { key: 'crm_pipeline_team', icon: <I.pipeline /> },
-      { key: 'admin_users', icon: <I.shield /> },
-      { key: 'settings', icon: <I.gear /> },
-    ];
-    return [
-      { key: 'dash_user', icon: <I.dash /> },
-      { key: 'orders', icon: <I.order /> },
-      { key: 'crm_pipeline_team', icon: <I.pipeline /> },
-      { key: 'my_clients', icon: <I.myclients /> },
-      { key: 'settings', icon: <I.gear /> },
-    ];
-  }, [profile?.role]);
+    const items: { key: string; icon: React.ReactNode; label: string }[] = [];
+    const seen = new Set<string>();
+    for (const item of filteredMenu) {
+      if (item.subs) {
+        for (const sub of item.subs) {
+          if (!seen.has(sub.key)) { seen.add(sub.key); items.push({ key: sub.key, icon: sub.icon || item.icon, label: sub.label }); }
+        }
+      } else if (item.key && PAGES[item.key] && !seen.has(item.key)) {
+        seen.add(item.key); items.push({ key: item.key, icon: item.icon, label: item.label });
+      }
+    }
+    return items;
+  }, [filteredMenu]);
 
   useEffect(() => {
     if (!profile) return;
@@ -709,7 +692,7 @@ function AppShell({ page, onLogout }: { page: string; navigate: (key: string, pr
                   letterSpacing:"-0.01em", textAlign:"center",
                   whiteSpace:"nowrap",
                 }}>
-                  {PAGE_LABELS[mobileNavItems[mobileMenuIndex]?.key] || mobileNavItems[mobileMenuIndex]?.key}
+                  {mobileNavItems[mobileMenuIndex]?.label || PAGE_LABELS[mobileNavItems[mobileMenuIndex]?.key] || mobileNavItems[mobileMenuIndex]?.key}
                 </span>
                 {page === mobileNavItems[mobileMenuIndex]?.key && (
                   <span style={{ fontSize:10, color:"rgba(255,255,255,0.5)", fontWeight:500 }}>actif</span>

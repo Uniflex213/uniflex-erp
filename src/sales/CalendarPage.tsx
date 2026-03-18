@@ -184,10 +184,12 @@ export default function CalendarPage() {
   const loadEvents = useCallback(async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      let q = supabase
         .from("calendar_events")
         .select("*")
         .order("start_at", { ascending: true });
+      if (ownerId) q = q.eq("owner_id", ownerId);
+      const { data, error } = await q;
       if (!error && data) setEvents(data as CalendarEvent[]);
 
       const { data: reminders } = await supabase
@@ -205,7 +207,7 @@ export default function CalendarPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [ownerId]);
 
   useEffect(() => { loadEvents(); }, [loadEvents]);
 
