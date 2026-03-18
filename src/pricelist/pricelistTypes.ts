@@ -33,6 +33,9 @@ export type Pricelist = {
   lines: PricelistLine[];
 };
 
+/** @deprecated Use real DB data instead of mocks */
+export const MOCK_PRICELISTS: Pricelist[] = [];
+
 export const PRICELIST_PRODUCTS: { name: string; description: string; imageUrl: string }[] = [
   { name: "Uni-100", description: "Époxy 100% solide — Résistance maximale pour planchers industriels haute intensité.", imageUrl: "https://images.pexels.com/photos/3736527/pexels-photo-3736527.jpeg?w=120" },
   { name: "Uni-8085", description: "Époxy couleur sable — Finition décorative premium pour espaces commerciaux et résidentiels.", imageUrl: "https://images.pexels.com/photos/1148496/pexels-photo-1148496.jpeg?w=120" },
