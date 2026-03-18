@@ -339,7 +339,7 @@ export default function UserManagement() {
         </div>
       )}
       {rejectTarget && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
           <div style={{ background: T.bgCard, borderRadius: 16, width: 400, padding: 24, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
             <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, color: T.text }}>Rejeter la demande</h3>
             <textarea value={rejectNote} onChange={(e) => setRejectNote(e.target.value)} placeholder="Note (optionnel)" rows={3} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 14, resize: "none", boxSizing: "border-box", marginBottom: 16 }} />

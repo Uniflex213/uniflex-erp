@@ -255,7 +255,7 @@ function PersonalizePanel({
   return (
     <>
       <div
-        style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9999 }}
+        style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 9999 }}
         onClick={onClose}
       />
       <div style={{

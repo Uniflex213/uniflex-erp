@@ -90,7 +90,7 @@ export function ImageUploadZone({
                 onClick={() => onRemove(i)}
                 style={{
                   position: "absolute", top: 2, right: 2, width: 18, height: 18,
-                  background: "rgba(0,0,0,0.6)", border: "none", borderRadius: "50%", cursor: "pointer",
+                  background: "rgba(0,0,0,0.75)", border: "none", borderRadius: "50%", cursor: "pointer",
                   color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", padding: 0,
                 }}
               >

@@ -553,7 +553,7 @@ function ResolveDisputeModal({ dispute, onClose, onResolve }: { dispute: any; on
 
   return (
     <>
-      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9999 }} onClick={onClose} />
+      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 9999 }} onClick={onClose} />
       <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 480, background: T.bgCard, borderRadius: 16, padding: 28, zIndex: 10000, boxShadow: "0 24px 80px rgba(0,0,0,0.22)", fontFamily: "'Outfit', sans-serif" }}>
         <div style={{ fontSize: 18, fontWeight: 900, color: T.text, marginBottom: 6 }}>Résoudre la dispute</div>
         <p style={{ fontSize: 13, color: T.textMid, marginBottom: 18 }}>
@@ -648,7 +648,7 @@ function AdminDisputeMessagesModal({ dispute, onClose }: { dispute: any; onClose
 
   return (
     <>
-      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9999 }} onClick={onClose} />
+      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 9999 }} onClick={onClose} />
       <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 520, maxHeight: "80vh", background: T.bgCard, borderRadius: 16, display: "flex", flexDirection: "column", zIndex: 10000, boxShadow: "0 24px 80px rgba(0,0,0,0.22)", fontFamily: "'Outfit', sans-serif", overflow: "hidden" }}>
         <div style={{ padding: "20px 24px 14px", borderBottom: `1px solid ${T.border}` }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -851,7 +851,7 @@ function CreditNotesPanel({ creditNotes, onUpdate, onSelectClient }: { creditNot
 function DeleteModal({ confirm, onChange, onConfirm }: { confirm: DeleteConfirm; onChange: (c: DeleteConfirm | null) => void; onConfirm: () => void }) {
   return (
     <>
-      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9999 }} onClick={() => onChange(null)} />
+      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 9999 }} onClick={() => onChange(null)} />
       <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 420, background: T.bgCard, borderRadius: 16, padding: 28, zIndex: 10000, boxShadow: "0 24px 80px rgba(0,0,0,0.22)", fontFamily: "'Outfit', sans-serif" }}>
         <div style={{ fontSize: 18, fontWeight: 900, color: T.text, marginBottom: 10 }}>
           {confirm.step === 1 ? "Supprimer ce client ?" : "Confirmation finale"}
@@ -883,7 +883,7 @@ function ReassignModalComp({ client, onReassign, onClose }: { client: Client; on
 
   return (
     <>
-      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9999 }} onClick={onClose} />
+      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 9999 }} onClick={onClose} />
       <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 420, background: T.bgCard, borderRadius: 16, padding: 28, zIndex: 10000, boxShadow: "0 24px 80px rgba(0,0,0,0.22)", fontFamily: "'Outfit', sans-serif" }}>
         <div style={{ fontSize: 18, fontWeight: 900, color: T.text, marginBottom: 6 }}>Réassigner le client</div>
         <p style={{ fontSize: 13, color: T.textMid, marginBottom: 18 }}>Client : <strong>{client.company_name}</strong></p>
