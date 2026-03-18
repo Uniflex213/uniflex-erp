@@ -87,16 +87,18 @@ export default function UserManagement() {
   const handleDelete = async (u: AdminProfile) => {
     if (!confirm(`Supprimer ${u.full_name}? Son compte auth sera supprimé et son courriel sera libéré.`)) return;
     try {
-      const { data, error } = await supabase.functions.invoke("admin-delete-user", {
-        body: { userId: u.id },
-      });
-      if (error) {
-        // data contains the response body even on error
-        const detail = typeof data === 'object' && data?.error ? data.error : (typeof data === 'string' ? data : error.message);
-        throw new Error(detail);
-      }
-      if (data?.error) throw new Error(data.error);
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-delete-user`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token}` },
+          body: JSON.stringify({ userId: u.id }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `Erreur ${res.status}`);
       if (user) await logActivity(supabase, user.id, "user_deleted", "admin", { target_id: u.id });
+      alert(`${u.full_name} supprimé avec succès.`);
     } catch (e) {
       alert(e instanceof Error ? e.message : String(e));
     }
