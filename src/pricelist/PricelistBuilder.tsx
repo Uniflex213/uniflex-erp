@@ -8,16 +8,6 @@ import PricelistPreviewModal from "./PricelistPreviewModal";
 import { generatePricelistPDF } from "./pdfGenerator";
 import { T } from "../theme";
 
-const MOCK_ADDRESSES = [
-  "1234 Rue Sherbrooke O, Montréal, QC H3A 1B1",
-  "500 King St W, Toronto, ON M5V 1M6",
-  "1200 4th Ave, Seattle, WA 98101",
-  "220 Main St, Moncton, NB E1C 1B7",
-  "88 Grande-Allée Est, Québec, QC G1R 2H8",
-  "45 Rue Principale, Saint-Jérôme, QC J7Z 2A1",
-  "999 Boul. de Maisonneuve, Montréal, QC H3A 0C1",
-  "1500 René-Lévesque Blvd, Montréal, QC H3G 0E9",
-];
 
 const fmt = (n: number, currency = "CAD") =>
   new Intl.NumberFormat("fr-CA", { style: "currency", currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
@@ -128,11 +118,7 @@ export default function PricelistBuilder({ onBack, onSave, prefill }: Props) {
 
   const handleAddrChange = (val: string) => {
     setClientForm(p => ({ ...p, address: val }));
-    if (val.length > 2) {
-      const m = MOCK_ADDRESSES.filter(a => a.toLowerCase().includes(val.toLowerCase())).slice(0, 4);
-      setAddrSuggestions(m);
-      setShowAddrDrop(m.length > 0);
-    } else setShowAddrDrop(false);
+    setShowAddrDrop(false);
   };
 
   const addLine = () => {
