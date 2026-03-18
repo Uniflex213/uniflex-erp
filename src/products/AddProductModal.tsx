@@ -89,7 +89,7 @@ export default function AddProductModal({ onClose, onSave }: { onClose: () => vo
     <div
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
       style={{
-        position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 9999,
+        position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", zIndex: 9999,
         display: "flex", alignItems: "flex-start", justifyContent: "center",
         padding: "32px 16px", overflowY: "auto",
       }}

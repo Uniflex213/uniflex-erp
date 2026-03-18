@@ -87,7 +87,7 @@ export default function ClientForm({ initial, pricelists = [], clientCount = 0, 
 
   return (
     <>
-      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 9999 }} onClick={onCancel} />
+      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", zIndex: 9999 }} onClick={onCancel} />
       <div style={{
         position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)",
         width: "min(900px, 96vw)", maxHeight: "92vh", overflowY: "auto",

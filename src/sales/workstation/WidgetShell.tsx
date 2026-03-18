@@ -113,7 +113,7 @@ export function ExpandModal({ title, icon, onClose, children, width = "92%", hei
     <div
       style={{
         position: "fixed", inset: 0,
-        background: "rgba(0,0,0,0.75)",
+        background: "rgba(0,0,0,0.92)",
         zIndex: 9999,
         display: "flex",
         alignItems: "center",

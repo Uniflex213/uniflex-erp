@@ -951,7 +951,7 @@ const ClientFormModal = ({
 
   return (
     <div style={{
-      position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 9999,
+      position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", zIndex: 9999,
       display: "flex", alignItems: "center", justifyContent: "center",
       animation: "fadeIn 0.15s ease",
     }}>

@@ -590,7 +590,7 @@ export default function NewOrderPage({ onBack, onSubmit, prefill }: Props) {
       </div>
 
       {showConfirm && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }}>
           <div style={{ background: T.bgCard, borderRadius: 16, padding: 32, maxWidth: 480, width: "90%", boxShadow: "0 24px 64px rgba(0,0,0,0.2)" }}>
             <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 16 }}>Confirmer l'envoi</div>
             <div style={{ fontSize: 13, color: T.textMid, lineHeight: 1.8, marginBottom: 20 }}>
