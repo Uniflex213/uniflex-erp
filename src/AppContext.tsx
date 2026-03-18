@@ -145,20 +145,60 @@ export function AppProvider({ children }: Props) {
     localStorage.setItem(STORAGE_KEY_PAGE, page);
   }, [tabs, activeTabIndex, page]);
 
+  // ── Fetch team member IDs for scoping leads & samples ──
+  const teamMemberIdsRef = useRef<string[] | null>(null);
+  const isAdmin = profile?.role === "admin" || profile?.role === "god_admin";
+
+  useEffect(() => {
+    if (!profile) return;
+    if (isAdmin) { teamMemberIdsRef.current = null; return; } // admins see all
+    if (profile.team_id) {
+      supabase.from("profiles").select("id").eq("team_id", profile.team_id).eq("is_active", true)
+        .then(({ data }) => {
+          teamMemberIdsRef.current = data?.map(p => p.id) || [profile.id];
+        });
+    } else {
+      teamMemberIdsRef.current = [profile.id]; // solo: only own data
+    }
+  }, [profile?.id, profile?.team_id, isAdmin]);
+
   const reloadLeads = useCallback(async () => {
-    const { data, error } = await supabase
+    let query = supabase
       .from("crm_leads")
       .select("*, crm_activities(*), crm_reminders(*), crm_files(*)")
       .eq("archived", false)
       .order("created_at", { ascending: false });
+
+    // Scope by team members (or self) for non-admins
+    const memberIds = teamMemberIdsRef.current;
+    if (memberIds) {
+      query = query.or(
+        memberIds.map(id => `assigned_agent_id.eq.${id}`).join(",")
+        + "," + memberIds.map(id => `owner_id.eq.${id}`).join(",")
+        + ",assigned_agent_id.eq.,assigned_agent_id.is.null"
+      );
+    }
+
+    const { data, error } = await query;
     if (!error && data) setLeads(data.map(mapLead));
   }, []);
 
   const reloadSamples = useCallback(async () => {
-    const { data, error } = await supabase
+    let query = supabase
       .from("sample_requests")
       .select("*, sample_items(*), sample_activities(*)")
       .order("created_at", { ascending: false });
+
+    // Scope by team members (or self) for non-admins
+    const memberIds = teamMemberIdsRef.current;
+    if (memberIds) {
+      query = query.or(
+        memberIds.map(id => `agent_id.eq.${id}`).join(",")
+        + "," + memberIds.map(id => `owner_id.eq.${id}`).join(",")
+      );
+    }
+
+    const { data, error } = await query;
     if (!error && data) {
       setSamples(data.map((s: any) => ({
         ...s,
