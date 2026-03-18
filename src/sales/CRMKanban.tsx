@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import {
   CRMLead, Stage, STAGES, STAGE_COLORS, STAGE_BG,
   TEMP_COLORS, TEMP_BG, TEMP_LABEL, TYPE_COLORS, TYPE_BG,
@@ -174,7 +175,7 @@ export default function CRMKanban({ leads, samples = [], onLeadClick, onStageCha
         );
       })}
 
-      {contextMenu && ctxLead && (
+      {contextMenu && ctxLead && createPortal(
         <>
         <div onClick={closeContext} style={{ position: "fixed", inset: 0, zIndex: 9998 }} />
         <div
@@ -230,7 +231,8 @@ export default function CRMKanban({ leads, samples = [], onLeadClick, onStageCha
             </>
           )}
         </div>
-        </>
+        </>,
+        document.body
       )}
 
       {deleteConfirm && (
