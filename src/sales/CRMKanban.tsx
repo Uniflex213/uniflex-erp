@@ -6,7 +6,7 @@ import {
 } from "./crmTypes";
 import { SampleRequest, SampleStatus, SAMPLE_STATUS_COLORS, SAMPLE_STATUS_BG } from "./sampleTypes";
 import { StageDetailModal } from "./CRMKpiModals";
-import { useAgents } from "../hooks/useAgents";
+import { useTeamAgents } from "../hooks/useAgents";
 import { T } from "../theme";
 const fmt = (n: number) => new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 
@@ -50,7 +50,7 @@ function getLeadSampleStatus(leadId: string, samples: SampleRequest[]): SampleSt
 }
 
 export default function CRMKanban({ leads, samples = [], onLeadClick, onStageChange, onLeadUpdate, onLeadDelete }: Props) {
-  const agentsList = useAgents();
+  const agentsList = useTeamAgents();
   const [dragging, setDragging] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState<Stage | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);

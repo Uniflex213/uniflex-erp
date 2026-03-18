@@ -9,7 +9,7 @@ import { supabase } from "../supabaseClient";
 import { useApp } from "../AppContext";
 import { useAuth } from "../contexts/AuthContext";
 import { MOCK_PRICELISTS } from "../pricelist/pricelistTypes";
-import { useAgents } from "../hooks/useAgents";
+import { useTeamAgents } from "../hooks/useAgents";
 import { useTeams } from "./agentTeamData";
 import { T } from "../theme";
 
@@ -51,7 +51,7 @@ function downloadCSV(clients: Client[]) {
 export default function AdminClientsPage() {
   const { navigate } = useApp();
   const { profile, realProfile } = useAuth();
-  const ALL_AGENTS = useAgents();
+  const ALL_AGENTS = useTeamAgents();
   const SALES_TEAMS = useTeams();
   const ownerId = realProfile?.id ?? profile?.id ?? null;
   const [clients, setClients] = useState<Client[]>([]);
@@ -875,7 +875,7 @@ function DeleteModal({ confirm, onChange, onConfirm }: { confirm: DeleteConfirm;
 }
 
 function ReassignModalComp({ client, onReassign, onClose }: { client: Client; onReassign: (client: Client, agentId: string) => void; onClose: () => void }) {
-  const ALL_AGENTS = useAgents();
+  const ALL_AGENTS = useTeamAgents();
   const SALES_TEAMS = useTeams();
   const [selectedAgent, setSelectedAgent] = useState(client.agent_id);
   const selectedAgentData = ALL_AGENTS.find(a => a.id === selectedAgent);

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
-import { useAgents, AgentOption } from "../hooks/useAgents";
+import { useTeamAgents, AgentOption } from "../hooks/useAgents";
 
 export type SalesTeam = {
   id: string;
@@ -15,7 +15,7 @@ const TEAM_COLORS = ["#2563eb", "#059669", "#d97706", "#7c3aed", "#0891b2", "#dc
 let cachedTeams: SalesTeam[] | null = null;
 
 export function useTeams() {
-  const agents = useAgents();
+  const agents = useTeamAgents();
   const [teams, setTeams] = useState<SalesTeam[]>(cachedTeams || []);
 
   useEffect(() => {

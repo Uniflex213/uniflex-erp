@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { CRMLead, CRMReminder, STAGES, STAGE_COLORS, TEMP_COLORS } from "./crmTypes";
-import { useAgents } from "../hooks/useAgents";
+import { useTeamAgents } from "../hooks/useAgents";
 import { T } from "../theme";
 
 const fmt = (n: number) => new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
@@ -119,7 +119,7 @@ export type KpiModalType =
 export function LeadsActifsModal({ leads, onClose, onSelectLead }: {
   leads: CRMLead[]; onClose: () => void; onSelectLead: (l: CRMLead) => void;
 }) {
-  const agents = useAgents();
+  const agents = useTeamAgents();
   const activeLeads = leads.filter(l => l.stage !== "Fermé Gagné" && l.stage !== "Fermé Perdu" && !l.archived);
   const totalValue = activeLeads.reduce((s, l) => s + (l.estimated_value || 0), 0);
   const activeStages = STAGES.filter(s => s !== "Fermé Gagné" && s !== "Fermé Perdu");
@@ -256,7 +256,7 @@ export function LeadsActifsModal({ leads, onClose, onSelectLead }: {
 export function ValeurPipelineModal({ leads, onClose, onSelectLead }: {
   leads: CRMLead[]; onClose: () => void; onSelectLead: (l: CRMLead) => void;
 }) {
-  const agents = useAgents();
+  const agents = useTeamAgents();
   const activeLeads = leads.filter(l => l.stage !== "Fermé Gagné" && l.stage !== "Fermé Perdu" && !l.archived);
   const totalValue = activeLeads.reduce((s, l) => s + (l.estimated_value || 0), 0);
   const activeStages = STAGES.filter(s => s !== "Fermé Gagné" && s !== "Fermé Perdu");
@@ -467,7 +467,7 @@ export function PipelinePondereModal({ leads, onClose, onSelectLead }: {
 export function LeadsHotModal({ leads, onClose, onSelectLead }: {
   leads: CRMLead[]; onClose: () => void; onSelectLead: (l: CRMLead) => void;
 }) {
-  const agents = useAgents();
+  const agents = useTeamAgents();
   const now = new Date();
   const hotLeads = leads.filter(l => l.temperature === "Hot" && l.stage !== "Fermé Gagné" && l.stage !== "Fermé Perdu" && !l.archived);
   const totalHotValue = hotLeads.reduce((s, l) => s + (l.estimated_value || 0), 0);
@@ -590,7 +590,7 @@ export function LeadsHotModal({ leads, onClose, onSelectLead }: {
 export function TauxConversionModal({ leads, onClose, onSelectLead }: {
   leads: CRMLead[]; onClose: () => void; onSelectLead: (l: CRMLead) => void;
 }) {
-  const agents = useAgents();
+  const agents = useTeamAgents();
   const totalLeads = leads.length;
   const wonLeads = leads.filter(l => l.stage === "Fermé Gagné");
   const lostLeads = leads.filter(l => l.stage === "Fermé Perdu");
@@ -754,7 +754,7 @@ export function TauxConversionModal({ leads, onClose, onSelectLead }: {
 export function TempsClosingModal({ leads, onClose, onSelectLead }: {
   leads: CRMLead[]; onClose: () => void; onSelectLead: (l: CRMLead) => void;
 }) {
-  const agents = useAgents();
+  const agents = useTeamAgents();
   const now = new Date();
   const sixMonthsAgo = new Date(now.getTime() - 180 * 86400000);
   const recentlyWon = leads.filter(l => l.stage === "Fermé Gagné" && l.closed_at && new Date(l.closed_at) >= sixMonthsAgo);
@@ -873,7 +873,7 @@ export function TempsClosingModal({ leads, onClose, onSelectLead }: {
 export function DealsFermesModal({ leads, onClose, onSelectLead }: {
   leads: CRMLead[]; onClose: () => void; onSelectLead: (l: CRMLead) => void;
 }) {
-  const agents = useAgents();
+  const agents = useTeamAgents();
   const now = new Date();
   const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const dealsThisMonth = leads.filter(l => l.stage === "Fermé Gagné" && l.closed_at && new Date(l.closed_at) >= thisMonthStart);
@@ -995,7 +995,7 @@ export function DealsFermesModal({ leads, onClose, onSelectLead }: {
 export function RemindersRetardModal({ leads, onClose, onSelectLead }: {
   leads: CRMLead[]; onClose: () => void; onSelectLead: (l: CRMLead) => void;
 }) {
-  const agents = useAgents();
+  const agents = useTeamAgents();
   const now = new Date();
   const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
 

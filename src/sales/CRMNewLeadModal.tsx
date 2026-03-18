@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { CRMLead, REGIONS, LeadType, Temperature, LeadSource } from "./crmTypes";
 import { useProducts } from "./useProducts";
-import { useAgents } from "../hooks/useAgents";
+import { useTeamAgents } from "../hooks/useAgents";
 import { useCurrentAgent } from "../hooks/useCurrentAgent";
 import { T } from "../theme";
 
@@ -31,7 +31,7 @@ function Field({ label, required, children, col2 }: { label: string; required?: 
 }
 
 export default function CRMNewLeadModal({ onSave, onClose, isAdmin = true }: Props) {
-  const agents = useAgents();
+  const agents = useTeamAgents();
   const currentAgent = useCurrentAgent();
   const { products, loading: productsLoading } = useProducts();
   const [companyName, setCompanyName] = useState("");

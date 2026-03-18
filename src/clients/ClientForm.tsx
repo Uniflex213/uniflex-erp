@@ -5,7 +5,7 @@ import {
   EMPTY_CLIENT, generateClientCode, TIER_COLORS, TYPE_COLORS,
 } from "./clientTypes";
 import { Pricelist } from "../pricelist/pricelistTypes";
-import { useAgents } from "../hooks/useAgents";
+import { useTeamAgents } from "../hooks/useAgents";
 import { supabase } from "../supabaseClient";
 import { T } from "../theme";
 
@@ -41,7 +41,7 @@ interface Props {
 }
 
 export default function ClientForm({ initial, pricelists = [], clientCount = 0, onSave, onCancel, isConversion, isAdmin }: Props) {
-  const agents = useAgents();
+  const agents = useTeamAgents();
   const [form, setForm] = useState<Omit<Client, "id" | "created_at" | "updated_at">>({
     ...EMPTY_CLIENT,
     ...initial,

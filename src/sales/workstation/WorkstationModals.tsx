@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { CRMLead, STAGE_COLORS, TEMP_COLORS, STAGES } from "../crmTypes";
-import { useAgents } from "../../hooks/useAgents";
+import { useTeamAgents } from "../../hooks/useAgents";
 import { SampleRequest } from "../sampleTypes";
 import { T, fmt, daysSince, timeAgo, isToday, isPast, mkId } from "./workstationTypes";
 import { useCurrentAgent } from "../../hooks/useCurrentAgent";
@@ -309,7 +309,7 @@ export function PipelineModal({ leads, onClose, onOpenLead }: { leads: CRMLead[]
 
 export function KpisModal({ leads, onClose }: { leads: CRMLead[]; onClose: () => void }) {
   const currentAgent = useCurrentAgent();
-  const agents = useAgents();
+  const agents = useTeamAgents();
   const myLeads = useMemo(() => leads.filter(l => l.assigned_agent_id === currentAgent.id), [leads, currentAgent.id]);
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
@@ -930,7 +930,7 @@ export function CalendarModal({ leads, onClose }: { leads: CRMLead[]; onClose: (
 
 export function ScoreModal({ leads, onClose }: { leads: CRMLead[]; onClose: () => void }) {
   const currentAgent = useCurrentAgent();
-  const agents = useAgents();
+  const agents = useTeamAgents();
   const myLeads = useMemo(() => leads.filter(l => l.assigned_agent_id === currentAgent.id), [leads, currentAgent.id]);
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();

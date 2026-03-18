@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { CRMLead } from "../crmTypes";
 import { T } from "./workstationTypes";
 import { useCurrentAgent } from "../../hooks/useCurrentAgent";
-import { useAgents } from "../../hooks/useAgents";
+import { useTeamAgents } from "../../hooks/useAgents";
 
 interface Props {
   leads: CRMLead[];
@@ -10,7 +10,7 @@ interface Props {
 
 export default function WidgetScore({ leads }: Props) {
   const currentAgent = useCurrentAgent();
-  const agents = useAgents();
+  const agents = useTeamAgents();
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 

@@ -3,7 +3,7 @@ import { CRMLead } from "../crmTypes";
 import { SampleRequest } from "../sampleTypes";
 import { T, fmt, daysSince } from "./workstationTypes";
 import { useCurrentAgent } from "../../hooks/useCurrentAgent";
-import { useAgents } from "../../hooks/useAgents";
+import { useTeamAgents } from "../../hooks/useAgents";
 import PersonalSamplesModal from "./PersonalSamplesModal";
 
 interface Props {
@@ -26,7 +26,7 @@ function loadGoals(): Goals {
 
 export default function WidgetKpis({ leads, samples = [], allSamples = [] }: Props) {
   const agent = useCurrentAgent();
-  const agents = useAgents();
+  const agents = useTeamAgents();
   const myLeads = useMemo(() => leads.filter(l => l.assigned_agent_id === agent.id), [leads, agent.id]);
   const [goals, setGoals] = useState<Goals>(loadGoals);
   const [editingGoals, setEditingGoals] = useState(false);

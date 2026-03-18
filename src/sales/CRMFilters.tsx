@@ -1,6 +1,6 @@
 import React from "react";
 import { REGIONS, Stage, Temperature, LeadType } from "./crmTypes";
-import { useAgents } from "../hooks/useAgents";
+import { useTeamAgents } from "../hooks/useAgents";
 import { T } from "../theme";
 
 export interface CRMFilters {
@@ -46,7 +46,7 @@ const types: LeadType[] = ["Installateur", "Distributeur", "Large Scale"];
 const tempLabels: Record<Temperature, string> = { Hot: "🔥 Hot", Warm: "⚡ Warm", Cold: "❄️ Cold" };
 
 export default function CRMFilterBar({ filters, onChange, view, onViewChange, totalCount, filteredCount }: Props) {
-  const agents = useAgents();
+  const agents = useTeamAgents();
   const set = (key: keyof CRMFilters, val: string) => onChange({ ...filters, [key]: val });
 
   const FILTER_LABELS: Partial<Record<keyof CRMFilters, (val: string) => string>> = {
