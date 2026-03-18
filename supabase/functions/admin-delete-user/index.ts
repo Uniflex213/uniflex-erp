@@ -69,13 +69,35 @@ Deno.serve(async (req: Request) => {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    // Delete related data first (FK constraints)
+    // Delete or nullify all FK references to profiles before deleting
+    // Direct ownership tables — delete rows
     await adminClient.from("user_permissions").delete().eq("user_id", userId);
     await adminClient.from("user_smtp_configs").delete().eq("user_id", userId);
+    await adminClient.from("user_data_store").delete().eq("user_id", userId);
     await adminClient.from("calendar_events").delete().eq("owner_id", userId);
     await adminClient.from("notifications").delete().eq("user_id", userId);
-    await adminClient.from("conversations").delete().or(`user1_id.eq.${userId},user2_id.eq.${userId}`);
-    await adminClient.from("account_requests").delete().eq("reviewed_by", userId);
+    await adminClient.from("messages").delete().eq("sender_id", userId);
+    await adminClient.from("conversation_participants").delete().eq("user_id", userId);
+    await adminClient.from("activity_logs").delete().eq("user_id", userId);
+    await adminClient.from("margin_analyses").delete().eq("owner_id", userId);
+    await adminClient.from("pricelists").delete().eq("owner_id", userId);
+
+    // Nullify references in shared tables (don't delete the records, just unlink)
+    await adminClient.from("account_requests").update({ reviewed_by: null }).eq("reviewed_by", userId);
+    await adminClient.from("clients").update({ owner_id: null }).eq("owner_id", userId);
+    await adminClient.from("crm_leads").update({ owner_id: null }).eq("owner_id", userId);
+    await adminClient.from("orders").update({ owner_id: null }).eq("owner_id", userId);
+    await adminClient.from("pickup_tickets").update({ owner_id: null }).eq("owner_id", userId);
+    await adminClient.from("sample_requests").update({ owner_id: null }).eq("owner_id", userId);
+    await adminClient.from("stores").update({ created_by: null }).eq("created_by", userId);
+    await adminClient.from("dispute_messages").update({ sender_id: null }).eq("sender_id", userId);
+    await adminClient.from("email_send_logs").update({ sent_by: null }).eq("sent_by", userId);
+    await adminClient.from("email_smtp_configs").update({ updated_by: null }).eq("updated_by", userId);
+    await adminClient.from("email_templates").update({ updated_by: null }).eq("updated_by", userId);
+    await adminClient.from("system_email_configs").update({ updated_by: null }).eq("updated_by", userId);
+    await adminClient.from("platform_teams").update({ manager_id: null }).eq("manager_id", userId);
+    await adminClient.from("team_commission_configs").delete().or(`member_id.eq.${userId},set_by.eq.${userId}`);
+    await adminClient.from("team_expenses").update({ added_by: null }).eq("added_by", userId);
 
     // Delete profile row (FK to auth.users must be removed before auth deletion)
     await adminClient.from("profiles").delete().eq("id", userId);
