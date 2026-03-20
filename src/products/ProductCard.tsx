@@ -5,7 +5,7 @@ import { DownloadIcon, EditIcon, ImageIcon } from "./productIcons";
 import { PARTIE_LABELS } from "./productFormTypes";
 import ProductCarousel from "./ProductCarousel";
 
-export default function ProductCard({ product, onEdit }: { product: SaleProduct; onEdit: (p: SaleProduct) => void }) {
+export default function ProductCard({ product, onEdit, canEdit }: { product: SaleProduct; onEdit: (p: SaleProduct) => void; canEdit?: boolean }) {
   const [activeTab, setActiveTab] = useState("description");
 
   const mainImage = product.images?.find(img => img.image_type === "main");
@@ -162,17 +162,19 @@ export default function ProductCard({ product, onEdit }: { product: SaleProduct;
               </a>
             )}
           </div>
-          <button
-            onClick={() => onEdit(product)}
-            style={{
-              display: "flex", alignItems: "center", gap: 4, padding: "3px 9px",
-              background: T.cardAlt, border: `1px solid ${T.silverLight}`,
-              borderRadius: 5, cursor: "pointer", fontSize: 10, fontWeight: 600, color: T.textMid,
-              fontFamily: "inherit",
-            }}
-          >
-            <EditIcon /> Modifier
-          </button>
+          {canEdit !== false && (
+            <button
+              onClick={() => onEdit(product)}
+              style={{
+                display: "flex", alignItems: "center", gap: 4, padding: "3px 9px",
+                background: T.cardAlt, border: `1px solid ${T.silverLight}`,
+                borderRadius: 5, cursor: "pointer", fontSize: 10, fontWeight: 600, color: T.textMid,
+                fontFamily: "inherit",
+              }}
+            >
+              <EditIcon /> Modifier
+            </button>
+          )}
         </div>
       </div>
 

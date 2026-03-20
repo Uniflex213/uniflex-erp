@@ -887,7 +887,6 @@ export const PRESET_VENDEUR: PermissionKey[] = [
   "performance.calendar.manage",
   "performance.my_team.view",
   "performance.my_clients.view",
-  "performance.my_clients.manage",
   "disputes.view_own",
   "disputes.create",
   "disputes.edit",

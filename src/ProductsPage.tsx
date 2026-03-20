@@ -11,8 +11,9 @@ import EditProductModal from "./products/EditProductModal";
 
 export default function ProductsPage() {
   const { products, addProduct, updateProduct, deleteProduct } = useApp();
-  const { permissions, profile } = useAuth();
+  const { permissions, profile, can } = useAuth();
   const canCreate = profile?.role === "god_admin";
+  const canEditProducts = can("ventes.products.edit");
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editProduct, setEditProduct] = useState<SaleProduct | null>(null);
@@ -126,13 +127,13 @@ export default function ProductsPage() {
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {filtered.map(p => (
-            <ProductCard key={p.id} product={p} onEdit={setEditProduct} />
+            <ProductCard key={p.id} product={p} onEdit={setEditProduct} canEdit={canEditProducts} />
           ))}
         </div>
       )}
 
       {showModal && <AddProductModal onClose={() => setShowModal(false)} onSave={handleAddSave} />}
-      {editProduct && (
+      {editProduct && canEditProducts && (
         <EditProductModal
           product={editProduct}
           onClose={() => setEditProduct(null)}
