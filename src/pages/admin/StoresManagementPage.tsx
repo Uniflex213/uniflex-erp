@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "../../supabaseClient";
 import { useAuth } from "../../contexts/AuthContext";
 import { T } from "../../theme";
+import AddressAutocomplete from "../../components/AddressAutocomplete";
 
 interface Store {
   id: string;
@@ -322,7 +323,17 @@ export default function StoresManagementPage() {
               </div>
               <div>
                 <label style={{ color: T.textMid, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>Adresse</label>
-                <input value={newAddress} onChange={(e) => setNewAddress(e.target.value)} placeholder="123 Rue Exemple" style={inputStyle} />
+                <AddressAutocomplete
+                  style={inputStyle}
+                  value={newAddress}
+                  onChange={setNewAddress}
+                  onSelect={s => {
+                    setNewAddress(s.address);
+                    setNewCity(s.city);
+                    setNewProvince(s.province);
+                  }}
+                  placeholder="123 Rue Exemple"
+                />
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <div>

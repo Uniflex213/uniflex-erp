@@ -8,6 +8,7 @@ import { Pricelist } from "../pricelist/pricelistTypes";
 import { useTeamAgents } from "../hooks/useAgents";
 import { supabase } from "../supabaseClient";
 import { T } from "../theme";
+import AddressAutocomplete from "../components/AddressAutocomplete";
 
 const labelStyle: React.CSSProperties = {
   fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase",
@@ -155,7 +156,19 @@ export default function ClientForm({ initial, pricelists = [], clientCount = 0, 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             <div style={{ gridColumn: "1 / -1" }}>
               <label style={labelStyle}>Adresse complète</label>
-              <input style={inputStyle} value={form.billing_address} onChange={e => set("billing_address", e.target.value)} placeholder="1234 Rue Sherbrooke O" />
+              <AddressAutocomplete
+                style={inputStyle}
+                value={form.billing_address}
+                onChange={v => set("billing_address", v)}
+                onSelect={s => {
+                  set("billing_address", s.address);
+                  set("billing_city", s.city);
+                  set("billing_province", s.province);
+                  set("billing_postal_code", s.postal_code);
+                  set("billing_country", s.country === "États-Unis" || s.country === "United States" ? "États-Unis" : "Canada");
+                }}
+                placeholder="1234 Rue Sherbrooke O"
+              />
             </div>
             <div>
               <label style={labelStyle}>Ville</label>
@@ -188,7 +201,18 @@ export default function ClientForm({ initial, pricelists = [], clientCount = 0, 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
               <div style={{ gridColumn: "1 / -1" }}>
                 <label style={labelStyle}>Adresse de livraison</label>
-                <input style={inputStyle} value={form.shipping_address} onChange={e => set("shipping_address", e.target.value)} />
+                <AddressAutocomplete
+                  style={inputStyle}
+                  value={form.shipping_address}
+                  onChange={v => set("shipping_address", v)}
+                  onSelect={s => {
+                    set("shipping_address", s.address);
+                    set("shipping_city", s.city);
+                    set("shipping_province", s.province);
+                    set("shipping_postal_code", s.postal_code);
+                    set("shipping_country", s.country === "États-Unis" || s.country === "United States" ? "États-Unis" : "Canada");
+                  }}
+                />
               </div>
               <div>
                 <label style={labelStyle}>Ville</label>

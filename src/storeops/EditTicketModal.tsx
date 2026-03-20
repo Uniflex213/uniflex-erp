@@ -5,6 +5,7 @@ import {
 } from "./storeOpsTypes";
 import { supabase } from "../supabaseClient";
 import { T } from "../theme";
+import AddressAutocomplete from "../components/AddressAutocomplete";
 
 interface StoreItem {
   id: string;
@@ -312,7 +313,15 @@ export default function EditTicketModal({ ticket, onSaved, onCancel }: Props) {
               </div>
               <div>
                 <label style={labelStyle}>Adresse de facturation</label>
-                <input value={billingAddress} onChange={e => setBillingAddress(e.target.value)} style={inputStyle} />
+                <AddressAutocomplete
+                  style={inputStyle}
+                  value={billingAddress}
+                  onChange={setBillingAddress}
+                  onSelect={s => {
+                    setBillingAddress(s.address);
+                    setProvince(s.province);
+                  }}
+                />
               </div>
               <div>
                 <label style={labelStyle}>Province</label>

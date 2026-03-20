@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { T } from "./theme";
+import AddressAutocomplete from "./components/AddressAutocomplete";
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("fr-CA", {
@@ -999,7 +1000,31 @@ const ClientFormModal = ({
             {/* TODO: Replace text fields with Mapbox Geocoding API autocomplete */}
             {/* API: https://api.mapbox.com/geocoding/v5/mapbox.places/{query}.json?access_token=VITE_MAPBOX_TOKEN */}
           </div>
-          <Field label="Adresse (rue)" value={form.address} onChange={set("address")} placeholder="8420 Rue Hochelaga" />
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: T.textMid, marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.4 }}>
+              Adresse (rue)
+            </label>
+            <AddressAutocomplete
+              style={{
+                width: "100%", padding: "8px 10px", borderRadius: 6, border: `1px solid ${T.border}`,
+                fontSize: 13, fontFamily: "inherit", color: T.text, background: T.cardAlt,
+                outline: "none", boxSizing: "border-box" as const,
+              }}
+              value={form.address}
+              onChange={set("address")}
+              onSelect={s => {
+                setForm(f => ({
+                  ...f,
+                  address: s.address,
+                  city: s.city,
+                  province: s.province,
+                  postalCode: s.postal_code,
+                  country: s.country === "United States" ? "États-Unis" : s.country,
+                }));
+              }}
+              placeholder="8420 Rue Hochelaga"
+            />
+          </div>
           <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: "0 12px" }}>
             <Field label="Ville" value={form.city} onChange={set("city")} placeholder="Montréal" />
             <Field label="Province" value={form.province} onChange={set("province")} type="select" options={PROVINCES} />

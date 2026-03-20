@@ -7,6 +7,7 @@ import { useApp } from "../AppContext";
 import PricelistPreviewModal from "./PricelistPreviewModal";
 import { generatePricelistPDF } from "./pdfGenerator";
 import { T } from "../theme";
+import AddressAutocomplete from "../components/AddressAutocomplete";
 
 
 const fmt = (n: number, currency = "CAD") =>
@@ -104,8 +105,6 @@ export default function PricelistBuilder({ onBack, onSave, prefill }: Props) {
   const [showPreview, setShowPreview] = useState(false);
   const [generating, setGenerating] = useState(false);
 
-  const [addrSuggestions, setAddrSuggestions] = useState<string[]>([]);
-  const [showAddrDrop, setShowAddrDrop] = useState(false);
   const addrRef = useRef<HTMLDivElement>(null);
 
   const dragItem = useRef<number | null>(null);
@@ -116,10 +115,6 @@ export default function PricelistBuilder({ onBack, onSave, prefill }: Props) {
   const rowValid = newRow.product !== "" && newRow.minQty !== "" && Number(newRow.minQty) > 0 && newRow.price !== "" && Number(newRow.price) > 0 && newRow.format !== "";
 
 
-  const handleAddrChange = (val: string) => {
-    setClientForm(p => ({ ...p, address: val }));
-    setShowAddrDrop(false);
-  };
 
   const addLine = () => {
     if (!rowValid) return;
@@ -264,21 +259,13 @@ export default function PricelistBuilder({ onBack, onSave, prefill }: Props) {
                   <div>
                     <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 6 }}>Adresse complète *</div>
                     <div style={{ position: "relative" }} ref={addrRef}>
-                      <input value={clientForm.address} onChange={e => handleAddrChange(e.target.value)} placeholder="1234 Rue..." style={inputStyle} />
-                      {showAddrDrop && (
-                        <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 20 }}>
-                          {addrSuggestions.map(a => (
-                            <div key={a} onClick={() => { setClientForm(p => ({ ...p, address: a })); setShowAddrDrop(false); }}
-                              style={{ padding: "10px 14px", cursor: "pointer", fontSize: 13, borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", gap: 8 }}
-                              onMouseOver={e => (e.currentTarget as HTMLDivElement).style.background = "#f8f9ff"}
-                              onMouseOut={e => (e.currentTarget as HTMLDivElement).style.background = "transparent"}
-                            >
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={T.textLight} strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                              {a}
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      <AddressAutocomplete
+                        style={inputStyle}
+                        value={clientForm.address}
+                        onChange={v => setClientForm(p => ({ ...p, address: v }))}
+                        onSelect={s => setClientForm(p => ({ ...p, address: s.full_address }))}
+                        placeholder="1234 Rue..."
+                      />
                     </div>
                   </div>
                   <div>
