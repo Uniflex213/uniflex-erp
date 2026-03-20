@@ -19,6 +19,7 @@ export default function EditProductModal({
   const [form, setForm] = useState<FormState>(() => ({
     name: product.name,
     sku: product.sku || "",
+    category: product.category || "Other",
     formats: product.formats,
     formatsOther: product.formats_other || "",
     unitsPalette: product.units_per_pallet != null ? String(product.units_per_pallet) : "",
@@ -68,6 +69,7 @@ export default function EditProductModal({
           name: form.name.trim(),
           sku: form.sku.trim(),
           description: form.description.trim(),
+          category: form.category,
           components_count: form.componentsCount,
           formats: form.formats,
           formats_other: form.formatsOther,
@@ -130,6 +132,7 @@ export default function EditProductModal({
         name: form.name.trim(),
         sku: form.sku.trim(),
         description: form.description.trim(),
+        category: form.category,
         components_count: form.componentsCount,
         formats: form.formats,
         formats_other: form.formatsOther,

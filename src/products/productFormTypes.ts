@@ -1,6 +1,7 @@
 export type FormState = {
   name: string;
   sku: string;
+  category: string;
   formats: string[];
   formatsOther: string;
   unitsPalette: string;
@@ -16,7 +17,7 @@ export type FormState = {
 };
 
 export const emptyForm = (): FormState => ({
-  name: "", sku: "", formats: [], formatsOther: "", unitsPalette: "",
+  name: "", sku: "", category: "Other", formats: [], formatsOther: "", unitsPalette: "",
   description: "", componentsCount: 1, isActive: true,
   productImages: [], exampleImages: [],
   tdsFile: null,
@@ -25,7 +26,7 @@ export const emptyForm = (): FormState => ({
   sdsC: false, sdsCFile: null,
 });
 
-export const FORMAT_OPTIONS = ["2 GAL", "3 GAL", "10 GAL", "Kit Baril (55 gallons)", "Totes", "Autre"];
+export const FORMAT_OPTIONS = ["2 GAL", "3 GAL", "5 GAL", "10 GAL", "15 GAL", "Kit Baril (55 gallons)", "Totes", "Autre"];
 
 export const PARTIE_LABELS = ["A", "B", "C"];
 

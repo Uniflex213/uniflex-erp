@@ -1,6 +1,7 @@
 import React from "react";
 import { T } from "../theme";
 import { FormState, FORMAT_OPTIONS, countWords } from "./productFormTypes";
+import { PRODUCT_CATEGORIES } from "../sales/productTypes";
 import { FileUploadZone, ImageUploadZone, Checkbox, inputStyle } from "./ProductFormHelpers";
 
 export default function ProductFormBody({ form, setForm }: { form: FormState; setForm: React.Dispatch<React.SetStateAction<FormState>> }) {
@@ -48,7 +49,33 @@ export default function ProductFormBody({ form, setForm }: { form: FormState; se
       </div>
 
       <div>
-        <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: T.text, marginBottom: 8 }}>3. Formats possibles</label>
+        <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: T.text, marginBottom: 8 }}>3. Catégorie</label>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {PRODUCT_CATEGORIES.map(cat => {
+            const active = form.category === cat;
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => set("category", cat)}
+                style={{
+                  padding: "6px 14px", borderRadius: 20, fontSize: 12, fontWeight: 700,
+                  cursor: "pointer", fontFamily: "inherit",
+                  background: active ? T.main : T.cardAlt,
+                  color: active ? "#fff" : T.textMid,
+                  border: `1.5px solid ${active ? T.main : T.silverLight}`,
+                  transition: "all 0.15s",
+                }}
+              >
+                {cat}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div>
+        <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: T.text, marginBottom: 8 }}>4. Formats possibles</label>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {FORMAT_OPTIONS.map(f => (
             <div key={f} style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -72,7 +99,7 @@ export default function ProductFormBody({ form, setForm }: { form: FormState; se
       </div>
 
       <div>
-        <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: T.text, marginBottom: 6 }}>4. Unites par palette</label>
+        <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: T.text, marginBottom: 6 }}>5. Unites par palette</label>
         <input
           type="number"
           min={1}
@@ -87,7 +114,7 @@ export default function ProductFormBody({ form, setForm }: { form: FormState; se
       </div>
 
       <div>
-        <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: T.text, marginBottom: 8 }}>5. Photo du produit</label>
+        <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: T.text, marginBottom: 8 }}>6. Photo du produit</label>
         <ImageUploadZone
           label="Photo principale du produit"
           maxImages={1}
@@ -99,7 +126,7 @@ export default function ProductFormBody({ form, setForm }: { form: FormState; se
 
       <div>
         <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: T.text, marginBottom: 4 }}>
-          6. Images d'exemple de projet
+          7. Images d'exemple de projet
         </label>
         <div style={{ fontSize: 11, color: T.textMid, marginBottom: 8 }}>3 images maximum</div>
         <ImageUploadZone
@@ -112,7 +139,7 @@ export default function ProductFormBody({ form, setForm }: { form: FormState; se
       </div>
 
       <div>
-        <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: T.text, marginBottom: 6 }}>7. Description du produit</label>
+        <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: T.text, marginBottom: 6 }}>8. Description du produit</label>
         <div style={{ position: "relative" }}>
           <textarea
             value={form.description}
@@ -137,7 +164,7 @@ export default function ProductFormBody({ form, setForm }: { form: FormState; se
       </div>
 
       <div>
-        <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: T.text, marginBottom: 6 }}>8. Nombre de composants</label>
+        <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: T.text, marginBottom: 6 }}>9. Nombre de composants</label>
         <select
           value={form.componentsCount}
           onChange={e => set("componentsCount", Number(e.target.value))}

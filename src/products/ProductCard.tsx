@@ -88,30 +88,37 @@ export default function ProductCard({ product, onEdit, canEdit }: { product: Sal
       background: T.card,
       border: `1px solid ${T.border}`,
       borderRadius: 10,
-      height: 190,
       width: "100%",
       boxSizing: "border-box",
       display: "flex",
+      flexDirection: "column",
       overflow: "hidden",
       boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
       position: "relative",
     }}>
-      <div style={{ width: 150, flexShrink: 0, display: "flex", flexDirection: "column", borderRight: `1px solid ${T.border}`, overflow: "hidden" }}>
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: T.cardAlt, overflow: "hidden" }}>
-          {mainImage ? (
-            <img src={mainImage.image_url} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} loading="lazy" />
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, color: T.silverDark }}>
-              <ImageIcon />
-              <span style={{ fontSize: 10 }}>Photo</span>
-            </div>
-          )}
-        </div>
-        <div style={{ padding: "6px 8px", borderTop: `1px solid ${T.border}`, background: T.card }}>
-          <div style={{ fontSize: 12, fontWeight: 800, color: T.text, letterSpacing: -0.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+      {/* Top bar: name + SKU + category badge + status + edit */}
+      <div style={{
+        padding: "10px 14px", borderBottom: `1px solid ${T.border}`,
+        display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap",
+      }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 14, fontWeight: 800, color: T.text, lineHeight: 1.3 }}>
             {product.name}
           </div>
-          <div style={{ marginTop: 3 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 3 }}>
+            {product.sku && (
+              <span style={{ fontSize: 10, fontWeight: 700, color: T.textLight, fontFamily: "monospace", letterSpacing: 0.5 }}>
+                {product.sku}
+              </span>
+            )}
+            {product.category && product.category !== "Other" && (
+              <span style={{
+                fontSize: 9.5, fontWeight: 700, padding: "1px 8px", borderRadius: 10,
+                background: "rgba(99,102,241,0.08)", color: T.main, border: `1px solid rgba(99,102,241,0.15)`,
+              }}>
+                {product.category}
+              </span>
+            )}
             <span style={{
               fontSize: 9.5, fontWeight: 700, padding: "1px 6px", borderRadius: 4,
               background: product.is_active ? T.greenBg : "#f3f4f6",
@@ -121,47 +128,19 @@ export default function ProductCard({ product, onEdit, canEdit }: { product: Sal
             </span>
           </div>
         </div>
-      </div>
-
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
-        <div style={{ display: "flex", borderBottom: `1px solid ${T.border}`, overflowX: "auto", flexShrink: 0, scrollbarWidth: "none" }}>
-          {tabs.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              style={{
-                padding: "7px 14px", border: "none", background: "transparent", cursor: "pointer",
-                fontSize: 11, fontWeight: activeTab === tab.key ? 700 : 500,
-                color: activeTab === tab.key ? T.main : T.textMid,
-                borderBottom: activeTab === tab.key ? `2px solid ${T.main}` : "2px solid transparent",
-                whiteSpace: "nowrap", fontFamily: "inherit", flexShrink: 0,
-                transition: "all 0.15s",
-              }}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        <div style={{ flex: 1, padding: "8px 12px", overflow: "hidden" }}>
-          {renderTabContent()}
-        </div>
-
-        <div style={{ padding: "5px 10px 6px", borderTop: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6, flexShrink: 0 }}>
-          <div style={{ display: "flex", gap: 5 }}>
-            {tdsFile && (
-              <a href={tdsFile.file_url} download={tdsFile.file_name} style={{ textDecoration: "none" }}>
-                <button style={{
-                  display: "flex", alignItems: "center", gap: 4, padding: "3px 8px",
-                  background: "rgba(99,102,241,0.08)", border: `1px solid rgba(99,102,241,0.2)`,
-                  borderRadius: 5, cursor: "pointer", fontSize: 10, fontWeight: 700, color: T.main,
-                  fontFamily: "inherit",
-                }}>
-                  <DownloadIcon /> TDS
-                </button>
-              </a>
-            )}
-          </div>
+        <div style={{ display: "flex", gap: 5, flexShrink: 0 }}>
+          {tdsFile && (
+            <a href={tdsFile.file_url} download={tdsFile.file_name} style={{ textDecoration: "none" }}>
+              <button style={{
+                display: "flex", alignItems: "center", gap: 4, padding: "3px 8px",
+                background: "rgba(99,102,241,0.08)", border: `1px solid rgba(99,102,241,0.2)`,
+                borderRadius: 5, cursor: "pointer", fontSize: 10, fontWeight: 700, color: T.main,
+                fontFamily: "inherit",
+              }}>
+                <DownloadIcon /> TDS
+              </button>
+            </a>
+          )}
           {canEdit !== false && (
             <button
               onClick={() => onEdit(product)}
@@ -178,11 +157,57 @@ export default function ProductCard({ product, onEdit, canEdit }: { product: Sal
         </div>
       </div>
 
-      {hasExamples && (
-        <div style={{ width: 300, flexShrink: 0, borderLeft: `1px solid ${T.border}`, overflow: "hidden" }}>
-          <ProductCarousel images={exampleImages} />
+      {/* Body: image + tabs + examples */}
+      <div style={{ display: "flex", height: 150, overflow: "hidden" }}>
+        {/* Product image — floating PNG, no border/outline */}
+        <div style={{ width: 140, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", padding: 8 }}>
+          {mainImage ? (
+            <img
+              src={mainImage.image_url}
+              alt={product.name}
+              style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
+              loading="lazy"
+            />
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, color: T.silverDark }}>
+              <ImageIcon />
+              <span style={{ fontSize: 10 }}>Photo</span>
+            </div>
+          )}
         </div>
-      )}
+
+        {/* Tabs content */}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden", borderLeft: `1px solid ${T.border}` }}>
+          <div style={{ display: "flex", borderBottom: `1px solid ${T.border}`, overflowX: "auto", flexShrink: 0, scrollbarWidth: "none" }}>
+            {tabs.map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                style={{
+                  padding: "7px 14px", border: "none", background: "transparent", cursor: "pointer",
+                  fontSize: 11, fontWeight: activeTab === tab.key ? 700 : 500,
+                  color: activeTab === tab.key ? T.main : T.textMid,
+                  borderBottom: activeTab === tab.key ? `2px solid ${T.main}` : "2px solid transparent",
+                  whiteSpace: "nowrap", fontFamily: "inherit", flexShrink: 0,
+                  transition: "all 0.15s",
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+          <div style={{ flex: 1, padding: "8px 12px", overflow: "hidden" }}>
+            {renderTabContent()}
+          </div>
+        </div>
+
+        {/* Example images carousel */}
+        {hasExamples && (
+          <div style={{ width: 280, flexShrink: 0, borderLeft: `1px solid ${T.border}`, overflow: "hidden" }}>
+            <ProductCarousel images={exampleImages} />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

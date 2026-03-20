@@ -12,11 +12,15 @@ export type SaleProductImage = {
   sort_order: number;
 };
 
+export const PRODUCT_CATEGORIES = ["Resin", "Resin Add-On", "Torginol Flakes", "Finish Coats", "Repair Kits", "Quartz Mixed Resin", "Other"] as const;
+export type ProductCategory = (typeof PRODUCT_CATEGORIES)[number];
+
 export type SaleProduct = {
   id: string;
   name: string;
   sku: string;
   description: string;
+  category: string;
   components_count: number;
   formats: string[];
   formats_other: string;

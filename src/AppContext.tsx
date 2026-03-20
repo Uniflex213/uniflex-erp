@@ -217,7 +217,9 @@ export function AppProvider({ children }: Props) {
       setProducts(data.map((p: any) => ({
         id: p.id,
         name: p.name,
+        sku: p.sku || "",
         description: p.description,
+        category: p.category || "Other",
         components_count: p.components_count,
         formats: p.formats || [],
         formats_other: p.formats_other || "",

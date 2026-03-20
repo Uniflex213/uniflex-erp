@@ -1,24 +1,54 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useApp } from "./AppContext";
 import { useAuth } from "./contexts/AuthContext";
-import { can as canPerm } from "./lib/permissions";
-import { SaleProduct } from "./sales/productTypes";
+import { SaleProduct, PRODUCT_CATEGORIES } from "./sales/productTypes";
 import { T } from "./theme";
 import { PlusIcon, SearchIcon } from "./products/productIcons";
 import ProductCard from "./products/ProductCard";
 import AddProductModal from "./products/AddProductModal";
 import EditProductModal from "./products/EditProductModal";
 
+const CATEGORY_ORDER: string[] = [...PRODUCT_CATEGORIES];
+
 export default function ProductsPage() {
   const { products, addProduct, updateProduct, deleteProduct } = useApp();
-  const { permissions, profile, can } = useAuth();
+  const { profile, can } = useAuth();
   const canCreate = profile?.role === "god_admin";
   const canEditProducts = can("ventes.products.edit");
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editProduct, setEditProduct] = useState<SaleProduct | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string>("all");
 
   const filtered = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
+
+  const categories = useMemo(() => {
+    const cats = new Set<string>();
+    products.forEach(p => {
+      if (p.formats_other) cats.add(p.category);
+    });
+    const sorted = CATEGORY_ORDER.filter(c => cats.has(c));
+    cats.forEach(c => { if (!sorted.includes(c)) sorted.push(c); });
+    return sorted;
+  }, [products]);
+
+  const grouped = useMemo(() => {
+    const map: Record<string, SaleProduct[]> = {};
+    filtered.forEach(p => {
+      const cat = p.category || "Autre";
+      if (!map[cat]) map[cat] = [];
+      map[cat].push(p);
+    });
+    return map;
+  }, [filtered]);
+
+  const displayCategories = activeCategory === "all"
+    ? categories.filter(c => grouped[c]?.length)
+    : [activeCategory].filter(c => grouped[c]?.length);
+
+  const totalFiltered = activeCategory === "all"
+    ? filtered.length
+    : (grouped[activeCategory]?.length || 0);
 
   const handleAddSave = (p: SaleProduct) => {
     addProduct(p);
@@ -52,7 +82,7 @@ export default function ProductsPage() {
           </div>
           <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: T.text, letterSpacing: -0.5 }}>Produits</h1>
           <p style={{ margin: "4px 0 0", fontSize: 13, color: T.textMid }}>
-            {products.length === 0 ? "Aucun produit dans le catalogue" : `${filtered.length} produit${filtered.length !== 1 ? "s" : ""} dans le catalogue`}
+            {products.length === 0 ? "Aucun produit dans le catalogue" : `${totalFiltered} produit${totalFiltered !== 1 ? "s" : ""} dans le catalogue`}
           </p>
         </div>
         {canCreate && (
@@ -72,27 +102,66 @@ export default function ProductsPage() {
       </div>
 
       {products.length > 0 && (
-        <div style={{ marginBottom: 18, position: "relative", maxWidth: 340 }}>
-          <div style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: T.silverDark }}>
-            <SearchIcon />
+        <>
+          {/* Search */}
+          <div style={{ marginBottom: 14, position: "relative", maxWidth: 340 }}>
+            <div style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: T.silverDark }}>
+              <SearchIcon />
+            </div>
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Rechercher un produit..."
+              style={{
+                width: "100%", padding: "9px 12px 9px 33px",
+                border: `1.5px solid ${T.silverLight}`, borderRadius: 8,
+                fontSize: 13, fontFamily: "inherit", outline: "none",
+                background: T.card, color: T.text, boxSizing: "border-box",
+              }}
+              onFocus={e => e.currentTarget.style.borderColor = T.main}
+              onBlur={e => e.currentTarget.style.borderColor = T.silverLight}
+            />
           </div>
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Rechercher un produit..."
-            style={{
-              width: "100%", padding: "9px 12px 9px 33px",
-              border: `1.5px solid ${T.silverLight}`, borderRadius: 8,
-              fontSize: 13, fontFamily: "inherit", outline: "none",
-              background: T.card, color: T.text, boxSizing: "border-box",
-            }}
-            onFocus={e => e.currentTarget.style.borderColor = T.main}
-            onBlur={e => e.currentTarget.style.borderColor = T.silverLight}
-          />
-        </div>
+
+          {/* Category tabs */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 20 }}>
+            <button
+              onClick={() => setActiveCategory("all")}
+              style={{
+                padding: "6px 14px", borderRadius: 20, fontSize: 12, fontWeight: 700,
+                cursor: "pointer", fontFamily: "inherit", border: "none",
+                background: activeCategory === "all" ? T.main : T.card,
+                color: activeCategory === "all" ? "#fff" : T.textMid,
+                transition: "all 0.15s",
+              }}
+            >
+              Tout ({filtered.length})
+            </button>
+            {categories.map(cat => {
+              const count = grouped[cat]?.length || 0;
+              if (count === 0 && search) return null;
+              const active = activeCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(active ? "all" : cat)}
+                  style={{
+                    padding: "6px 14px", borderRadius: 20, fontSize: 12, fontWeight: 700,
+                    cursor: "pointer", fontFamily: "inherit", border: "none",
+                    background: active ? T.main : T.card,
+                    color: active ? "#fff" : T.textMid,
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {cat} ({count})
+                </button>
+              );
+            })}
+          </div>
+        </>
       )}
 
-      {filtered.length === 0 ? (
+      {totalFiltered === 0 ? (
         <div style={{
           display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
           padding: "70px 20px", background: T.card, borderRadius: 12, border: `1px dashed ${T.silverLight}`,
@@ -125,9 +194,32 @@ export default function ProductsPage() {
           )}
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {filtered.map(p => (
-            <ProductCard key={p.id} product={p} onEdit={setEditProduct} canEdit={canEditProducts} />
+        <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+          {displayCategories.map(cat => (
+            <div key={cat}>
+              <div style={{
+                display: "flex", alignItems: "center", gap: 10, marginBottom: 12,
+              }}>
+                <div style={{
+                  fontSize: 14, fontWeight: 800, color: T.text, textTransform: "uppercase",
+                  letterSpacing: 0.8,
+                }}>
+                  {cat}
+                </div>
+                <div style={{
+                  fontSize: 11, fontWeight: 700, color: T.textLight,
+                  background: T.bg, padding: "2px 10px", borderRadius: 12,
+                }}>
+                  {grouped[cat].length}
+                </div>
+                <div style={{ flex: 1, height: 1, background: T.border }} />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {grouped[cat].map(p => (
+                  <ProductCard key={p.id} product={p} onEdit={setEditProduct} canEdit={canEditProducts} />
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       )}
