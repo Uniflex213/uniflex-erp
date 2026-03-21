@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Pricelist } from "./pricelistTypes";
 import PricelistHistory from "./PricelistHistory";
 import PricelistBuilder from "./PricelistBuilder";
-import { generatePricelistPDF, generatePricelistPDFBase64 } from "./pdfGenerator";
+import { generatePricelistPDF, generatePricelistPDFBase64, PdfSellerInfo } from "./pdfGenerator";
 import { useApp } from "../AppContext";
 import SendEmailModal from "../components/email/SendEmailModal";
 import { tplPricelistClient } from "../lib/emailTemplates";
@@ -18,6 +18,14 @@ export default function PricelistGeneratorPage() {
   const [pricelists, setPricelists] = useState<Pricelist[]>([]);
   const [prefill, setPrefill] = useState<Pricelist | null>(null);
   const [emailModal, setEmailModal] = useState<{ pl: Pricelist; subject: string; html: string; text: string } | null>(null);
+
+  const sellerInfo: PdfSellerInfo | undefined = profile ? {
+    fullName: profile.full_name || "Équipe Uniflex",
+    title: profile.role === "god_admin" ? "Directeur" : profile.role === "admin" ? "Gestionnaire" : "Représentant",
+    email: profile.email || "",
+    phone: profile.phone || "",
+    agentCode: profile.agent_code || "",
+  } : undefined;
 
   const loadPricelists = useCallback(async () => {
     const ownerId = profile?.id;
@@ -137,7 +145,7 @@ export default function PricelistGeneratorPage() {
   };
 
   const handleGeneratePDF = async (pl: Pricelist) => {
-    await generatePricelistPDF(pl);
+    await generatePricelistPDF(pl, sellerInfo);
   };
 
   if (view === "create") {
@@ -171,7 +179,7 @@ export default function PricelistGeneratorPage() {
           templateKey="pricelist_client"
           referenceType="pricelist"
           attachmentLabel={`Pricelist_${emailModal.pl.companyName.replace(/\s+/g, "_")}.pdf`}
-          onGetAttachment={() => generatePricelistPDFBase64(emailModal.pl)}
+          onGetAttachment={() => generatePricelistPDFBase64(emailModal.pl, sellerInfo)}
         />
       )}
     </>

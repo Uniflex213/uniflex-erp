@@ -18,7 +18,15 @@ function fmtDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("fr-CA", { year: "numeric", month: "long", day: "numeric" });
 }
 
-async function buildPricelistDoc(pricelist: Pricelist) {
+export type PdfSellerInfo = {
+  fullName: string;
+  title: string;
+  email: string;
+  phone: string;
+  agentCode: string;
+};
+
+async function buildPricelistDoc(pricelist: Pricelist, seller?: PdfSellerInfo) {
   const { jsPDF } = await import("jspdf");
 
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
@@ -68,8 +76,13 @@ async function buildPricelistDoc(pricelist: Pricelist) {
     doc.setFontSize(7);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(TEXT_LIGHT);
-    doc.text("Karim Benali — Directeur des ventes", MARGIN, y + 14);
-    doc.text("karim@uniflex.ca  ·  514-555-0100  ·  VND-KA01", MARGIN, y + 18);
+    const sellerName = seller?.fullName || "Équipe Uniflex";
+    const sellerTitle = seller?.title || "Représentant";
+    const sellerEmail = seller?.email || "";
+    const sellerPhone = seller?.phone || "";
+    const sellerCode = seller?.agentCode || "";
+    doc.text(`${sellerName} — ${sellerTitle}`, MARGIN, y + 14);
+    doc.text(`${sellerEmail}${sellerPhone ? "  ·  " + sellerPhone : ""}${sellerCode ? "  ·  " + sellerCode : ""}`, MARGIN, y + 18);
     doc.text("Uniflex Distribution Inc.  ·  Boisbriand, QC", MARGIN, y + 22);
 
     doc.setFontSize(7);
@@ -206,13 +219,13 @@ async function buildPricelistDoc(pricelist: Pricelist) {
   return doc;
 }
 
-export async function generatePricelistPDF(pricelist: Pricelist): Promise<void> {
-  const doc = await buildPricelistDoc(pricelist);
+export async function generatePricelistPDF(pricelist: Pricelist, seller?: PdfSellerInfo): Promise<void> {
+  const doc = await buildPricelistDoc(pricelist, seller);
   doc.save(`Pricelist_${pricelist.companyName.replace(/\s+/g, "_")}_${pricelist.id}.pdf`);
 }
 
-export async function generatePricelistPDFBase64(pricelist: Pricelist): Promise<{ filename: string; base64: string; mimeType: string }> {
-  const doc = await buildPricelistDoc(pricelist);
+export async function generatePricelistPDFBase64(pricelist: Pricelist, seller?: PdfSellerInfo): Promise<{ filename: string; base64: string; mimeType: string }> {
+  const doc = await buildPricelistDoc(pricelist, seller);
   const base64 = doc.output("datauristring").split(",")[1];
   const filename = `Pricelist_${pricelist.companyName.replace(/\s+/g, "_")}_${pricelist.id || "new"}.pdf`;
   return { filename, base64, mimeType: "application/pdf" };
