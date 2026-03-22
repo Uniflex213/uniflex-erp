@@ -179,8 +179,13 @@ export default function PricelistBuilder({ onBack, onSave, prefill }: Props) {
   const handleGenerate = async () => {
     setGenerating(true);
     const pl = buildPricelist();
-    await generatePricelistPDF(pl);
-    setGenerating(false);
+    try {
+      await generatePricelistPDF(pl);
+    } catch (e) {
+      console.error("PDF generation error:", e);
+    } finally {
+      setGenerating(false);
+    }
     setShowPreview(false);
     onSave(pl);
   };
@@ -516,8 +521,13 @@ export default function PricelistBuilder({ onBack, onSave, prefill }: Props) {
                   if (lines.length === 0) return;
                   setGenerating(true);
                   const pl = buildPricelist();
-                  await generatePricelistPDF(pl);
-                  setGenerating(false);
+                  try {
+                    await generatePricelistPDF(pl);
+                  } catch (e) {
+                    console.error("PDF generation error:", e);
+                  } finally {
+                    setGenerating(false);
+                  }
                   onSave(pl);
                 }}
                 disabled={lines.length === 0 || generating}
