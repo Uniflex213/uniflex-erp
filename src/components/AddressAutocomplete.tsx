@@ -104,7 +104,7 @@ export default function AddressAutocomplete({ value, onChange, onSelect, placeho
       {open && suggestions.length > 0 && (
         <div style={{
           position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0,
-          background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 8,
+          background: "#ffffff", border: `1px solid ${T.border}`, borderRadius: 8,
           boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 9999, maxHeight: 220, overflowY: "auto",
         }}>
           {suggestions.map(s => (
