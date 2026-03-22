@@ -107,7 +107,7 @@ export default function PricelistHistory({ pricelists, onCreateNew, onDuplicate,
                     style={{ borderBottom: i < pricelists.length - 1 ? `1px solid ${T.border}` : "none" }}
                   >
                     <td style={{ padding: "14px 16px" }}>
-                      <div style={{ fontWeight: 700, color: T.main, fontFamily: "monospace", fontSize: 12 }}>PL-{pl.createdAt ? new Date(pl.createdAt).getFullYear() : "----"}-{String(i + 1).padStart(3, "0")}</div>
+                      <div style={{ fontWeight: 700, color: T.main, fontFamily: "monospace", fontSize: 12 }}>PL-{pl.id.slice(0, 4).toUpperCase()}-{pl.id.slice(4, 8).toUpperCase()}</div>
                       <div style={{ fontSize: 11, color: T.textLight, marginTop: 2 }}>{fmtDate(pl.createdAt)}</div>
                     </td>
                     <td style={{ padding: "14px 16px" }}>
