@@ -167,12 +167,14 @@ export default function NewPickupTicketPage({ onBack, onCreated }: Props) {
 
   async function loadStoreItems() {
     const { data } = await supabase
-      .from("store_price_items")
-      .select("id, name, formats, unit_price, price_unit")
+      .from("sale_products")
+      .select("id, name, formats, store_unit_price, store_price_unit")
       .eq("is_active", true)
-      .order("sort_order")
       .order("name");
-    if (data) setStoreItems(data as StoreItem[]);
+    if (data) setStoreItems(data.map((p: any) => ({
+      id: p.id, name: p.name, formats: p.formats || [],
+      unit_price: p.store_unit_price || 0, price_unit: p.store_price_unit || "/KIT",
+    })) as StoreItem[]);
   }
 
   useEffect(() => {

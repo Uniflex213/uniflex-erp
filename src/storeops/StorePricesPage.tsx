@@ -3,25 +3,24 @@ import { supabase } from "../supabaseClient";
 import { useAuth } from "../contexts/AuthContext";
 import {
   Search, Save, DollarSign, Package, AlertCircle, Check,
-  Pencil, Plus, Trash2, X, ToggleLeft, ToggleRight,
+  Pencil, Plus, X,
 } from "lucide-react";
 import { T } from "../theme";
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD", minimumFractionDigits: 2 }).format(n);
 
-const ALL_FORMATS = ["Common (3gal/2gal)", "Large (15GAL/10GAL)", "BARREL KIT", "TOTE KIT", "SPECIAL"];
 const PRICE_UNITS = ["/KIT", "/GAL"];
 
-interface StoreItem {
+interface CatalogueProduct {
   id: string;
   name: string;
   sku: string;
+  category: string;
   formats: string[];
-  unit_price: number;
-  price_unit: string;
+  store_unit_price: number;
+  store_price_unit: string;
   is_active: boolean;
-  sort_order: number;
 }
 
 interface SaleProduct {
@@ -46,9 +45,6 @@ const inputStyle: React.CSSProperties = {
   boxSizing: "border-box",
 };
 
-function emptyItem(): Omit<StoreItem, "id"> {
-  return { name: "", sku: "", formats: [], unit_price: 0, price_unit: "/KIT", is_active: true, sort_order: 0 };
-}
 
 export default function StorePricesPage() {
   const [tab, setTab] = useState<"catalogue" | "coutants">("catalogue");
@@ -95,85 +91,44 @@ export default function StorePricesPage() {
 }
 
 function CatalogueTab() {
-  const { profile, storeCode } = useAuth();
-  const isMagasin = profile?.role === "magasin";
-  const [items, setItems] = useState<StoreItem[]>([]);
+  const [items, setItems] = useState<CatalogueProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [showForm, setShowForm] = useState(false);
-  const [editItem, setEditItem] = useState<StoreItem | null>(null);
-  const [form, setForm] = useState(emptyItem());
+  const [editItem, setEditItem] = useState<CatalogueProduct | null>(null);
+  const [editPrice, setEditPrice] = useState("");
+  const [editUnit, setEditUnit] = useState("/KIT");
   const [saving, setSaving] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [savedId, setSavedId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    let query = supabase
-      .from("store_price_items")
-      .select("id, name, sku, formats, unit_price, price_unit, is_active, sort_order")
-      .order("sort_order")
+    const { data } = await supabase
+      .from("sale_products")
+      .select("id, name, sku, category, formats, store_unit_price, store_price_unit, is_active")
+      .order("category")
       .order("name");
-    if (isMagasin && storeCode) query = query.eq("store_code", storeCode);
-    const { data } = await query;
-    setItems((data || []) as StoreItem[]);
+    setItems((data || []) as CatalogueProduct[]);
     setLoading(false);
-  }, [isMagasin, storeCode]);
+  }, []);
 
   useEffect(() => { load(); }, [load]);
 
-  function openCreate() {
-    setEditItem(null);
-    setForm(emptyItem());
-    setShowForm(true);
-  }
-
-  function openEdit(item: StoreItem) {
+  function openEdit(item: CatalogueProduct) {
     setEditItem(item);
-    setForm({ name: item.name, sku: item.sku, formats: item.formats, unit_price: item.unit_price, price_unit: item.price_unit, is_active: item.is_active, sort_order: item.sort_order });
-    setShowForm(true);
+    setEditPrice(String(item.store_unit_price || ""));
+    setEditUnit(item.store_price_unit || "/KIT");
   }
 
-  function toggleFormat(f: string) {
-    setForm(prev => ({
-      ...prev,
-      formats: prev.formats.includes(f) ? prev.formats.filter(x => x !== f) : [...prev.formats, f],
-    }));
-  }
-
-  async function handleSave() {
-    if (!form.name.trim()) return;
+  async function handleSavePrice() {
+    if (!editItem) return;
     setSaving(true);
-    if (editItem) {
-      const { data } = await supabase
-        .from("store_price_items")
-        .update({ ...form, updated_at: new Date().toISOString() })
-        .eq("id", editItem.id)
-        .select()
-        .maybeSingle();
-      if (data) setItems(prev => prev.map(x => x.id === editItem.id ? data as StoreItem : x));
-    } else {
-      const { data } = await supabase
-        .from("store_price_items")
-        .insert({ ...form, owner_id: profile?.id, store_code: storeCode ?? "BSB" })
-        .select()
-        .maybeSingle();
-      if (data) setItems(prev => [...prev, data as StoreItem]);
-    }
+    const newPrice = parseFloat(editPrice) || 0;
+    await supabase.from("sale_products").update({ store_unit_price: newPrice, store_price_unit: editUnit }).eq("id", editItem.id);
+    setItems(prev => prev.map(x => x.id === editItem.id ? { ...x, store_unit_price: newPrice, store_price_unit: editUnit } : x));
     setSaving(false);
-    setShowForm(false);
-  }
-
-  async function handleToggleActive(item: StoreItem) {
-    const newVal = !item.is_active;
-    await supabase.from("store_price_items").update({ is_active: newVal }).eq("id", item.id);
-    setItems(prev => prev.map(x => x.id === item.id ? { ...x, is_active: newVal } : x));
-  }
-
-  async function handleDelete(id: string) {
-    setDeletingId(id);
-    await supabase.from("store_price_items").delete().eq("id", id);
-    setItems(prev => prev.filter(x => x.id !== id));
-    setDeletingId(null);
+    setSavedId(editItem.id);
+    setEditItem(null);
+    setTimeout(() => setSavedId(null), 2000);
   }
 
   const filtered = items.filter(
@@ -181,6 +136,8 @@ function CatalogueTab() {
          (i.sku || "").toLowerCase().includes(search.toLowerCase())
   );
 
+  const withPrice = items.filter(i => (i.store_unit_price || 0) > 0).length;
+  const withoutPrice = items.length - withPrice;
   const activeCount = items.filter(i => i.is_active).length;
 
   return (
@@ -189,9 +146,10 @@ function CatalogueTab() {
         {[
           { icon: <Package size={20} />, count: items.length, label: "Produits total", color: T.main, bg: `${T.main}10` },
           { icon: <Check size={20} />, count: activeCount, label: "Actifs", color: T.green, bg: T.greenBg },
-          { icon: <AlertCircle size={20} />, count: items.length - activeCount, label: "Inactifs", color: T.orange, bg: T.orangeBg },
+          { icon: <DollarSign size={20} />, count: withPrice, label: "Avec prix magasin", color: T.main, bg: `${T.main}10` },
+          { icon: <AlertCircle size={20} />, count: withoutPrice, label: "Sans prix magasin", color: withoutPrice > 0 ? T.orange : T.green, bg: withoutPrice > 0 ? T.orangeBg : T.greenBg },
         ].map(s => (
-          <div key={s.label} style={{ flex: "1 1 180px", background: T.card, borderRadius: 12, padding: "18px 20px", border: `1px solid ${T.border}` }}>
+          <div key={s.label} style={{ flex: "1 1 160px", background: T.card, borderRadius: 12, padding: "18px 20px", border: `1px solid ${T.border}` }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <div style={{ width: 42, height: 42, borderRadius: 10, background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", color: s.color }}>{s.icon}</div>
               <div>
@@ -201,6 +159,13 @@ function CatalogueTab() {
             </div>
           </div>
         ))}
+      </div>
+
+      <div style={{ padding: "12px 18px", background: `${T.main}08`, borderRadius: 10, marginBottom: 16, display: "flex", alignItems: "center", gap: 10 }}>
+        <Package size={16} color={T.main} />
+        <span style={{ fontSize: 12, color: T.textMid }}>
+          Les produits proviennent du <strong>menu Produits</strong>. Vous pouvez définir un prix de vente magasin ici.
+        </span>
       </div>
 
       <div style={{ background: T.card, borderRadius: 12, border: `1px solid ${T.border}`, overflow: "hidden" }}>
@@ -213,27 +178,20 @@ function CatalogueTab() {
               style={{ border: "none", background: "transparent", outline: "none", fontSize: 13, width: "100%", fontFamily: "inherit" }}
             />
           </div>
-          <button
-            onClick={openCreate}
-            style={{ display: "flex", alignItems: "center", gap: 7, background: T.main, color: "#fff", border: "none", borderRadius: 8, padding: "9px 18px", cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "inherit" }}
-          >
-            <Plus size={15} />
-            Nouveau produit
-          </button>
         </div>
 
         {loading ? (
           <div style={{ padding: 40, textAlign: "center", color: T.textMid }}>Chargement...</div>
         ) : filtered.length === 0 ? (
           <div style={{ padding: 40, textAlign: "center", color: T.textMid }}>
-            {items.length === 0 ? "Aucun produit. Cliquez sur « Nouveau produit » pour commencer." : "Aucun produit correspondant"}
+            {items.length === 0 ? "Aucun produit. Ajoutez des produits dans le menu Produits." : "Aucun produit correspondant"}
           </div>
         ) : (
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ background: T.cardAlt }}>
-                  {["Produit", "SKU", "Formats", "Prix de vente", "Unité", "Statut", ""].map(h => (
+                  {["Produit", "SKU", "Catégorie", "Formats", "Prix magasin", "Unité", "Statut", ""].map(h => (
                     <th key={h} style={{ textAlign: "left", padding: "11px 16px", fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5 }}>{h}</th>
                   ))}
                 </tr>
@@ -252,6 +210,9 @@ function CatalogueTab() {
                       ) : <span style={{ color: T.textLight, fontSize: 12 }}>—</span>}
                     </td>
                     <td style={{ padding: "13px 16px" }}>
+                      <span style={{ fontSize: 12, color: T.textMid }}>{item.category || "—"}</span>
+                    </td>
+                    <td style={{ padding: "13px 16px" }}>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                         {(item.formats || []).slice(0, 2).map(f => (
                           <span key={f} style={{ background: T.cardAlt, padding: "2px 7px", borderRadius: 4, fontSize: 11, color: T.textMid }}>{f}</span>
@@ -261,40 +222,24 @@ function CatalogueTab() {
                       </div>
                     </td>
                     <td style={{ padding: "13px 16px" }}>
-                      <span style={{ fontSize: 14, fontWeight: 700, color: item.unit_price > 0 ? T.text : T.orange }}>
-                        {item.unit_price > 0 ? fmt(item.unit_price) : "Non défini"}
+                      <span style={{ fontSize: 14, fontWeight: 700, color: (item.store_unit_price || 0) > 0 ? T.text : T.orange }}>
+                        {(item.store_unit_price || 0) > 0 ? fmt(item.store_unit_price) : "Non défini"}
+                      </span>
+                      {savedId === item.id && <Check size={14} color={T.green} style={{ marginLeft: 6 }} />}
+                    </td>
+                    <td style={{ padding: "13px 16px" }}>
+                      <span style={{ fontSize: 12, color: T.textMid }}>{item.store_price_unit || "/KIT"}</span>
+                    </td>
+                    <td style={{ padding: "13px 16px" }}>
+                      <span style={{ background: item.is_active ? T.greenBg : T.cardAlt, color: item.is_active ? T.green : T.textMid, padding: "3px 9px", borderRadius: 6, fontSize: 11, fontWeight: 600 }}>
+                        {item.is_active ? "Actif" : "Inactif"}
                       </span>
                     </td>
                     <td style={{ padding: "13px 16px" }}>
-                      <span style={{ fontSize: 12, color: T.textMid }}>{item.price_unit}</span>
-                    </td>
-                    <td style={{ padding: "13px 16px" }}>
-                      <button
-                        onClick={() => handleToggleActive(item)}
-                        style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, padding: 0 }}
-                        title={item.is_active ? "Désactiver" : "Activer"}
-                      >
-                        {item.is_active
-                          ? <ToggleRight size={22} color={T.green} />
-                          : <ToggleLeft size={22} color={T.textLight} />}
-                        <span style={{ fontSize: 12, fontWeight: 600, color: item.is_active ? T.green : T.textLight }}>
-                          {item.is_active ? "Actif" : "Inactif"}
-                        </span>
+                      <button onClick={() => openEdit(item)}
+                        style={{ display: "flex", alignItems: "center", gap: 4, background: (item.store_unit_price || 0) > 0 ? T.cardAlt : T.main, color: (item.store_unit_price || 0) > 0 ? T.textMid : "#fff", border: "none", borderRadius: 6, padding: "5px 10px", cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "inherit" }}>
+                        <Pencil size={12} /> {(item.store_unit_price || 0) > 0 ? "Modifier" : "Définir prix"}
                       </button>
-                    </td>
-                    <td style={{ padding: "13px 16px" }}>
-                      <div style={{ display: "flex", gap: 6 }}>
-                        <button onClick={() => openEdit(item)}
-                          style={{ background: T.cardAlt, color: T.textMid, border: "none", borderRadius: 6, padding: "5px 10px", cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "inherit", display: "flex", alignItems: "center", gap: 4 }}>
-                          <Pencil size={12} /> Modifier
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          disabled={deletingId === item.id}
-                          style={{ background: T.redBg, color: T.red, border: "none", borderRadius: 6, padding: "5px 10px", cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "inherit", display: "flex", alignItems: "center", gap: 4, opacity: deletingId === item.id ? 0.5 : 1 }}>
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
                     </td>
                   </tr>
                 ))}
@@ -304,97 +249,42 @@ function CatalogueTab() {
         )}
       </div>
 
-      {showForm && (
+      {editItem && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-          <div style={{ background: T.card, borderRadius: 16, width: "100%", maxWidth: 520, boxShadow: "0 20px 60px rgba(0,0,0,0.2)", fontFamily: "inherit" }}>
+          <div style={{ background: T.card, borderRadius: 16, width: "100%", maxWidth: 420, boxShadow: "0 20px 60px rgba(0,0,0,0.2)", fontFamily: "inherit" }}>
             <div style={{ padding: "18px 24px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h2 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: T.text }}>
-                {editItem ? "Modifier le produit" : "Nouveau produit magasin"}
-              </h2>
-              <button onClick={() => setShowForm(false)} style={{ background: "none", border: "none", cursor: "pointer", color: T.textMid, padding: 4 }}>
+              <h2 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: T.text }}>Prix magasin</h2>
+              <button onClick={() => setEditItem(null)} style={{ background: "none", border: "none", cursor: "pointer", color: T.textMid, padding: 4 }}>
                 <X size={20} />
               </button>
             </div>
             <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ padding: "12px 16px", background: T.cardAlt, borderRadius: 8 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: T.text }}>{editItem.name}</div>
+                {editItem.sku && <div style={{ fontSize: 12, color: T.textMid, marginTop: 2 }}>SKU: {editItem.sku}</div>}
+              </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-                <div style={{ gridColumn: "1 / -1" }}>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>
-                    Nom du produit <span style={{ color: T.red }}>*</span>
-                  </label>
-                  <input style={inputStyle} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Ex: Revêtement Toiture..." />
-                </div>
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>SKU</label>
-                  <input style={inputStyle} value={form.sku} onChange={e => setForm(f => ({ ...f, sku: e.target.value }))} placeholder="Ex: SKU-001" />
-                </div>
-                <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>Ordre d'affichage</label>
-                  <input type="number" style={inputStyle} value={form.sort_order} onChange={e => setForm(f => ({ ...f, sort_order: Number(e.target.value) }))} min={0} />
-                </div>
-                <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>Prix de vente par défaut ($)</label>
-                  <input type="number" step="0.01" min="0" style={inputStyle} value={form.unit_price || ""} onChange={e => setForm(f => ({ ...f, unit_price: Number(e.target.value) }))} placeholder="0.00" />
+                  <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>Prix de vente ($)</label>
+                  <input type="number" step="0.01" min="0" style={inputStyle} value={editPrice} onChange={e => setEditPrice(e.target.value)} autoFocus placeholder="0.00" />
                 </div>
                 <div>
                   <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>Unité</label>
-                  <select style={inputStyle} value={form.price_unit} onChange={e => setForm(f => ({ ...f, price_unit: e.target.value }))}>
+                  <select style={inputStyle} value={editUnit} onChange={e => setEditUnit(e.target.value)}>
                     {PRICE_UNITS.map(u => <option key={u} value={u}>{u}</option>)}
                   </select>
                 </div>
               </div>
-
-              <div>
-                <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 8 }}>Formats disponibles</label>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                  {ALL_FORMATS.map(f => {
-                    const active = form.formats.includes(f);
-                    return (
-                      <button
-                        key={f}
-                        type="button"
-                        onClick={() => toggleFormat(f)}
-                        style={{
-                          background: active ? `${T.main}15` : T.cardAlt,
-                          color: active ? T.main : T.textMid,
-                          border: active ? `1.5px solid ${T.main}40` : `1.5px solid ${T.border}`,
-                          borderRadius: 7,
-                          padding: "5px 12px",
-                          cursor: "pointer",
-                          fontSize: 12,
-                          fontWeight: 600,
-                          fontFamily: "inherit",
-                          transition: "all 0.12s",
-                        }}
-                      >
-                        {f}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <button
-                  type="button"
-                  onClick={() => setForm(f => ({ ...f, is_active: !f.is_active }))}
-                  style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 7 }}
-                >
-                  {form.is_active ? <ToggleRight size={24} color={T.green} /> : <ToggleLeft size={24} color={T.textLight} />}
-                  <span style={{ fontSize: 13, fontWeight: 600, color: form.is_active ? T.green : T.textMid }}>
-                    {form.is_active ? "Actif — visible dans les pickup tickets" : "Inactif — masqué dans les pickup tickets"}
-                  </span>
-                </button>
-              </div>
             </div>
             <div style={{ padding: "14px 24px", borderTop: `1px solid ${T.border}`, display: "flex", justifyContent: "flex-end", gap: 10 }}>
-              <button onClick={() => setShowForm(false)}
+              <button onClick={() => setEditItem(null)}
                 style={{ background: T.cardAlt, color: T.textMid, border: "none", borderRadius: 8, padding: "9px 20px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
                 Annuler
               </button>
-              <button onClick={handleSave} disabled={!form.name.trim() || saving}
-                style={{ background: form.name.trim() ? T.main : "#d1d5db", color: form.name.trim() ? "#fff" : "#9ca3af", border: "none", borderRadius: 8, padding: "9px 22px", fontSize: 13, fontWeight: 700, cursor: form.name.trim() ? "pointer" : "default", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 7 }}>
+              <button onClick={handleSavePrice} disabled={saving}
+                style={{ background: T.main, color: "#fff", border: "none", borderRadius: 8, padding: "9px 22px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 7 }}>
                 <Save size={14} />
-                {saving ? "Sauvegarde..." : editItem ? "Sauvegarder" : "Créer le produit"}
+                {saving ? "Sauvegarde..." : "Sauvegarder"}
               </button>
             </div>
           </div>
@@ -582,7 +472,7 @@ function CoutantsTab() {
       <div style={{ marginTop: 20, padding: "14px 18px", background: T.orangeBg, borderRadius: 10, display: "flex", alignItems: "flex-start", gap: 12 }}>
         <AlertCircle size={18} color={T.orange} style={{ flexShrink: 0, marginTop: 2 }} />
         <div style={{ fontSize: 12, color: T.textMid, lineHeight: 1.5 }}>
-          Les prix coutants définis ici sont utilisés pour calculer le bénéfice dans le menu <strong>Bénéfice Magasin</strong>. Ces produits (menu Ventes) sont indépendants du catalogue magasin ci-dessus.
+          Les prix coutants définis ici sont utilisés pour calculer le bénéfice dans le menu <strong>Bénéfice Magasin</strong>. Le prix magasin (onglet Catalogue) est le prix de vente client.
         </div>
       </div>
     </div>

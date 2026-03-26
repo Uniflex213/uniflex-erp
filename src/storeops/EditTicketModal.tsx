@@ -94,12 +94,16 @@ export default function EditTicketModal({ ticket, onSaved, onCancel }: Props) {
 
   useEffect(() => {
     supabase
-      .from("store_price_items")
-      .select("id, name, formats, unit_price, price_unit")
+      .from("sale_products")
+      .select("id, name, formats, store_unit_price, store_price_unit")
       .eq("is_active", true)
-      .order("sort_order")
       .order("name")
-      .then(({ data }) => { if (data) setStoreItems(data as StoreItem[]); });
+      .then(({ data }) => {
+        if (data) setStoreItems(data.map((p: any) => ({
+          id: p.id, name: p.name, formats: p.formats || [],
+          unit_price: p.store_unit_price || 0, price_unit: p.store_price_unit || "/KIT",
+        })) as StoreItem[]);
+      });
   }, []);
 
   const subtotalProducts = items.reduce((s, it) => s + it.quantity * it.unit_price, 0);
