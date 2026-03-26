@@ -203,7 +203,21 @@ export default function EmailToolModal({ docs, logType = "send", onClose, onSent
             // Fetch full order + products from DB
             const orderRes = await supabase.from("orders").select("*").eq("id", doc.id).maybeSingle();
             if (!orderRes.data) { pdfErrors.push(`Commande ${doc.document_number}: données introuvables`); continue; }
-            const orderObj = { ...orderRes.data, products: orderRes.data.products ?? [] } as unknown as Order;
+            const r = orderRes.data as Record<string, any>;
+            const orderObj: Order = {
+              id: r.id, date: r.date, client: r.client, clientId: r.client_id,
+              motif: r.motif, motifAutre: r.motif_autre, vendeurCode: r.vendeur_code ?? "",
+              destination: r.destination, destinationAutre: r.destination_autre,
+              deliveryAddress: r.delivery_address ?? "", deliveryType: r.delivery_type ?? "Pickup",
+              shippingCost: r.shipping_cost, label: r.label,
+              products: r.products ?? [],
+              subtotal: r.subtotal ?? 0, discountType: r.discount_type, discountValue: r.discount_value,
+              discount: r.discount, subtotalAfterDiscount: r.subtotal_after_discount,
+              province: r.province, taxLines: r.tax_lines, taxTotal: r.tax_total,
+              extraFees: r.extra_fees, total: r.total ?? 0,
+              status: r.status, adminNote: r.admin_note, shipping: r.shipping,
+              createdBy: r.created_by, billing_status: r.billing_status,
+            };
             const att = await generateOrderPDFBase64(orderObj);
             attachments.push({ filename: att.filename, base64Content: att.base64, mimeType: att.mimeType });
           }
