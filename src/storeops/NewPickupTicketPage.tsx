@@ -144,7 +144,7 @@ export default function NewPickupTicketPage({ onBack, onCreated }: Props) {
   const [walkinProvince, setWalkinProvince] = useState("");
   const [issuedAt, setIssuedAt] = useState(() => new Date().toISOString().slice(0, 16));
   const [estimatedPickupAt, setEstimatedPickupAt] = useState("");
-  const [agentName, setAgentName] = useState("Karim");
+  const [agentName, setAgentName] = useState(profile?.full_name || "");
   const [notes, setNotes] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodOps>("account_net30");
   const [items, setItems] = useState<NewTicketItem[]>([]);
