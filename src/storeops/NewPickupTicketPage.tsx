@@ -144,7 +144,7 @@ export default function NewPickupTicketPage({ onBack, onCreated }: Props) {
   const [walkinProvince, setWalkinProvince] = useState("");
   const [issuedAt, setIssuedAt] = useState(() => new Date().toISOString().slice(0, 16));
   const [estimatedPickupAt, setEstimatedPickupAt] = useState("");
-  const [agentName, setAgentName] = useState(profile?.full_name || "");
+  const agentName = profile?.vendeur_code || profile?.full_name || "";
   const [notes, setNotes] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodOps>("account_net30");
   const [items, setItems] = useState<NewTicketItem[]>([]);
@@ -524,7 +524,7 @@ export default function NewPickupTicketPage({ onBack, onCreated }: Props) {
               <input type="datetime-local" style={inputStyle} value={estimatedPickupAt} onChange={e => setEstimatedPickupAt(e.target.value)} />
             </Field>
             <Field label="Employé / Agent responsable" required>
-              <input style={inputStyle} value={agentName} onChange={e => setAgentName(e.target.value)} placeholder="Nom de l'agent" />
+              <input style={{ ...inputStyle, background: "#f0f0f0", color: T.textMid, cursor: "default" }} value={agentName} readOnly />
             </Field>
             <Field label="Méthode de paiement prévue">
               <select style={inputStyle} value={paymentMethod} onChange={e => setPaymentMethod(e.target.value as PaymentMethodOps)}>
