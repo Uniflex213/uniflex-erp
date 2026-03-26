@@ -186,22 +186,36 @@ export default function EmailToolModal({ docs, logType = "send", onClose, onSent
       }
 
       const attachments: Array<{ filename: string; base64Content: string; mimeType: string }> = [];
+      const pdfErrors: string[] = [];
       for (const doc of docs) {
         try {
-          if (doc.document_type === "pickup" && doc.raw) {
-            const { data: items } = await supabase
-              .from("pickup_ticket_items")
-              .select("*")
-              .eq("ticket_id", doc.id);
-            const ticketObj = { ...doc.raw, items: items ?? [] } as unknown as PickupTicket;
+          if (doc.document_type === "pickup") {
+            // Fetch full ticket + items from DB to ensure complete data
+            const [ticketRes, itemsRes] = await Promise.all([
+              supabase.from("pickup_tickets").select("*").eq("id", doc.id).maybeSingle(),
+              supabase.from("pickup_ticket_items").select("*").eq("ticket_id", doc.id),
+            ]);
+            if (!ticketRes.data) { pdfErrors.push(`Ticket ${doc.document_number}: données introuvables`); continue; }
+            const ticketObj = { ...ticketRes.data, items: itemsRes.data ?? [] } as unknown as PickupTicket;
             const att = await generatePickupTicketPDFBase64(ticketObj);
             attachments.push({ filename: att.filename, base64Content: att.base64, mimeType: att.mimeType });
-          } else if (doc.document_type === "order" && doc.raw) {
-            const orderObj = { ...doc.raw, products: (doc.raw.products ?? []) } as unknown as Order;
+          } else if (doc.document_type === "order") {
+            // Fetch full order + products from DB
+            const orderRes = await supabase.from("orders").select("*").eq("id", doc.id).maybeSingle();
+            if (!orderRes.data) { pdfErrors.push(`Commande ${doc.document_number}: données introuvables`); continue; }
+            const orderObj = { ...orderRes.data, products: orderRes.data.products ?? [] } as unknown as Order;
             const att = await generateOrderPDFBase64(orderObj);
             attachments.push({ filename: att.filename, base64Content: att.base64, mimeType: att.mimeType });
           }
-        } catch {}
+        } catch (pdfErr: any) {
+          console.error(`PDF generation failed for ${doc.document_number}:`, pdfErr);
+          pdfErrors.push(`${doc.document_number}: ${pdfErr.message || "erreur PDF"}`);
+        }
+      }
+
+      if (attachments.length === 0 && docs.length > 0) {
+        setSendError(`Impossible de générer les PDFs: ${pdfErrors.join(", ")}`);
+        return;
       }
 
       const ccList = cc.split(",").map(s => s.trim()).filter(Boolean);
