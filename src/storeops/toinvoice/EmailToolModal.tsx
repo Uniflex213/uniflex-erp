@@ -14,7 +14,7 @@ interface Props {
   onSent: () => void;
 }
 
-const SCI_EMAIL = "michael@sci.com";
+const SCI_EMAIL = "receivables@scicoatings.com";
 const SENDER_NAME = "Administration Uniflex";
 const SENDER_PHONE = "1 (514) 000-0000";
 
@@ -313,7 +313,7 @@ export default function EmailToolModal({ docs, logType = "send", onClose, onSent
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div>
                 <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, letterSpacing: 0.6, textTransform: "uppercase", display: "block", marginBottom: 5 }}>À (destinataire)</label>
-                <input value={to} onChange={e => setTo(e.target.value)} style={inputStyle} />
+                <input value={to} readOnly style={{ ...inputStyle, background: "#f0f0f0", color: T.textMid, cursor: "default" }} />
               </div>
               <div>
                 <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, letterSpacing: 0.6, textTransform: "uppercase", display: "block", marginBottom: 5 }}>CC</label>
