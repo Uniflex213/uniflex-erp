@@ -13,6 +13,11 @@ function hexRgb(hex: string): [number, number, number] {
   return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
 }
 
+function s(val: any): string {
+  if (val == null) return "—";
+  return String(val);
+}
+
 async function buildOrderDoc(order: Order) {
   const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
@@ -41,13 +46,13 @@ async function buildOrderDoc(order: Order) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
   doc.setTextColor(...hexRgb(MAIN));
-  doc.text(order.id, MARGIN + 4, y + 6);
+  doc.text(s(order.id), MARGIN + 4, y + 6);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(...hexRgb(TEXT_MID));
   doc.text(`Date: ${fmtDate(order.date)}`, MARGIN + 4, y + 13);
-  doc.text(`Client: ${order.client}`, MARGIN + 4, y + 19);
+  doc.text(`Client: ${s(order.client)}`, MARGIN + 4, y + 19);
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
@@ -59,10 +64,10 @@ async function buildOrderDoc(order: Order) {
 
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...hexRgb(TEXT));
-  doc.text(order.motif, PAGE_W - MARGIN - 30, y + 6);
-  doc.text(order.destination, PAGE_W - MARGIN - 30, y + 11);
-  doc.text(order.label, PAGE_W - MARGIN - 30, y + 16);
-  doc.text(order.deliveryType, PAGE_W - MARGIN - 30, y + 21);
+  doc.text(s(order.motif), PAGE_W - MARGIN - 30, y + 6);
+  doc.text(s(order.destination), PAGE_W - MARGIN - 30, y + 11);
+  doc.text(s(order.label), PAGE_W - MARGIN - 30, y + 16);
+  doc.text(s(order.deliveryType), PAGE_W - MARGIN - 30, y + 21);
   y += 36;
 
   doc.setDrawColor(...hexRgb(BORDER));
@@ -96,9 +101,11 @@ async function buildOrderDoc(order: Order) {
     doc.setFillColor(...hexRgb(bg));
     doc.rect(MARGIN, y - 3, CONTENT_W, 7, "F");
     doc.setTextColor(...hexRgb(TEXT));
-    const name = p.product.length > 30 ? p.product.slice(0, 28) + "…" : p.product;
-    const fmtStr = p.format.length > 24 ? p.format.slice(0, 22) + "…" : p.format;
-    [String(idx + 1), name, fmtStr, String(p.qty), fmt(p.price), fmt(p.qty * p.price)].forEach((c, i) => {
+    const pname = s(p.product);
+    const pfmt = s(p.format);
+    const name = pname.length > 30 ? pname.slice(0, 28) + "…" : pname;
+    const fmtStr = pfmt.length > 24 ? pfmt.slice(0, 22) + "…" : pfmt;
+    [String(idx + 1), name, fmtStr, String(p.qty ?? 0), fmt(p.price ?? 0), fmt((p.qty ?? 0) * (p.price ?? 0))].forEach((c, i) => {
       doc.text(c, colX[i] + 1, y + 1);
     });
     y += 7;
@@ -125,7 +132,7 @@ async function buildOrderDoc(order: Order) {
 
   sumRow("Sous-total", fmt(order.subtotal));
   if (order.discount && order.discount > 0) {
-    sumRow(`Rabais (${order.discountValue}${order.discountType})`, `— ${fmt(order.discount)}`);
+    sumRow(`Rabais (${s(order.discountValue)}${s(order.discountType)})`, `— ${fmt(order.discount)}`);
   }
   if (order.taxLines && order.taxLines.length > 0) {
     for (const t of order.taxLines) sumRow(t.label, fmt(t.amount));

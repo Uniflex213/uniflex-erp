@@ -21,6 +21,11 @@ function hexToRgb(hex: string): [number, number, number] {
   return [r, g, b];
 }
 
+function s(val: any): string {
+  if (val == null) return "—";
+  return String(val);
+}
+
 async function buildPickupTicketDoc(ticket: PickupTicket) {
   const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
@@ -58,7 +63,7 @@ async function buildPickupTicketDoc(ticket: PickupTicket) {
 
   doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
-  doc.text(ticket.ticket_number, PAGE_W - MARGIN, 14, { align: "right" });
+  doc.text(s(ticket.ticket_number), PAGE_W - MARGIN, 14, { align: "right" });
   y = 30;
 
   setColor(TEXT_MID);
@@ -84,12 +89,12 @@ async function buildPickupTicketDoc(ticket: PickupTicket) {
   y += 5;
 
   const clientData = [
-    ["Compagnie", ticket.client_name],
-    ticket.client_contact ? ["Contact", ticket.client_contact] : null,
-    ticket.client_phone ? ["Téléphone", ticket.client_phone] : null,
-    ticket.client_email ? ["Email", ticket.client_email] : null,
-    ticket.billing_address ? ["Adresse de facturation", ticket.billing_address] : null,
-    ticket.province ? ["Province", ticket.province] : null,
+    ["Compagnie", s(ticket.client_name)],
+    ticket.client_contact ? ["Contact", s(ticket.client_contact)] : null,
+    ticket.client_phone ? ["Téléphone", s(ticket.client_phone)] : null,
+    ticket.client_email ? ["Email", s(ticket.client_email)] : null,
+    ticket.billing_address ? ["Adresse de facturation", s(ticket.billing_address)] : null,
+    ticket.province ? ["Province", s(ticket.province)] : null,
   ].filter(Boolean) as [string, string][];
 
   doc.setFontSize(8);
@@ -130,9 +135,9 @@ async function buildPickupTicketDoc(ticket: PickupTicket) {
     ["Date d'émission", fmtDateTime(ticket.issued_at)],
     ticket.estimated_pickup_at ? ["Ramassage estimé", fmtDateTime(ticket.estimated_pickup_at)] : null,
     ticket.picked_up_at ? ["Récupéré le", fmtDateTime(ticket.picked_up_at)] : null,
-    ["Agent", ticket.agent_name],
-    ["Méthode de paiement", PAYMENT_METHOD_LABELS[ticket.payment_method] || ticket.payment_method],
-    ticket.notes ? ["Notes", ticket.notes] : null,
+    ["Agent", s(ticket.agent_name)],
+    ["Méthode de paiement", s(PAYMENT_METHOD_LABELS[ticket.payment_method] || ticket.payment_method)],
+    ticket.notes ? ["Notes", s(ticket.notes)] : null,
   ].filter(Boolean) as [string, string][];
 
   doc.setFontSize(8);
@@ -179,14 +184,16 @@ async function buildPickupTicketDoc(ticket: PickupTicket) {
     doc.setFillColor(br, bg2, bb);
     doc.rect(MARGIN, y - 3, CONTENT_W, 7, "F");
     setColor(TEXT);
+    const pname = s(it.product_name);
+    const pfmt = s(it.format);
     const cells = [
       String(idx + 1),
-      it.product_name.length > 28 ? it.product_name.slice(0, 26) + "…" : it.product_name,
-      (it.format || "").length > 16 ? (it.format || "").slice(0, 14) + "…" : (it.format || ""),
-      String(it.quantity),
-      fmt2(it.unit_price),
-      it.price_unit,
-      fmt2(it.subtotal),
+      pname.length > 28 ? pname.slice(0, 26) + "…" : pname,
+      pfmt.length > 16 ? pfmt.slice(0, 14) + "…" : pfmt,
+      String(it.quantity ?? 0),
+      fmt2(it.unit_price ?? 0),
+      s(it.price_unit),
+      fmt2(it.subtotal ?? 0),
     ];
     cells.forEach((c, i) => doc.text(c, colX[i] + 1, y + 1));
     y += 7;
@@ -228,7 +235,7 @@ async function buildPickupTicketDoc(ticket: PickupTicket) {
 
   sumRow("Sous-total produits", fmt2(subtotalProducts));
   if (discountAmt > 0) {
-    sumRow(`Rabais (${ticket.discount_value}${ticket.discount_type})`, `— ${fmt2(discountAmt)}`);
+    sumRow(`Rabais (${s(ticket.discount_value)}${s(ticket.discount_type)})`, `— ${fmt2(discountAmt)}`);
   }
   divLine();
   sumRow("Sous-total après rabais", fmt2(subtotalAfterDiscount), true);
@@ -285,7 +292,7 @@ async function buildPickupTicketDoc(ticket: PickupTicket) {
   setColor(TEXT_LIGHT);
   doc.text("Signature du client", MARGIN, sigY + 19);
   doc.text("Signature de l'employé", MARGIN + 90, sigY + 19);
-  doc.text(`Agent: ${ticket.agent_name}`, MARGIN + 90, sigY + 23);
+  doc.text(`Agent: ${s(ticket.agent_name)}`, MARGIN + 90, sigY + 23);
   doc.text(`Date: ${fmtDateTime(ticket.issued_at)}`, MARGIN, sigY + 23);
   y = sigY + 28;
 
