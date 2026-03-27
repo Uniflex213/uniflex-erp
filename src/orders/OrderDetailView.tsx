@@ -5,16 +5,18 @@ import ChangeLogPanel from "../shared/ChangeLogPanel";
 import { supabase } from "../supabaseClient";
 import EmailComposerModal from "../components/email/EmailComposerModal";
 import { T } from "../theme";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const fmt = (n: number) => new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 
-const TIMELINE_STEPS: { key: OrderStatus | "confirmed"; label: string }[] = [
-  { key: "pending_approval", label: "À confirmer" },
-  { key: "confirmed", label: "Confirmée" },
-  { key: "en_production", label: "En production" },
-  { key: "produced", label: "Produite" },
-  { key: "shipped", label: "En route" },
-  { key: "completed", label: "Complétée" },
+// NOTE: labelKey/labelFallback are translated at render time via t()
+const TIMELINE_STEPS: { key: OrderStatus | "confirmed"; labelKey: string; labelFallback: string }[] = [
+  { key: "pending_approval", labelKey: "orders.pending_approval", labelFallback: "À confirmer" },
+  { key: "confirmed", labelKey: "orders.confirmed", labelFallback: "Confirmée" },
+  { key: "en_production", labelKey: "orders.in_production", labelFallback: "En production" },
+  { key: "produced", labelKey: "orders.produced", labelFallback: "Produite" },
+  { key: "shipped", labelKey: "orders.shipped", labelFallback: "En route" },
+  { key: "completed", labelKey: "orders.completed", labelFallback: "Complétée" },
 ];
 
 const statusOrder: Record<string, number> = {
@@ -106,6 +108,7 @@ function Divider() {
 }
 
 export default function OrderDetailView({ order: initialOrder, onBack, onUpdateOrder }: Props) {
+  const { t } = useLanguage();
   const [order, setOrder] = useState(initialOrder);
   const [activeTab, setActiveTab] = useState<DetailTab>("details");
   const [showEdit, setShowEdit] = useState(false);
@@ -159,7 +162,7 @@ export default function OrderDetailView({ order: initialOrder, onBack, onUpdateO
           onClick={onBack}
           style={{ display: "flex", alignItems: "center", gap: 6, background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 13, color: T.textMid, fontFamily: "inherit" }}
         >
-          <BackIcon /> Retour
+          <BackIcon /> {t("back")}
         </button>
         <div>
           <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>{order.id}</h2>
@@ -175,7 +178,7 @@ export default function OrderDetailView({ order: initialOrder, onBack, onUpdateO
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
               </svg>
-              Modifier
+              {t("edit")}
             </button>
           )}
           <button
@@ -183,7 +186,7 @@ export default function OrderDetailView({ order: initialOrder, onBack, onUpdateO
             style={{ display: "flex", alignItems: "center", gap: 6, background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 12, fontWeight: 700, color: T.textMid, fontFamily: "inherit" }}
           >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,4 12,13 2,4"/></svg>
-            Envoyer par email
+            {t("orders.send_by_email", "Envoyer par email")}
           </button>
           <span style={{ background: cfg.bg, color: cfg.color, padding: "5px 14px", borderRadius: 20, fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
             {order.status === "shipped" && <TruckIcon />}
@@ -194,7 +197,7 @@ export default function OrderDetailView({ order: initialOrder, onBack, onUpdateO
       </div>
 
       <div style={{ display: "flex", gap: 0, marginBottom: 20, borderBottom: `1px solid ${T.border}` }}>
-        {([["details", "Détails"], ["history", "Historique des modifications"]] as [DetailTab, string][]).map(([key, label]) => (
+        {([["details", t("details")], ["history", t("orders.change_history", "Historique des modifications")]] as [DetailTab, string][]).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setActiveTab(key)}
@@ -220,40 +223,40 @@ export default function OrderDetailView({ order: initialOrder, onBack, onUpdateO
           <div style={{ flex: "1 1 560px", display: "flex", flexDirection: "column", gap: 16 }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               <div style={{ background: T.card, borderRadius: 12, border: `1px solid ${T.border}`, padding: 20 }}>
-                <SectionTitle>Contexte de la commande</SectionTitle>
+                <SectionTitle>{t("orders.order_context", "Contexte de la commande")}</SectionTitle>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px 16px" }}>
-                  <InfoField label="Motif" value={order.motif + (order.motifAutre ? ` — ${order.motifAutre}` : "")} />
-                  <InfoField label="Code vendeur" value={order.vendeurCode} />
-                  <InfoField label="Type de livraison" value={order.deliveryType} />
-                  <InfoField label="Destination" value={order.destination + (order.province ? ` (${order.province})` : "")} />
-                  <InfoField label="Label" value={order.label} />
-                  <InfoField label="Statut" value={cfg.label} />
+                  <InfoField label={t("orders.motif")} value={order.motif + (order.motifAutre ? ` — ${order.motifAutre}` : "")} />
+                  <InfoField label={t("orders.vendor_code")} value={order.vendeurCode} />
+                  <InfoField label={t("orders.delivery_type")} value={order.deliveryType} />
+                  <InfoField label={t("orders.destination")} value={order.destination + (order.province ? ` (${order.province})` : "")} />
+                  <InfoField label={t("orders.label")} value={order.label} />
+                  <InfoField label={t("status")} value={cfg.label} />
                 </div>
               </div>
 
               <div style={{ background: T.card, borderRadius: 12, border: `1px solid ${T.border}`, padding: 20 }}>
-                <SectionTitle>Informations client</SectionTitle>
+                <SectionTitle>{t("orders.client_info", "Informations client")}</SectionTitle>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px 16px" }}>
-                  <InfoField label="Compagnie" value={order.client} />
-                  <InfoField label="Email" value={clientInfo?.email} />
-                  <InfoField label="Téléphone" value={clientInfo?.phone} />
-                  <InfoField label="Contact" value={[clientInfo?.contact_first_name, clientInfo?.contact_last_name].filter(Boolean).join(" ") || undefined} />
+                  <InfoField label={t("orders.company", "Compagnie")} value={order.client} />
+                  <InfoField label={t("email")} value={clientInfo?.email} />
+                  <InfoField label={t("phone")} value={clientInfo?.phone} />
+                  <InfoField label={t("orders.contact", "Contact")} value={[clientInfo?.contact_first_name, clientInfo?.contact_last_name].filter(Boolean).join(" ") || undefined} />
                   <div style={{ gridColumn: "1 / -1" }}>
-                    <InfoField label="Adresse de facturation" value={[clientInfo?.billing_address, clientInfo?.billing_city, clientInfo?.billing_province, clientInfo?.billing_postal_code].filter(Boolean).join(", ") || undefined} />
+                    <InfoField label={t("orders.billing_address", "Adresse de facturation")} value={[clientInfo?.billing_address, clientInfo?.billing_city, clientInfo?.billing_province, clientInfo?.billing_postal_code].filter(Boolean).join(", ") || undefined} />
                   </div>
                   <div style={{ gridColumn: "1 / -1" }}>
-                    <InfoField label="Adresse de livraison" value={order.deliveryAddress} />
+                    <InfoField label={t("orders.delivery_address")} value={order.deliveryAddress} />
                   </div>
                 </div>
               </div>
             </div>
 
             <div style={{ background: T.card, borderRadius: 12, border: `1px solid ${T.border}`, padding: 20 }}>
-              <SectionTitle>Produits commandés</SectionTitle>
+              <SectionTitle>{t("orders.ordered_products", "Produits commandés")}</SectionTitle>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                 <thead>
                   <tr style={{ background: "#f8f9fb" }}>
-                    {["#", "Produit", "Format", "Qté", "Prix négocié", "Unité", "Sous-total ligne"].map((h, j) => (
+                    {["#", t("product"), t("orders.format"), t("orders.qty"), t("orders.negotiated_price", "Prix négocié"), t("orders.unit"), t("orders.line_subtotal", "Sous-total ligne")].map((h, j) => (
                       <th key={h} style={{ padding: "8px 10px", textAlign: j >= 3 ? "right" : "left", fontWeight: 700, fontSize: 10, textTransform: "uppercase", letterSpacing: 0.3, color: T.textLight, borderBottom: `1px solid ${T.border}` }}>{h}</th>
                     ))}
                   </tr>
@@ -275,15 +278,15 @@ export default function OrderDetailView({ order: initialOrder, onBack, onUpdateO
             </div>
 
             <div style={{ background: "#f8f9fb", borderRadius: 12, border: `1px solid ${T.border}`, padding: 20 }}>
-              <SectionTitle>Résumé financier</SectionTitle>
-              <FinancialRow label="Sous-total produits" value={fmt(order.subtotal)} bold />
+              <SectionTitle>{t("orders.financial_summary", "Résumé financier")}</SectionTitle>
+              <FinancialRow label={t("orders.product_subtotal", "Sous-total produits")} value={fmt(order.subtotal)} bold />
               {order.discount != null && order.discount > 0 && (
-                <FinancialRow label={`Rabais${order.discountType ? ` (${order.discountValue}${order.discountType})` : ""}`} value={`-${fmt(order.discount)}`} red />
+                <FinancialRow label={`${t("discount")}${order.discountType ? ` (${order.discountValue}${order.discountType})` : ""}`} value={`-${fmt(order.discount)}`} red />
               )}
               <Divider />
-              <FinancialRow label="Sous-total après rabais" value={fmt(subtotalAfterDiscount)} bold />
+              <FinancialRow label={t("orders.subtotal_after_discount")} value={fmt(subtotalAfterDiscount)} bold />
               <FinancialRow
-                label="Shipping"
+                label={t("orders.shipping_cost")}
                 value={order.deliveryType === "Add Shipping" ? fmt(shippingAmt) : "N/A"}
                 muted={order.deliveryType !== "Add Shipping"}
               />
@@ -295,13 +298,13 @@ export default function OrderDetailView({ order: initialOrder, onBack, onUpdateO
               ) : (
                 <>
                   <Divider />
-                  <FinancialRow label="Taxes" value={order.destination === "CANADA" ? "N/C" : "N/A — Hors Canada"} muted />
+                  <FinancialRow label={t("taxes")} value={order.destination === "CANADA" ? "N/C" : t("orders.taxes_outside_canada", "N/A — Hors Canada")} muted />
                 </>
               )}
               {order.extraFees != null && order.extraFees > 0 && (
                 <>
                   <Divider />
-                  <FinancialRow label="Extra fees" value={fmt(order.extraFees)} />
+                  <FinancialRow label={t("orders.extra_fees")} value={fmt(order.extraFees)} />
                 </>
               )}
               <div style={{ borderTop: `2px solid ${T.main}22`, marginTop: 8, paddingTop: 10, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
@@ -313,22 +316,22 @@ export default function OrderDetailView({ order: initialOrder, onBack, onUpdateO
 
           <div style={{ flex: "0 0 320px", display: "flex", flexDirection: "column", gap: 16 }}>
             <div style={{ background: T.card, borderRadius: 12, border: `1px solid ${T.border}`, padding: 20 }}>
-              <SectionTitle>Suivi de commande</SectionTitle>
+              <SectionTitle>{t("orders.order_tracking", "Suivi de commande")}</SectionTitle>
 
               {order.status === "rejected" ? (
                 <div style={{ background: "#fee2e2", borderRadius: 10, padding: 16, border: "1px solid #fca5a5" }}>
-                  <div style={{ fontWeight: 800, color: "#dc2626", marginBottom: 6 }}>Commande rejetée</div>
-                  <div style={{ fontSize: 13, color: "#7f1d1d" }}>{order.rejectionReason || "Aucune raison fournie."}</div>
+                  <div style={{ fontWeight: 800, color: "#dc2626", marginBottom: 6 }}>{t("orders.order_rejected", "Commande rejetée")}</div>
+                  <div style={{ fontSize: 13, color: "#7f1d1d" }}>{order.rejectionReason || t("orders.no_reason_provided", "Aucune raison fournie.")}</div>
                 </div>
               ) : order.status === "en_revision" ? (
                 <div style={{ marginBottom: 16 }}>
                   <div style={{ background: "#ffedd5", borderRadius: 10, padding: 16, border: "1px solid #fed7aa", marginBottom: 12 }}>
-                    <div style={{ fontWeight: 800, color: "#c2410c", marginBottom: 6 }}>Révision requise par le Head Office</div>
-                    <div style={{ fontSize: 13, color: "#7c2d12", lineHeight: 1.6 }}>{order.revisionComment || "Cette commande doit être révisée."}</div>
+                    <div style={{ fontWeight: 800, color: "#c2410c", marginBottom: 6 }}>{t("orders.revision_required_ho", "Révision requise par le Head Office")}</div>
+                    <div style={{ fontSize: 13, color: "#7c2d12", lineHeight: 1.6 }}>{order.revisionComment || t("orders.order_must_be_revised", "Cette commande doit être révisée.")}</div>
                   </div>
                   {order.revisionResponse ? (
                     <div style={{ background: "#f0fdf4", borderRadius: 10, padding: 14, border: "1px solid #86efac" }}>
-                      <div style={{ fontSize: 11, fontWeight: 800, color: "#15803d", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>Votre réponse envoyée</div>
+                      <div style={{ fontSize: 11, fontWeight: 800, color: "#15803d", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>{t("orders.your_response_sent", "Votre réponse envoyée")}</div>
                       <div style={{ fontSize: 13, color: "#166534", lineHeight: 1.5 }}>{order.revisionResponse}</div>
                       {order.revisionResponseAt && (
                         <div style={{ fontSize: 11, color: "#4ade80", marginTop: 6 }}>{new Date(order.revisionResponseAt).toLocaleString("fr-CA")}</div>
@@ -336,17 +339,17 @@ export default function OrderDetailView({ order: initialOrder, onBack, onUpdateO
                     </div>
                   ) : (
                     <div style={{ background: T.bgCard, borderRadius: 10, padding: 14, border: "1px solid #fed7aa" }}>
-                      <div style={{ fontSize: 12, fontWeight: 800, color: "#c2410c", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>Votre réponse à la révision</div>
+                      <div style={{ fontSize: 12, fontWeight: 800, color: "#c2410c", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>{t("orders.your_revision_response", "Votre réponse à la révision")}</div>
                       {replySent ? (
                         <div style={{ background: "#f0fdf4", borderRadius: 8, padding: 12, fontSize: 13, color: "#15803d", fontWeight: 600 }}>
-                          Réponse envoyée avec succès.
+                          {t("orders.response_sent_success", "Réponse envoyée avec succès.")}
                         </div>
                       ) : (
                         <>
                           <textarea
                             value={revisionReply}
                             onChange={e => setRevisionReply(e.target.value)}
-                            placeholder="Répondez au commentaire de révision..."
+                            placeholder={t("orders.reply_revision_placeholder", "Répondez au commentaire de révision...")}
                             rows={3}
                             style={{ border: "1px solid #fed7aa", borderRadius: 8, padding: "8px 10px", fontSize: 13, fontFamily: "inherit", outline: "none", background: "#fffbf5", width: "100%", boxSizing: "border-box", resize: "vertical", color: "#111" }}
                           />
@@ -355,7 +358,7 @@ export default function OrderDetailView({ order: initialOrder, onBack, onUpdateO
                             disabled={!revisionReply.trim() || !onUpdateOrder}
                             style={{ marginTop: 8, background: revisionReply.trim() ? "#ff9f0a" : "#e5e7eb", color: revisionReply.trim() ? "#fff" : "#9ca3af", border: "none", borderRadius: 8, padding: "9px 18px", fontSize: 12, fontWeight: 800, cursor: revisionReply.trim() ? "pointer" : "not-allowed", fontFamily: "inherit" }}
                           >
-                            Envoyer ma réponse
+                            {t("orders.send_my_response", "Envoyer ma réponse")}
                           </button>
                         </>
                       )}
@@ -391,7 +394,7 @@ export default function OrderDetailView({ order: initialOrder, onBack, onUpdateO
                         </div>
                         <div style={{ paddingTop: 4 }}>
                           <div style={{ fontSize: 13, fontWeight: isCurrent ? 800 : isDone ? 600 : 400, color: isDone ? T.text : T.textLight }}>
-                            {step.label}
+                            {t(step.labelKey, step.labelFallback)}
                           </div>
                           {isCurrent && order.status === "shipped" && order.shipping?.eta && (
                             <div style={{ fontSize: 11, color: T.textMid, marginTop: 2 }}>ETA: {order.shipping.eta}</div>
@@ -406,20 +409,20 @@ export default function OrderDetailView({ order: initialOrder, onBack, onUpdateO
 
             {(order.status === "shipped" || order.status === "completed") && order.shipping && (
               <div style={{ background: T.card, borderRadius: 12, border: `1px solid ${T.border}`, padding: 20 }}>
-                <SectionTitle>Informations d'expédition</SectionTitle>
+                <SectionTitle>{t("orders.shipping_info")}</SectionTitle>
                 <div style={{ marginBottom: 10 }}>
-                  <div style={{ fontSize: 11, color: T.textLight, fontWeight: 600, textTransform: "uppercase" }}>Transporteur</div>
+                  <div style={{ fontSize: 11, color: T.textLight, fontWeight: 600, textTransform: "uppercase" }}>{t("orders.carrier")}</div>
                   <div style={{ fontSize: 13, fontWeight: 700, marginTop: 2 }}>{order.shipping.carrier}</div>
                 </div>
                 {order.shipping.eta && (
                   <div style={{ marginBottom: 10 }}>
-                    <div style={{ fontSize: 11, color: T.textLight, fontWeight: 600, textTransform: "uppercase" }}>Date estimée de livraison</div>
+                    <div style={{ fontSize: 11, color: T.textLight, fontWeight: 600, textTransform: "uppercase" }}>{t("orders.estimated_delivery_date", "Date estimée de livraison")}</div>
                     <div style={{ fontSize: 13, fontWeight: 700, marginTop: 2, color: T.main }}>{order.shipping.eta}</div>
                   </div>
                 )}
                 {order.shipping.trackingNumbers && order.shipping.trackingNumbers.length > 0 && (
                   <div>
-                    <div style={{ fontSize: 11, color: T.textLight, fontWeight: 600, textTransform: "uppercase", marginBottom: 6 }}>Numéros de suivi</div>
+                    <div style={{ fontSize: 11, color: T.textLight, fontWeight: 600, textTransform: "uppercase", marginBottom: 6 }}>{t("orders.tracking_numbers", "Numéros de suivi")}</div>
                     {order.shipping.trackingNumbers.map((tn, i) => (
                       <div key={i} style={{ background: "#f4f5f9", borderRadius: 6, padding: "6px 10px", fontSize: 12, fontFamily: "monospace", marginBottom: 4 }}>{tn}</div>
                     ))}
@@ -427,8 +430,8 @@ export default function OrderDetailView({ order: initialOrder, onBack, onUpdateO
                 )}
                 {order.shipping.delayed && order.shipping.newEta && (
                   <div style={{ background: "#fff3d4", borderRadius: 8, padding: 12, marginTop: 10, border: "1px solid #fed7aa" }}>
-                    <div style={{ fontWeight: 700, color: T.orange, fontSize: 12 }}>Délai signalé</div>
-                    <div style={{ fontSize: 12, color: "#92400e", marginTop: 4 }}>Nouvelle ETA : {order.shipping.newEta}</div>
+                    <div style={{ fontWeight: 700, color: T.orange, fontSize: 12 }}>{t("orders.delay_reported", "Délai signalé")}</div>
+                    <div style={{ fontSize: 12, color: "#92400e", marginTop: 4 }}>{t("orders.new_eta", "Nouvelle ETA")} : {order.shipping.newEta}</div>
                   </div>
                 )}
               </div>
@@ -436,25 +439,25 @@ export default function OrderDetailView({ order: initialOrder, onBack, onUpdateO
 
             {order.status === "en_production" && (
               <div style={{ background: "#dbeafe", borderRadius: 12, padding: 16, border: "1px solid #bfdbfe" }}>
-                <div style={{ fontWeight: 800, color: "#1d4ed8", marginBottom: 4 }}>En production</div>
-                <div style={{ fontSize: 13, color: "#1e40af" }}>Votre commande a été confirmée et est actuellement en production.</div>
+                <div style={{ fontWeight: 800, color: "#1d4ed8", marginBottom: 4 }}>{t("orders.in_production")}</div>
+                <div style={{ fontSize: 13, color: "#1e40af" }}>{t("orders.in_production_msg", "Votre commande a été confirmée et est actuellement en production.")}</div>
                 {order.adminNote && (
-                  <div style={{ fontSize: 12, color: "#1e40af", marginTop: 8, fontStyle: "italic" }}>Note : {order.adminNote}</div>
+                  <div style={{ fontSize: 12, color: "#1e40af", marginTop: 8, fontStyle: "italic" }}>{t("notes")} : {order.adminNote}</div>
                 )}
               </div>
             )}
 
             {showBilling && (
               <div style={{ background: T.card, borderRadius: 12, border: `1px solid ${T.border}`, padding: 20 }}>
-                <SectionTitle>Facturation</SectionTitle>
+                <SectionTitle>{t("orders.billing", "Facturation")}</SectionTitle>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
                   <BillingBadge status={order.billing_status} />
                 </div>
                 <div style={{ fontSize: 12, color: T.textMid, lineHeight: 1.5 }}>
-                  {order.billing_status === "unbilled" && "Cette commande n'a pas encore été envoyée pour facturation."}
-                  {order.billing_status === "sent" && "Cette commande a été envoyée au manufacturier (SCI) pour facturation."}
-                  {order.billing_status === "billed_by_sci" && "Cette commande a été facturée par le manufacturier (SCI)."}
-                  {!order.billing_status && "Cette commande n'a pas encore été envoyée pour facturation."}
+                  {order.billing_status === "unbilled" && t("orders.billing_unbilled_msg", "Cette commande n'a pas encore été envoyée pour facturation.")}
+                  {order.billing_status === "sent" && t("orders.billing_sent_msg", "Cette commande a été envoyée au manufacturier (SCI) pour facturation.")}
+                  {order.billing_status === "billed_by_sci" && t("orders.billing_billed_msg", "Cette commande a été facturée par le manufacturier (SCI).")}
+                  {!order.billing_status && t("orders.billing_unbilled_msg", "Cette commande n'a pas encore été envoyée pour facturation.")}
                 </div>
               </div>
             )}
@@ -474,11 +477,11 @@ export default function OrderDetailView({ order: initialOrder, onBack, onUpdateO
         isOpen={showEmailModal}
         onClose={() => setShowEmailModal(false)}
         defaultTo={clientInfo?.email ?? ""}
-        defaultSubject={`Uniflex — Confirmation de commande ${order.id}`}
-        defaultBody={`Bonjour,\n\nVeuillez trouver ci-joint la confirmation pour la commande ${order.id}.\n\nClient : ${order.client}\nDate : ${order.date}\nMontant total : ${new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD" }).format(order.total)}\n\nPour toute question, n'hésitez pas à nous contacter.\n\nCordialement,\nUniflex Distribution Inc.\nBoisbriand, Québec`}
+        defaultSubject={`Uniflex — ${t("orders.order_confirmation", "Confirmation de commande")} ${order.id}`}
+        defaultBody={`${t("orders.email_greeting", "Bonjour")},\n\n${t("orders.email_body_intro", "Veuillez trouver ci-joint la confirmation pour la commande")} ${order.id}.\n\n${t("client")} : ${order.client}\n${t("date")} : ${order.date}\n${t("orders.total_amount", "Montant total")} : ${new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD" }).format(order.total)}\n\n${t("orders.email_body_contact", "Pour toute question, n'hésitez pas à nous contacter.")}\n\n${t("orders.email_body_closing", "Cordialement")},\nUniflex Distribution Inc.\nBoisbriand, Québec`}
         module="orders"
         referenceId={order.id}
-        attachmentLabel={`Confirmation de commande ${order.id}`}
+        attachmentLabel={`${t("orders.order_confirmation", "Confirmation de commande")} ${order.id}`}
         onSent={() => setShowEmailModal(false)}
       />
     </div>

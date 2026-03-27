@@ -20,6 +20,7 @@ import WidgetSamples from "./workstation/WidgetSamples";
 import WidgetCalendar from "./workstation/WidgetCalendar";
 import WidgetScore from "./workstation/WidgetScore";
 
+import { useLanguage } from "../i18n/LanguageContext";
 import {
   MaJourneeModal,
   PipelineModal,
@@ -34,6 +35,7 @@ import {
 } from "./workstation/WorkstationModals";
 
 export default function PersonalWorkstationPage() {
+  const { t } = useLanguage();
   const agent = useCurrentAgent();
   const { leads, navigate, samples } = useApp();
   const { prefs, loaded: prefsLoaded, updatePref } = useUserPreferences();
@@ -152,10 +154,10 @@ export default function PersonalWorkstationPage() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28 }}>
         <div>
           <h2 style={{ margin: "0 0 6px", fontSize: 24, fontWeight: 900, color: T.text }}>
-            Personal Workstation
+            {t("workstation.title", "Personal Workstation")}
           </h2>
           <p style={{ margin: 0, color: T.textMid, fontSize: 14 }}>
-            Votre espace de travail personnel —{" "}
+            {t("workstation.subtitle", "Votre espace de travail personnel")} —{" "}
             <span style={{ fontWeight: 700, color: T.main }}>{agent.name}</span>
           </p>
         </div>
@@ -169,7 +171,7 @@ export default function PersonalWorkstationPage() {
             boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
           }}
         >
-          Personnaliser les widgets
+          {t("workstation.customize_widgets", "Personnaliser les widgets")}
         </button>
       </div>
 
@@ -246,6 +248,7 @@ function PersonalizePanel({
   onToggle: (id: WidgetId) => void;
   onClose: () => void;
 }) {
+  const { t } = useLanguage();
   const activeCount = Object.values(visibility).filter(Boolean).length;
 
   return (
@@ -262,9 +265,9 @@ function PersonalizePanel({
         <div style={{ padding: "20px 24px 16px", borderBottom: `1px solid ${T.border}` }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
-              <div style={{ fontWeight: 800, fontSize: 16 }}>Personnaliser</div>
+              <div style={{ fontWeight: 800, fontSize: 16 }}>{t("workstation.customize", "Personnaliser")}</div>
               <div style={{ fontSize: 12, color: T.textMid, marginTop: 2 }}>
-                {activeCount}/{widgetOrder.length} widgets actifs
+                {activeCount}/{widgetOrder.length} {t("workstation.active_widgets", "widgets actifs")}
               </div>
             </div>
             <button
@@ -278,7 +281,7 @@ function PersonalizePanel({
 
         <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
           <div style={{ fontSize: 12, color: T.textMid, marginBottom: 18, lineHeight: 1.6 }}>
-            Activez ou désactivez les widgets. Glissez-déposez pour réorganiser votre espace.
+            {t("workstation.toggle_widgets", "Activez ou désactivez les widgets. Glissez-déposez pour réorganiser votre espace.")}
           </div>
 
           {widgetOrder.map((id, idx) => {
@@ -331,7 +334,7 @@ function PersonalizePanel({
               cursor: "pointer", fontFamily: "inherit",
             }}
           >
-            Fermer
+            {t("close", "Fermer")}
           </button>
         </div>
       </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "../../supabaseClient";
 import { InvoiceDoc, T, fmt, fmtDate } from "./toInvoiceTypes";
 import { useEmailSender } from "../../hooks/useEmailSender";
+import { useLanguage } from "../../i18n/LanguageContext";
 import { generatePickupTicketPDFBase64 } from "../pickupTicketPDF";
 import { generateOrderPDFBase64 } from "../../orders/orderPDF";
 import { PickupTicket } from "../storeOpsTypes";
@@ -123,6 +124,7 @@ function buildHtmlBody(docs: InvoiceDoc[], now: Date, logType: "send" | "followu
 }
 
 export default function EmailToolModal({ docs, logType = "send", onClose, onSent }: Props) {
+  const { t } = useLanguage();
   const now = new Date();
   const total = docs.reduce((a, d) => a + d.value, 0);
   const { sendEmail, sending } = useEmailSender();
@@ -249,7 +251,7 @@ export default function EmailToolModal({ docs, logType = "send", onClose, onSent
       });
 
       if (!emailResult.success) {
-        setSendError(emailResult.error ?? "Erreur lors de l'envoi de l'email.");
+        setSendError(emailResult.error ?? t("email.send_error", "Erreur lors de l'envoi de l'email."));
         return;
       }
 
@@ -259,7 +261,7 @@ export default function EmailToolModal({ docs, logType = "send", onClose, onSent
         onClose();
       }, 1800);
     } catch (e: any) {
-      setSendError(e.message ?? "Erreur inattendue. Veuillez réessayer.");
+      setSendError(e.message ?? t("email.unexpected_error", "Erreur inattendue. Veuillez réessayer."));
     }
   };
 
@@ -277,10 +279,10 @@ export default function EmailToolModal({ docs, logType = "send", onClose, onSent
         <div style={{ padding: "20px 24px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
             <h2 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: T.text }}>
-              {logType === "followup" ? "Relancer SCI" : "Envoyer à SCI pour facturation"}
+              {logType === "followup" ? t("email.followup_sci", "Relancer SCI") : t("email.send_to_sci", "Envoyer à SCI pour facturation")}
             </h2>
             <p style={{ margin: "4px 0 0", fontSize: 12, color: T.textMid }}>
-              {docs.length} document{docs.length !== 1 ? "s" : ""} sélectionné{docs.length !== 1 ? "s" : ""} — Valeur totale : <strong style={{ color: T.main }}>{fmt(total)}</strong>
+              {docs.length} document{docs.length !== 1 ? "s" : ""} {t("email.selected", "sélectionné")}{docs.length !== 1 ? "s" : ""} — {t("toinvoice.total_value", "Valeur totale")} : <strong style={{ color: T.main }}>{fmt(total)}</strong>
             </p>
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 20, color: T.textMid, lineHeight: 1, padding: 4 }}>×</button>
@@ -291,8 +293,8 @@ export default function EmailToolModal({ docs, logType = "send", onClose, onSent
             <div style={{ width: 64, height: 64, borderRadius: "50%", background: T.greenBg, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={T.green} strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: T.green, marginBottom: 6 }}>Email envoyé !</div>
-            <div style={{ fontSize: 13, color: T.textMid }}>{docs.length} document{docs.length !== 1 ? "s" : ""} envoyé{docs.length !== 1 ? "s" : ""} à SCI — {fmt(total)}</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: T.green, marginBottom: 6 }}>{t("email.sent_success", "Email envoyé !")}</div>
+            <div style={{ fontSize: 13, color: T.textMid }}>{docs.length} document{docs.length !== 1 ? "s" : ""} {t("email.sent_to_sci", "envoyé à SCI")} — {fmt(total)}</div>
           </div>
         ) : preview ? (
           <div style={{ padding: "20px 24px" }}>
@@ -302,18 +304,18 @@ export default function EmailToolModal({ docs, logType = "send", onClose, onSent
               </div>
             )}
             <div style={{ background: T.cardAlt, borderRadius: 12, padding: 20, border: `1px solid ${T.border}`, fontFamily: "monospace", fontSize: 13 }}>
-              <div style={{ marginBottom: 8 }}><strong>À :</strong> {to}</div>
-              {cc && <div style={{ marginBottom: 8 }}><strong>CC :</strong> {cc}</div>}
-              <div style={{ marginBottom: 12 }}><strong>Objet :</strong> {subject}</div>
+              <div style={{ marginBottom: 8 }}><strong>{t("to", "À")} :</strong> {to}</div>
+              {cc && <div style={{ marginBottom: 8 }}><strong>{t("cc", "CC")} :</strong> {cc}</div>}
+              <div style={{ marginBottom: 12 }}><strong>{t("subject", "Objet")} :</strong> {subject}</div>
               <div style={{ borderTop: `1px solid ${T.border}`, paddingTop: 12, whiteSpace: "pre-wrap", lineHeight: 1.7 }}>{body}</div>
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 16 }}>
               <button onClick={() => setPreview(false)} style={{ background: T.cardAlt, color: T.text, border: `1px solid ${T.border}`, borderRadius: 8, padding: "10px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-                Modifier
+                {t("edit", "Modifier")}
               </button>
               <button onClick={handleSend} disabled={isSending} style={{ background: T.main, color: "#fff", border: "none", borderRadius: 8, padding: "10px 22px", fontSize: 13, fontWeight: 700, cursor: isSending ? "not-allowed" : "pointer", fontFamily: "inherit", opacity: isSending ? 0.7 : 1, display: "flex", alignItems: "center", gap: 8 }}>
                 {isSending && <span style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", borderRadius: "50%", display: "inline-block", animation: "spin 0.7s linear infinite" }} />}
-                {isSending ? "Envoi en cours..." : "Confirmer et envoyer"}
+                {isSending ? t("email.sending", "Envoi en cours...") : t("email.confirm_and_send", "Confirmer et envoyer")}
               </button>
             </div>
           </div>
@@ -326,19 +328,19 @@ export default function EmailToolModal({ docs, logType = "send", onClose, onSent
             )}
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div>
-                <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, letterSpacing: 0.6, textTransform: "uppercase", display: "block", marginBottom: 5 }}>À (destinataire)</label>
+                <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, letterSpacing: 0.6, textTransform: "uppercase", display: "block", marginBottom: 5 }}>{t("email.to_recipient", "À (destinataire)")}</label>
                 <input value={to} readOnly style={{ ...inputStyle, background: "#f0f0f0", color: T.textMid, cursor: "default" }} />
               </div>
               <div>
-                <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, letterSpacing: 0.6, textTransform: "uppercase", display: "block", marginBottom: 5 }}>CC</label>
+                <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, letterSpacing: 0.6, textTransform: "uppercase", display: "block", marginBottom: 5 }}>{t("cc", "CC")}</label>
                 <input value={cc} onChange={e => setCc(e.target.value)} placeholder="email@exemple.com, email2@exemple.com" style={inputStyle} />
               </div>
               <div>
-                <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, letterSpacing: 0.6, textTransform: "uppercase", display: "block", marginBottom: 5 }}>Objet</label>
+                <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, letterSpacing: 0.6, textTransform: "uppercase", display: "block", marginBottom: 5 }}>{t("subject", "Objet")}</label>
                 <input value={subject} onChange={e => setSubject(e.target.value)} style={inputStyle} />
               </div>
               <div>
-                <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, letterSpacing: 0.6, textTransform: "uppercase", display: "block", marginBottom: 5 }}>Corps de l'email</label>
+                <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, letterSpacing: 0.6, textTransform: "uppercase", display: "block", marginBottom: 5 }}>{t("email.body_label", "Corps de l'email")}</label>
                 <textarea
                   value={body}
                   onChange={e => setBody(e.target.value)}
@@ -348,7 +350,7 @@ export default function EmailToolModal({ docs, logType = "send", onClose, onSent
               </div>
 
               <div style={{ background: T.cardAlt, borderRadius: 10, padding: "12px 16px", border: `1px solid ${T.border}` }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 8 }}>Pièces jointes ({docs.length} PDF)</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 8 }}>{t("attachments", "Pièces jointes")} ({docs.length} PDF)</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                   {docs.map(d => (
                     <div key={d.id} style={{ display: "flex", alignItems: "center", gap: 5, background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 600, color: T.text }}>
@@ -362,16 +364,16 @@ export default function EmailToolModal({ docs, logType = "send", onClose, onSent
 
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 20, paddingTop: 16, borderTop: `1px solid ${T.border}` }}>
               <button onClick={onClose} style={{ background: T.cardAlt, color: T.textMid, border: `1px solid ${T.border}`, borderRadius: 8, padding: "10px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-                Annuler
+                {t("cancel", "Annuler")}
               </button>
               <button onClick={() => setPreview(true)} style={{ background: T.cardAlt, color: T.text, border: `1px solid ${T.borderMid}`, borderRadius: 8, padding: "10px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-                Aperçu
+                {t("email.preview", "Aperçu")}
               </button>
               <button onClick={handleSend} disabled={isSending} style={{ background: T.main, color: "#fff", border: "none", borderRadius: 8, padding: "10px 24px", fontSize: 13, fontWeight: 700, cursor: isSending ? "not-allowed" : "pointer", fontFamily: "inherit", opacity: isSending ? 0.7 : 1, display: "flex", alignItems: "center", gap: 8 }}>
                 {isSending && (
                   <span style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", borderRadius: "50%", display: "inline-block", animation: "spin 0.7s linear infinite" }} />
                 )}
-                {isSending ? "Envoi en cours..." : "Envoyer"}
+                {isSending ? t("email.sending", "Envoi en cours...") : t("send", "Envoyer")}
               </button>
             </div>
           </div>

@@ -10,6 +10,7 @@ import { logChange } from "../shared/changeLogUtils";
 import { useCurrentAgent } from "../hooks/useCurrentAgent";
 import { useAuth } from "../contexts/AuthContext";
 import { T } from "../theme";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const fmt2 = (n: number) => new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD" }).format(n);
 
@@ -59,6 +60,7 @@ const inputStyle: React.CSSProperties = {
 const selectStyle: React.CSSProperties = { ...inputStyle };
 
 export default function PickupTicketsPage() {
+  const { t } = useLanguage();
   const { storeCode } = useAuth();
   const agent = useCurrentAgent();
   const [view, setView] = useState<"list" | "new" | "detail">("list");
@@ -253,66 +255,66 @@ export default function PickupTicketsPage() {
 
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 24 }}>
         <div>
-          <h1 style={{ fontSize: 26, fontWeight: 800, color: T.text, margin: 0 }}>Pickup Tickets</h1>
-          <div style={{ fontSize: 13, color: T.textMid, marginTop: 4 }}>Gestion des sorties de consignation</div>
+          <h1 style={{ fontSize: 26, fontWeight: 800, color: T.text, margin: 0 }}>{t("pickup.title", "Pickup Tickets")}</h1>
+          <div style={{ fontSize: 13, color: T.textMid, marginTop: 4 }}>{t("pickup.subtitle", "Gestion des sorties de consignation")}</div>
         </div>
         <button onClick={() => setView("new")} className="breathe-btn"
           style={{ background: T.main, color: "#fff", border: "none", borderRadius: 10, padding: "12px 22px", cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "inherit", letterSpacing: 0.3 }}>
-          + NOUVEAU PICKUP TICKET
+          + {t("pickup.new_ticket", "NOUVEAU PICKUP TICKET")}
         </button>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 14, marginBottom: 24 }}>
-        <KpiCard label="Tickets ce mois" value={String(thisMonth.length)} sub="Émis depuis le 1er" />
-        <KpiCard label="Valeur ce mois (taxes)" value={fmt2(confirmedThisMonth.reduce((s, t) => s + getTotal(t), 0))} accent sub="Facturés ou ramassés" />
-        <KpiCard label="En attente" value={String(pendingPickup.length)} sub="Préparés / Prêts" />
-        <KpiCard label="Envoyés" value={String(sentToManufacturer.length)} sub="Au manufacturier" />
-        <KpiCard label="Non-facturés" value={String(unbilledTickets.length)} warn={unbilledTickets.length > 0} sub="Tickets actifs" />
+        <KpiCard label={t("pickup.kpi_tickets_month", "Tickets ce mois")} value={String(thisMonth.length)} sub={t("pickup.kpi_issued_since_1st", "Émis depuis le 1er")} />
+        <KpiCard label={t("pickup.kpi_value_month", "Valeur ce mois (taxes)")} value={fmt2(confirmedThisMonth.reduce((s, t) => s + getTotal(t), 0))} accent sub={t("pickup.kpi_billed_or_picked", "Facturés ou ramassés")} />
+        <KpiCard label={t("pickup.kpi_pending", "En attente")} value={String(pendingPickup.length)} sub={t("pickup.kpi_prepared_ready", "Préparés / Prêts")} />
+        <KpiCard label={t("pickup.kpi_sent", "Envoyés")} value={String(sentToManufacturer.length)} sub={t("pickup.kpi_to_manufacturer", "Au manufacturier")} />
+        <KpiCard label={t("pickup.kpi_unbilled", "Non-facturés")} value={String(unbilledTickets.length)} warn={unbilledTickets.length > 0} sub={t("pickup.kpi_active_tickets", "Tickets actifs")} />
         <KpiCard
-          label="Délai moyen"
+          label={t("pickup.kpi_avg_delay", "Délai moyen")}
           value={avgHours < 24 ? `${avgHours}h` : `${Math.round(avgHours / 24)}j`}
-          sub="Émission → Ramassage"
+          sub={t("pickup.kpi_issue_to_pickup", "Émission → Ramassage")}
         />
       </div>
 
       <div style={{ background: T.card, borderRadius: 12, border: `1px solid ${T.border}`, padding: "16px 20px", marginBottom: 20, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, background: T.cardAlt, borderRadius: 8, padding: "8px 12px", minWidth: 260 }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.textMid} strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="# ticket, client, produit..." style={{ border: "none", background: "transparent", outline: "none", fontSize: 13, fontFamily: "inherit", width: "100%" }} />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t("pickup.search_placeholder", "# ticket, client, produit...")} style={{ border: "none", background: "transparent", outline: "none", fontSize: 13, fontFamily: "inherit", width: "100%" }} />
         </div>
         <select style={selectStyle} value={filterStatus} onChange={e => setFilterStatus(e.target.value as any)}>
-          <option value="">Tous les statuts</option>
-          <option value="prepared">Préparé</option>
-          <option value="ready">Prêt au ramassage</option>
-          <option value="picked_up">Récupéré</option>
-          <option value="cancelled">Annulé</option>
+          <option value="">{t("pickup.all_statuses", "Tous les statuts")}</option>
+          <option value="prepared">{t("pickup.preparing", "Préparé")}</option>
+          <option value="ready">{t("pickup.ready", "Prêt au ramassage")}</option>
+          <option value="picked_up">{t("pickup.picked_up", "Récupéré")}</option>
+          <option value="cancelled">{t("pickup.cancelled", "Annulé")}</option>
         </select>
         <select style={selectStyle} value={filterBilling} onChange={e => setFilterBilling(e.target.value as any)}>
-          <option value="">Facturation — Tous</option>
-          <option value="unbilled">Non-facturé</option>
-          <option value="sent">Envoyé</option>
-          <option value="billed_by_sci">Facturé par SCI</option>
+          <option value="">{t("pickup.billing_all", "Facturation — Tous")}</option>
+          <option value="unbilled">{t("billing.unbilled", "Non-facturé")}</option>
+          <option value="sent">{t("billing.sent", "Envoyé")}</option>
+          <option value="billed_by_sci">{t("billing.billed_by_sci", "Facturé par SCI")}</option>
         </select>
-        <input type="date" style={selectStyle} value={filterDateFrom} onChange={e => setFilterDateFrom(e.target.value)} title="Date de début" />
-        <input type="date" style={selectStyle} value={filterDateTo} onChange={e => setFilterDateTo(e.target.value)} title="Date de fin" />
+        <input type="date" style={selectStyle} value={filterDateFrom} onChange={e => setFilterDateFrom(e.target.value)} title={t("pickup.date_from", "Date de début")} />
+        <input type="date" style={selectStyle} value={filterDateTo} onChange={e => setFilterDateTo(e.target.value)} title={t("pickup.date_to", "Date de fin")} />
         <select style={selectStyle} value={filterAgent} onChange={e => setFilterAgent(e.target.value)}>
-          <option value="">Tous les agents</option>
+          <option value="">{t("pickup.all_agents", "Tous les agents")}</option>
           {uniqueAgents.map(a => <option key={a} value={a}>{a}</option>)}
         </select>
         {(search || filterStatus || filterBilling || filterDateFrom || filterDateTo || filterAgent) && (
           <button onClick={resetFilters} style={{ background: "none", border: `1px solid ${T.border}`, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 12, color: T.textMid, fontFamily: "inherit" }}>
-            Réinitialiser
+            {t("reset", "Réinitialiser")}
           </button>
         )}
         <span style={{ marginLeft: "auto", fontSize: 12, color: T.textMid }}>{filtered.length} ticket{filtered.length !== 1 ? "s" : ""}</span>
       </div>
 
       {loading ? (
-        <div style={{ background: T.card, borderRadius: 14, border: `1px solid ${T.border}`, padding: 40, textAlign: "center", color: T.textMid }}>Chargement...</div>
+        <div style={{ background: T.card, borderRadius: 14, border: `1px solid ${T.border}`, padding: 40, textAlign: "center", color: T.textMid }}>{t("loading_dots", "Chargement...")}</div>
       ) : filtered.length === 0 ? (
         <div style={{ background: T.card, borderRadius: 14, border: `1px solid ${T.border}`, padding: 48, textAlign: "center" }}>
-          <div style={{ fontSize: 16, fontWeight: 600, color: T.textMid, marginBottom: 8 }}>Aucun pickup ticket</div>
-          <div style={{ fontSize: 13, color: T.textLight }}>Créez votre premier pickup ticket avec le bouton en haut à droite.</div>
+          <div style={{ fontSize: 16, fontWeight: 600, color: T.textMid, marginBottom: 8 }}>{t("pickup.no_tickets", "Aucun pickup ticket")}</div>
+          <div style={{ fontSize: 13, color: T.textLight }}>{t("pickup.create_first", "Créez votre premier pickup ticket avec le bouton en haut à droite.")}</div>
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -323,7 +325,7 @@ export default function PickupTicketsPage() {
             const sc = STATUS_COLORS[status];
             const groupTotal = group.reduce((s, t) => s + getTotal(t), 0);
             const toggleCollapse = () => setCollapsedGroups(prev => ({ ...prev, [status]: !prev[status] }));
-            const TABLE_HEADERS = ["# Ticket", "Date", "Client", "Produits", "Qté", "Valeur", "Facturé", "Agent", "Actions"];
+            const TABLE_HEADERS = [t("pickup.ticket_number", "# Ticket"), t("date", "Date"), t("client", "Client"), t("products", "Produits"), t("orders.qty", "Qté"), t("pickup.value", "Valeur"), t("pickup.billed", "Facturé"), t("agent", "Agent"), t("actions", "Actions")];
 
             return (
               <div key={status} style={{ background: T.card, borderRadius: 14, border: `1px solid ${T.border}`, overflow: "hidden" }}>
@@ -379,7 +381,7 @@ export default function PickupTicketsPage() {
                             <td style={{ padding: "13px 16px" }}>
                               <button onClick={e => { e.stopPropagation(); openDetail(ticket); }}
                                 style={{ background: T.blueBg, color: T.blue, border: "none", borderRadius: 6, padding: "5px 12px", cursor: "pointer", fontSize: 11, fontWeight: 700, fontFamily: "inherit" }}>
-                                Voir
+                                {t("view", "Voir")}
                               </button>
                             </td>
                           </tr>

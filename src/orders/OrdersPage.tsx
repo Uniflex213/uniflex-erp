@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { Order, STATUS_CONFIG, OrderStatus, ORDER_BILLING_LABELS, ORDER_BILLING_COLORS, OrderBillingStatus } from "./orderTypes";
 import OrderDetailView from "./OrderDetailView";
 import { T } from "../theme";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const fmt = (n: number) => new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 
@@ -37,9 +38,11 @@ const pulseStyle = `
 }
 `;
 
+// NOTE: labelKey is translated at render time via t()
 const SECTION_CONFIG: {
   key: "pending" | "ongoing" | "completed";
-  label: string;
+  labelKey: string;
+  labelFallback: string;
   statuses: OrderStatus[];
   color: string;
   bg: string;
@@ -47,7 +50,8 @@ const SECTION_CONFIG: {
 }[] = [
   {
     key: "pending",
-    label: "En attente",
+    labelKey: "pending",
+    labelFallback: "En attente",
     statuses: ["pending_approval", "en_revision", "rejected"],
     color: "#b45309",
     bg: "#fffbeb",
@@ -55,7 +59,8 @@ const SECTION_CONFIG: {
   },
   {
     key: "ongoing",
-    label: "En cours",
+    labelKey: "in_progress",
+    labelFallback: "En cours",
     statuses: ["en_production", "produced", "shipped"],
     color: "#1d4ed8",
     bg: "#eff6ff",
@@ -63,7 +68,8 @@ const SECTION_CONFIG: {
   },
   {
     key: "completed",
-    label: "Complétée",
+    labelKey: "completed",
+    labelFallback: "Complétée",
     statuses: ["completed"],
     color: "#15803d",
     bg: "#f0fdf4",
@@ -72,19 +78,20 @@ const SECTION_CONFIG: {
 ];
 
 function WithdrawModal({ orderId, orderClient, onConfirm, onCancel }: { orderId: string; orderClient: string; onConfirm: () => void; onCancel: () => void }) {
+  const { t } = useLanguage();
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
       <div style={{ background: T.bgCard, borderRadius: 14, padding: 28, maxWidth: 420, width: "100%", boxShadow: "0 24px 64px rgba(0,0,0,0.25)" }}>
-        <div style={{ fontSize: 16, fontWeight: 800, color: T.text, marginBottom: 10 }}>Retirer la demande</div>
+        <div style={{ fontSize: 16, fontWeight: 800, color: T.text, marginBottom: 10 }}>{t("orders.withdraw_request", "Retirer la demande")}</div>
         <p style={{ fontSize: 13, color: T.textMid, lineHeight: 1.6, marginBottom: 24 }}>
-          Êtes-vous sûr de vouloir retirer la demande de commande <strong style={{ color: T.text }}>{orderId}</strong> pour <strong style={{ color: T.text }}>{orderClient}</strong> ? Elle sera supprimée définitivement.
+          {t("orders.withdraw_confirm_msg", "Êtes-vous sûr de vouloir retirer la demande de commande")} <strong style={{ color: T.text }}>{orderId}</strong> {t("orders.withdraw_for", "pour")} <strong style={{ color: T.text }}>{orderClient}</strong> ? {t("orders.withdraw_permanent", "Elle sera supprimée définitivement.")}
         </p>
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
           <button onClick={onCancel} style={{ padding: "9px 18px", background: "#f4f5f9", border: `1px solid ${T.border}`, borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", color: T.textMid, fontFamily: "inherit" }}>
-            Annuler
+            {t("cancel")}
           </button>
           <button onClick={onConfirm} style={{ padding: "9px 18px", background: T.red, border: "none", borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: "pointer", color: "#fff", fontFamily: "inherit" }}>
-            Oui, retirer la demande
+            {t("orders.withdraw_yes", "Oui, retirer la demande")}
           </button>
         </div>
       </div>
@@ -93,6 +100,7 @@ function WithdrawModal({ orderId, orderClient, onConfirm, onCancel }: { orderId:
 }
 
 function OrderRow({ order, onClick, isLast, onWithdraw }: { order: Order; onClick: () => void; isLast: boolean; onWithdraw?: (e: React.MouseEvent) => void }) {
+  const { t } = useLanguage();
   const cfg = STATUS_CONFIG[order.status];
   return (
     <tr
@@ -133,7 +141,7 @@ function OrderRow({ order, onClick, isLast, onWithdraw }: { order: Order; onClic
                 fontFamily: "inherit", whiteSpace: "nowrap",
               }}
             >
-              Retirer
+              {t("orders.withdraw", "Retirer")}
             </button>
           )}
         </div>
@@ -156,6 +164,7 @@ function OrderSection({
   onSelect: (o: Order) => void;
   onWithdraw: (id: string) => void;
 }) {
+  const { t } = useLanguage();
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -183,13 +192,13 @@ function OrderSection({
         <div style={{ background: T.card, borderRadius: "0 0 10px 10px", border: `1px solid ${borderColor}`, borderTop: "none", overflow: "hidden" }}>
           {orders.length === 0 ? (
             <div style={{ padding: "28px 16px", textAlign: "center", color: T.textLight, fontSize: 13 }}>
-              Aucune commande dans cette section
+              {t("orders.no_orders_in_section", "Aucune commande dans cette section")}
             </div>
           ) : (
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
                 <tr style={{ background: "#f8f9fb" }}>
-                  {["# Commande", "Date", "Client", "Motif", "Montant total", "Destination", "État", ""].map(h => (
+                  {[t("orders.order_number", "# Commande"), t("date"), t("client"), t("orders.motif"), t("orders.total_amount", "Montant total"), t("orders.destination"), t("orders.status_header", "État"), ""].map(h => (
                     <th key={h} style={{ padding: "9px 16px", textAlign: "left", fontWeight: 700, fontSize: 11, textTransform: "uppercase", letterSpacing: 0.3, color: T.textLight, borderBottom: `1px solid ${T.border}` }}>{h}</th>
                   ))}
                 </tr>
@@ -214,6 +223,7 @@ function OrderSection({
 }
 
 export default function OrdersPage({ onNewOrder, orders, onRemoveOrder, onUpdateOrder }: Props) {
+  const { t } = useLanguage();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [withdrawTarget, setWithdrawTarget] = useState<Order | null>(null);
   const [filterDateFrom, setFilterDateFrom] = useState("");
@@ -282,8 +292,8 @@ export default function OrdersPage({ onNewOrder, orders, onRemoveOrder, onUpdate
       <style>{pulseStyle}</style>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <div>
-          <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 800 }}>Commandes</h2>
-          <p style={{ margin: 0, color: T.textMid, fontSize: 14 }}>{filtered.length} commande(s)</p>
+          <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 800 }}>{t("nav.orders", "Commandes")}</h2>
+          <p style={{ margin: 0, color: T.textMid, fontSize: 14 }}>{filtered.length} {t("orders.count_label", "commande(s)")}</p>
         </div>
         <button
           onClick={onNewOrder}
@@ -294,7 +304,7 @@ export default function OrdersPage({ onNewOrder, orders, onRemoveOrder, onUpdate
             animation: "orderBtnPulse 2.5s ease-in-out infinite",
           }}
         >
-          + PASSER UNE COMMANDE
+          + {t("orders.place_order", "PASSER UNE COMMANDE")}
         </button>
       </div>
 
@@ -312,8 +322,8 @@ export default function OrdersPage({ onNewOrder, orders, onRemoveOrder, onUpdate
               <polyline points="10 9 9 9 8 9"/>
             </svg>
           </div>
-          <div style={{ fontSize: 17, fontWeight: 700, color: T.text, marginBottom: 8 }}>Aucune commande</div>
-          <div style={{ fontSize: 13, color: T.textMid, marginBottom: 28 }}>Cliquez sur PASSER UNE COMMANDE pour commencer</div>
+          <div style={{ fontSize: 17, fontWeight: 700, color: T.text, marginBottom: 8 }}>{t("orders.no_orders")}</div>
+          <div style={{ fontSize: 13, color: T.textMid, marginBottom: 28 }}>{t("orders.click_to_start", "Cliquez sur PASSER UNE COMMANDE pour commencer")}</div>
           <button
             onClick={onNewOrder}
             style={{
@@ -322,7 +332,7 @@ export default function OrdersPage({ onNewOrder, orders, onRemoveOrder, onUpdate
               fontFamily: "inherit", animation: "orderBtnPulse 2.5s ease-in-out infinite",
             }}
           >
-            + PASSER UNE COMMANDE
+            + {t("orders.place_order", "PASSER UNE COMMANDE")}
           </button>
         </div>
       ) : (
@@ -330,44 +340,44 @@ export default function OrdersPage({ onNewOrder, orders, onRemoveOrder, onUpdate
           <div style={{ background: T.card, borderRadius: 12, border: `1px solid ${T.border}`, padding: 16, marginBottom: 20 }}>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-end" }}>
               <div style={{ flex: "1 1 180px" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>Date début</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>{t("orders.date_from", "Date début")}</div>
                 <input type="date" value={filterDateFrom} onChange={e => setFilterDateFrom(e.target.value)} style={inputStyle} />
               </div>
               <div style={{ flex: "1 1 180px" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>Date fin</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>{t("orders.date_to", "Date fin")}</div>
                 <input type="date" value={filterDateTo} onChange={e => setFilterDateTo(e.target.value)} style={inputStyle} />
               </div>
               <div style={{ flex: "1 1 120px" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>Montant min</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>{t("orders.amount_min", "Montant min")}</div>
                 <input type="number" placeholder="0" value={filterAmtMin} onChange={e => setFilterAmtMin(e.target.value)} style={inputStyle} />
               </div>
               <div style={{ flex: "1 1 120px" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>Montant max</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>{t("orders.amount_max", "Montant max")}</div>
                 <input type="number" placeholder="∞" value={filterAmtMax} onChange={e => setFilterAmtMax(e.target.value)} style={inputStyle} />
               </div>
               <div style={{ flex: "1 1 160px" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>Motif</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>{t("orders.motif")}</div>
                 <select value={filterMotif} onChange={e => setFilterMotif(e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
-                  <option value="">Tous</option>
+                  <option value="">{t("all")}</option>
                   {["Restock", "Dropship client", "Sample", "Gros client", "Autre"].map(m => (
                     <option key={m} value={m}>{m}</option>
                   ))}
                 </select>
               </div>
               <div style={{ flex: "1 1 140px" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>Code postal</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>{t("orders.postal_code", "Code postal")}</div>
                 <input placeholder="H3A, 98101..." value={filterZip} onChange={e => setFilterZip(e.target.value)} style={inputStyle} />
               </div>
               <div style={{ flex: "1 1 160px" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>Client</div>
-                <input placeholder="Nom du client..." value={filterClient} onChange={e => setFilterClient(e.target.value)} style={inputStyle} />
+                <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>{t("client")}</div>
+                <input placeholder={t("orders.client_name_placeholder", "Nom du client...")} value={filterClient} onChange={e => setFilterClient(e.target.value)} style={inputStyle} />
               </div>
               <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
                 <button onClick={applyFilters} style={{ background: T.main, color: "#fff", border: "none", borderRadius: 8, padding: "9px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}>
-                  Filtrer
+                  {t("filter")}
                 </button>
                 <button onClick={resetFilters} style={{ background: "#f4f5f9", color: T.textMid, border: `1px solid ${T.border}`, borderRadius: 8, padding: "9px 14px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}>
-                  Réinitialiser
+                  {t("reset")}
                 </button>
               </div>
             </div>
@@ -376,7 +386,7 @@ export default function OrdersPage({ onNewOrder, orders, onRemoveOrder, onUpdate
           {sections.map(s => (
             <OrderSection
               key={s.key}
-              label={s.label}
+              label={t(s.labelKey, s.labelFallback)}
               orders={s.orders}
               color={s.color}
               bg={s.bg}

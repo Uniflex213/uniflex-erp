@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { SaleProduct, SaleProductImage, SaleProductFile } from "../sales/productTypes";
 import { supabase } from "../supabaseClient";
 import { T } from "../theme";
+import { useLanguage } from "../i18n/LanguageContext";
 import { CloseIcon } from "./productIcons";
 import { FormState, emptyForm, uploadFile } from "./productFormTypes";
 import ProductFormBody from "./ProductFormBody";
 
 export default function AddProductModal({ onClose, onSave }: { onClose: () => void; onSave: (p: SaleProduct) => void }) {
+  const { t } = useLanguage();
   const [form, setForm] = useState<FormState>(emptyForm());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +35,7 @@ export default function AddProductModal({ onClose, onSave }: { onClose: () => vo
         .select()
         .single();
 
-      if (insertError || !product) throw new Error(insertError?.message || "Erreur lors de la création");
+      if (insertError || !product) throw new Error(insertError?.message || t("products.create_error", "Erreur lors de la création"));
 
       const pid = product.id as string;
       const images: SaleProductImage[] = [];
@@ -82,7 +84,7 @@ export default function AddProductModal({ onClose, onSave }: { onClose: () => vo
       };
       onSave(newProduct);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Une erreur est survenue");
+      setError(err instanceof Error ? err.message : t("products.generic_error", "Une erreur est survenue"));
       setSaving(false);
     }
   };
@@ -104,8 +106,8 @@ export default function AddProductModal({ onClose, onSave }: { onClose: () => vo
       }}>
         <div style={{ padding: "18px 24px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <div>
-            <div style={{ fontSize: 16, fontWeight: 800, color: T.text }}>Ajouter un produit</div>
-            <div style={{ fontSize: 12, color: T.textMid, marginTop: 2 }}>Remplissez les informations du nouveau produit</div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: T.text }}>{t("products.add", "Ajouter un produit")}</div>
+            <div style={{ fontSize: 12, color: T.textMid, marginTop: 2 }}>{t("products.fill_info", "Remplissez les informations du nouveau produit")}</div>
           </div>
           <button onClick={onClose} style={{ background: T.cardAlt, border: `1px solid ${T.silverLight}`, borderRadius: 8, width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: T.textMid }}>
             <CloseIcon />
@@ -130,7 +132,7 @@ export default function AddProductModal({ onClose, onSave }: { onClose: () => vo
                 borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", color: T.textMid, fontFamily: "inherit",
               }}
             >
-              Annuler
+              {t("cancel", "Annuler")}
             </button>
             <button
               onClick={handleSave}
@@ -141,7 +143,7 @@ export default function AddProductModal({ onClose, onSave }: { onClose: () => vo
                 opacity: saving || !form.name.trim() ? 0.6 : 1, transition: "opacity 0.15s",
               }}
             >
-              {saving ? "Enregistrement..." : "Enregistrer le produit"}
+              {saving ? t("products.saving", "Enregistrement...") : t("products.save_product", "Enregistrer le produit")}
             </button>
           </div>
         </div>

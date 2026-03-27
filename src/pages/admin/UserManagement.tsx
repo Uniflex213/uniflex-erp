@@ -8,6 +8,7 @@ import CreateUserModal from "./CreateUserModal";
 import SuspendModal from "./SuspendModal";
 import EditUserPanel from "./EditUserPanel";
 import { T } from "../../theme";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 const ROLE_LABELS: Record<string, string> = { god_admin: "God Admin", admin: "Admin", vendeur: "Vendeur", manuf: "Manuf", magasin: "Magasin" };
 const ROLE_COLORS: Record<string, string> = { god_admin: "#dc2626", admin: "#111", vendeur: "#2563eb", manuf: "#059669", magasin: "#d97706" };
@@ -18,9 +19,10 @@ function RoleBadge({ role }: { role: string }) {
 }
 
 function StatusBadge({ profile }: { profile: AdminProfile }) {
-  if (!profile.is_active) return <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 4, background: "#f3f4f6", color: T.light }}>Inactif</span>;
-  if (profile.is_suspended) return <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 4, background: "#fef3c7", color: T.orange }}>Suspendu</span>;
-  return <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 4, background: "#d1fae5", color: T.green }}>Actif</span>;
+  const { t } = useLanguage();
+  if (!profile.is_active) return <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 4, background: "#f3f4f6", color: T.light }}>{t("status.inactive", "Inactif")}</span>;
+  if (profile.is_suspended) return <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 4, background: "#fef3c7", color: T.orange }}>{t("status.suspended", "Suspendu")}</span>;
+  return <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 4, background: "#d1fae5", color: T.green }}>{t("status.active", "Actif")}</span>;
 }
 
 function Avatar({ name, avatarUrl, size = 32 }: { name: string; avatarUrl?: string | null; size?: number }) {
@@ -34,6 +36,7 @@ function IconBtn({ onClick, title, color = "#6b7280", children }: { onClick: () 
 }
 
 export default function UserManagement() {
+  const { t } = useLanguage();
   const { user, session, can } = useAuth();
   const [tab, setTab] = useState<"users" | "requests" | "teams">("users");
   const [users, setUsers] = useState<AdminProfile[]>([]);
@@ -75,7 +78,7 @@ export default function UserManagement() {
   };
 
   if (!can("admin.users.view")) {
-    return <div style={{ padding: 40, textAlign: "center", color: T.mid }}>Accès non autorisé.</div>;
+    return <div style={{ padding: 40, textAlign: "center", color: T.mid }}>{t("users.access_denied", "Accès non autorisé.")}</div>;
   }
 
   const filtered = users.filter((u) => {
@@ -138,16 +141,16 @@ export default function UserManagement() {
   return (
     <div style={{ fontFamily: "'Outfit', sans-serif", maxWidth: 1100, margin: "0 auto" }}>
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 800, color: "#fff", margin: 0 }}>Gestion des utilisateurs</h1>
-        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", marginTop: 4 }}>Gérez les comptes, les demandes et les équipes</p>
+        <h1 style={{ fontSize: 28, fontWeight: 800, color: "#fff", margin: 0 }}>{t("users.title", "Gestion des utilisateurs")}</h1>
+        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", marginTop: 4 }}>{t("users.manage_subtitle", "Gérez les comptes, les demandes et les équipes")}</p>
       </div>
 
       <div style={{ background: T.bgCard, borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
         <div style={{ display: "flex", borderBottom: `1px solid ${T.border}`, padding: "0 8px" }}>
-          {(["users", "requests", "teams"] as const).map((t) => (
-            <button key={t} onClick={() => setTab(t)} style={{ padding: "16px 20px", border: "none", background: "none", cursor: "pointer", fontSize: 14, fontWeight: tab === t ? 600 : 400, color: tab === t ? T.main : T.mid, borderBottom: tab === t ? `2px solid ${T.main}` : "2px solid transparent", display: "flex", alignItems: "center", gap: 6 }}>
-              {t === "users" ? "Utilisateurs" : t === "requests" ? "Demandes" : "Équipes"}
-              {t === "requests" && pendingRequests.length > 0 && (
+          {(["users", "requests", "teams"] as const).map((tabKey) => (
+            <button key={tabKey} onClick={() => setTab(tabKey)} style={{ padding: "16px 20px", border: "none", background: "none", cursor: "pointer", fontSize: 14, fontWeight: tab === tabKey ? 600 : 400, color: tab === tabKey ? T.main : T.mid, borderBottom: tab === tabKey ? `2px solid ${T.main}` : "2px solid transparent", display: "flex", alignItems: "center", gap: 6 }}>
+              {tabKey === "users" ? t("user", "Utilisateurs") : tabKey === "requests" ? t("users.access_requests", "Demandes") : t("team", "Équipes")}
+              {tabKey === "requests" && pendingRequests.length > 0 && (
                 <span style={{ background: T.red, color: "#fff", fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: 10 }}>{pendingRequests.length}</span>
               )}
             </button>
@@ -160,26 +163,26 @@ export default function UserManagement() {
               <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
                 <div style={{ flex: 1, minWidth: 200, position: "relative" }}>
                   <Search size={14} color={T.light} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)" }} />
-                  <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher..." style={{ width: "100%", padding: "8px 12px 8px 32px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, boxSizing: "border-box", outline: "none" }} />
+                  <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("common.search", "Rechercher...")} style={{ width: "100%", padding: "8px 12px 8px 32px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, boxSizing: "border-box", outline: "none" }} />
                 </div>
                 <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} style={{ padding: "8px 12px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, background: T.bgCard }}>
-                  <option value="">Tous les rôles</option>
+                  <option value="">{t("users.all_roles", "Tous les rôles")}</option>
                   {["god_admin", "admin", "vendeur", "manuf", "magasin"].map((r) => <option key={r} value={r}>{ROLE_LABELS[r]}</option>)}
                 </select>
                 {can("admin.users.create") && (
                   <button onClick={() => { setPrefill(undefined); setShowCreate(true); }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, border: "none", background: T.main, color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
-                    <Plus size={14} /> Nouvel utilisateur
+                    <Plus size={14} /> {t("users.new_user", "Nouvel utilisateur")}
                   </button>
                 )}
               </div>
               {loading ? (
-                <div style={{ padding: 40, textAlign: "center", color: T.mid }}>Chargement...</div>
+                <div style={{ padding: 40, textAlign: "center", color: T.mid }}>{t("common.loading", "Chargement...")}</div>
               ) : (
                 <div style={{ overflowX: "auto" }}>
                   <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                     <thead>
                       <tr style={{ borderBottom: `1px solid ${T.border}` }}>
-                        {["Utilisateur", "Rôle", "Code", "Statut", "Dernière connexion", ""].map((h) => (
+                        {[t("users.user", "Utilisateur"), t("users.role", "Rôle"), t("users.code", "Code"), t("users.status", "Statut"), t("users.last_login", "Dernière connexion"), ""].map((h) => (
                           <th key={h} style={{ padding: "8px 12px", textAlign: "left", fontSize: 11, fontWeight: 600, color: T.mid, whiteSpace: "nowrap" }}>{h}</th>
                         ))}
                       </tr>
@@ -199,17 +202,17 @@ export default function UserManagement() {
                           <td style={{ padding: "12px" }}><RoleBadge role={u.role} /></td>
                           <td style={{ padding: "12px", color: T.mid }}>{u.seller_code || "—"}</td>
                           <td style={{ padding: "12px" }}><StatusBadge profile={u} /></td>
-                          <td style={{ padding: "12px", color: T.mid, fontSize: 12 }}>{u.last_login_at ? new Date(u.last_login_at).toLocaleDateString("fr-CA") : "Jamais"}</td>
+                          <td style={{ padding: "12px", color: T.mid, fontSize: 12 }}>{u.last_login_at ? new Date(u.last_login_at).toLocaleDateString("fr-CA") : t("users.never", "Jamais")}</td>
                           <td style={{ padding: "12px" }}>
                             <div style={{ display: "flex", gap: 4 }}>
-                              {can("admin.users.edit") && <IconBtn onClick={() => setEditTarget(u)} title="Modifier"><Edit2 size={13} /></IconBtn>}
-                              {can("admin.users.suspend") && <IconBtn onClick={() => setSuspendTarget(u)} title={u.is_suspended ? "Lever" : "Suspendre"} color={u.is_suspended ? T.green : T.orange}><Shield size={13} /></IconBtn>}
-                              {can("admin.users.delete") && <IconBtn onClick={() => handleDelete(u)} title="Désactiver" color={T.red}><Trash2 size={13} /></IconBtn>}
+                              {can("admin.users.edit") && <IconBtn onClick={() => setEditTarget(u)} title={t("common.edit", "Modifier")}><Edit2 size={13} /></IconBtn>}
+                              {can("admin.users.suspend") && <IconBtn onClick={() => setSuspendTarget(u)} title={u.is_suspended ? t("users.unsuspend", "Lever") : t("users.suspend", "Suspendre")} color={u.is_suspended ? T.green : T.orange}><Shield size={13} /></IconBtn>}
+                              {can("admin.users.delete") && <IconBtn onClick={() => handleDelete(u)} title={t("users.deactivate", "Désactiver")} color={T.red}><Trash2 size={13} /></IconBtn>}
                             </div>
                           </td>
                         </tr>
                       ))}
-                      {filtered.length === 0 && <tr><td colSpan={6} style={{ padding: 32, textAlign: "center", color: T.mid }}>Aucun utilisateur trouvé.</td></tr>}
+                      {filtered.length === 0 && <tr><td colSpan={6} style={{ padding: 32, textAlign: "center", color: T.mid }}>{t("users.no_users_found", "Aucun utilisateur trouvé.")}</td></tr>}
                     </tbody>
                   </table>
                 </div>
@@ -218,7 +221,7 @@ export default function UserManagement() {
           )}
 
           {tab === "requests" && (
-            loading ? <div style={{ padding: 40, textAlign: "center", color: T.mid }}>Chargement...</div> : requests.length === 0 ? <div style={{ padding: 40, textAlign: "center", color: T.mid }}>Aucune demande.</div> : (
+            loading ? <div style={{ padding: 40, textAlign: "center", color: T.mid }}>{t("common.loading", "Chargement...")}</div> : requests.length === 0 ? <div style={{ padding: 40, textAlign: "center", color: T.mid }}>{t("users.no_requests", "Aucune demande.")}</div> : (
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {requests.map((req) => (
                   <div key={req.id} style={{ border: `1px solid ${T.border}`, borderRadius: 12, padding: 16, display: "flex", alignItems: "flex-start", gap: 16 }}>
@@ -229,14 +232,14 @@ export default function UserManagement() {
                         <span style={{ fontSize: 11, padding: "1px 8px", borderRadius: 4, fontWeight: 600, background: req.status === "pending" ? "#fef3c7" : req.status === "approved" ? "#d1fae5" : "#fee2e2", color: req.status === "pending" ? T.orange : req.status === "approved" ? T.green : T.red }}>{req.status}</span>
                       </div>
                       <div style={{ fontSize: 12, color: T.mid }}>{req.email} {req.phone && `· ${req.phone}`} {req.company && `· ${req.company}`}</div>
-                      {req.role_requested && <div style={{ fontSize: 12, color: T.mid, marginTop: 2 }}>Rôle: <strong>{req.role_requested}</strong></div>}
+                      {req.role_requested && <div style={{ fontSize: 12, color: T.mid, marginTop: 2 }}>{t("users.role", "Rôle")}: <strong>{req.role_requested}</strong></div>}
                       {req.message && <div style={{ fontSize: 12, color: T.text, marginTop: 6, background: "rgba(0,0,0,0.03)", borderRadius: 6, padding: "6px 10px" }}>{req.message}</div>}
                       <div style={{ fontSize: 11, color: T.light, marginTop: 6 }}>{new Date(req.created_at).toLocaleDateString("fr-CA", { day: "numeric", month: "long", year: "numeric" })}</div>
                     </div>
                     {req.status === "pending" && can("admin.account_requests.approve") && (
                       <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-                        <button onClick={() => handleApproveRequest(req)} style={{ display: "flex", alignItems: "center", gap: 4, padding: "6px 12px", borderRadius: 8, border: "none", background: T.main, color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}><Check size={13} /> Approuver</button>
-                        <button onClick={() => setRejectTarget(req)} style={{ display: "flex", alignItems: "center", gap: 4, padding: "6px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, color: T.red, fontSize: 12, fontWeight: 600, cursor: "pointer" }}><X size={13} /> Rejeter</button>
+                        <button onClick={() => handleApproveRequest(req)} style={{ display: "flex", alignItems: "center", gap: 4, padding: "6px 12px", borderRadius: 8, border: "none", background: T.main, color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}><Check size={13} /> {t("users.approve", "Approuver")}</button>
+                        <button onClick={() => setRejectTarget(req)} style={{ display: "flex", alignItems: "center", gap: 4, padding: "6px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, color: T.red, fontSize: 12, fontWeight: 600, cursor: "pointer" }}><X size={13} /> {t("users.reject", "Rejeter")}</button>
                       </div>
                     )}
                   </div>
@@ -248,13 +251,13 @@ export default function UserManagement() {
           {tab === "teams" && (
             <>
               <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
-                {can("admin.teams.create") && <button onClick={() => setShowCreateTeam(true)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, border: "none", background: T.main, color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer" }}><Plus size={14} /> Nouvelle équipe</button>}
+                {can("admin.teams.create") && <button onClick={() => setShowCreateTeam(true)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, border: "none", background: T.main, color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer" }}><Plus size={14} /> {t("users.new_team", "Nouvelle équipe")}</button>}
               </div>
               {showCreateTeam && (
                 <div style={{ background: "rgba(0,0,0,0.03)", border: `1px solid ${T.border}`, borderRadius: 10, padding: 16, marginBottom: 16, display: "flex", gap: 10 }}>
-                  <input value={newTeamName} onChange={(e) => setNewTeamName(e.target.value)} placeholder="Nom de l'équipe" style={{ flex: 1, padding: "8px 12px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 14 }} />
-                  <button onClick={handleCreateTeam} style={{ padding: "8px 16px", borderRadius: 8, border: "none", background: T.main, color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Créer</button>
-                  <button onClick={() => setShowCreateTeam(false)} style={{ padding: "8px 16px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, fontSize: 13, cursor: "pointer" }}>Annuler</button>
+                  <input value={newTeamName} onChange={(e) => setNewTeamName(e.target.value)} placeholder={t("users.team_name", "Nom de l'équipe")} style={{ flex: 1, padding: "8px 12px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 14 }} />
+                  <button onClick={handleCreateTeam} style={{ padding: "8px 16px", borderRadius: 8, border: "none", background: T.main, color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>{t("common.create", "Créer")}</button>
+                  <button onClick={() => setShowCreateTeam(false)} style={{ padding: "8px 16px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, fontSize: 13, cursor: "pointer" }}>{t("cancel", "Annuler")}</button>
                 </div>
               )}
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -270,7 +273,7 @@ export default function UserManagement() {
                     </div>
                     {expandedTeam === team.id && (
                       <div style={{ borderTop: `1px solid ${T.border}`, padding: 16 }}>
-                        {(teamMembers[team.id] ?? []).length === 0 ? <p style={{ fontSize: 13, color: T.mid, margin: 0 }}>Aucun membre.</p> : (
+                        {(teamMembers[team.id] ?? []).length === 0 ? <p style={{ fontSize: 13, color: T.mid, margin: 0 }}>{t("users.no_members", "Aucun membre.")}</p> : (
                           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                             {(teamMembers[team.id] ?? []).map((m) => (
                               <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -285,7 +288,7 @@ export default function UserManagement() {
                     )}
                   </div>
                 ))}
-                {teams.length === 0 && <div style={{ padding: 32, textAlign: "center", color: T.mid }}>Aucune équipe configurée.</div>}
+                {teams.length === 0 && <div style={{ padding: 32, textAlign: "center", color: T.mid }}>{t("users.no_teams", "Aucune équipe configurée.")}</div>}
               </div>
             </>
           )}
@@ -300,7 +303,7 @@ export default function UserManagement() {
           <style>{`@keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }`}</style>
           <div style={{ padding: "20px 24px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
-              <div style={{ fontSize: 16, fontWeight: 800, color: T.text }}>Demande d'accès</div>
+              <div style={{ fontSize: 16, fontWeight: 800, color: T.text }}>{t("users.access_request", "Demande d'accès")}</div>
               <div style={{ fontSize: 11, color: T.mid, marginTop: 2 }}>Reçue le {new Date(reviewTarget.created_at).toLocaleDateString("fr-CA", { day: "numeric", month: "long", year: "numeric" })}</div>
             </div>
             <button onClick={() => setReviewTarget(null)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 18, color: T.mid, padding: 4 }}>✕</button>
@@ -313,11 +316,11 @@ export default function UserManagement() {
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {[
-                ["Téléphone", reviewTarget.phone],
-                ["Entreprise", reviewTarget.company],
-                ["Rôle demandé", reviewTarget.role_requested],
-                ["Code magasin", reviewTarget.store_code_requested],
-                ["Zone", [reviewTarget.city, reviewTarget.province, reviewTarget.country].filter(Boolean).join(", ")],
+                [t("auth.phone", "Téléphone"), reviewTarget.phone],
+                [t("auth.company", "Entreprise"), reviewTarget.company],
+                [t("users.requested_role", "Rôle demandé"), reviewTarget.role_requested],
+                [t("users.store_code", "Code magasin"), reviewTarget.store_code_requested],
+                [t("auth.zone", "Zone"), [reviewTarget.city, reviewTarget.province, reviewTarget.country].filter(Boolean).join(", ")],
               ].filter(([, v]) => v).map(([label, value]) => (
                 <div key={label as string} style={{ background: "rgba(0,0,0,0.03)", border: `1px solid ${T.border}`, borderRadius: 10, padding: "12px 16px" }}>
                   <div style={{ fontSize: 10, fontWeight: 700, color: T.light, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>{label}</div>
@@ -333,19 +336,19 @@ export default function UserManagement() {
             </div>
           </div>
           <div style={{ padding: "16px 24px", borderTop: `1px solid ${T.border}`, display: "flex", gap: 10 }}>
-            <button onClick={() => { setReviewTarget(null); setRejectTarget(reviewTarget); }} style={{ flex: 1, padding: "10px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, color: T.red, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>Rejeter</button>
-            <button onClick={proceedFromReview} style={{ flex: 1, padding: "10px", borderRadius: 8, border: "none", background: T.main, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Créer le compte</button>
+            <button onClick={() => { setReviewTarget(null); setRejectTarget(reviewTarget); }} style={{ flex: 1, padding: "10px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, color: T.red, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>{t("users.reject", "Rejeter")}</button>
+            <button onClick={proceedFromReview} style={{ flex: 1, padding: "10px", borderRadius: 8, border: "none", background: T.main, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>{t("users.create_account", "Créer le compte")}</button>
           </div>
         </div>
       )}
       {rejectTarget && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
           <div style={{ background: T.bgCard, borderRadius: 16, width: 400, padding: 24, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
-            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, color: T.text }}>Rejeter la demande</h3>
-            <textarea value={rejectNote} onChange={(e) => setRejectNote(e.target.value)} placeholder="Note (optionnel)" rows={3} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 14, resize: "none", boxSizing: "border-box", marginBottom: 16 }} />
+            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, color: T.text }}>{t("users.reject_request", "Rejeter la demande")}</h3>
+            <textarea value={rejectNote} onChange={(e) => setRejectNote(e.target.value)} placeholder={t("users.note_optional", "Note (optionnel)")} rows={3} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 14, resize: "none", boxSizing: "border-box", marginBottom: 16 }} />
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-              <button onClick={() => setRejectTarget(null)} style={{ padding: "9px 20px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, fontSize: 14, cursor: "pointer" }}>Annuler</button>
-              <button onClick={handleRejectRequest} style={{ padding: "9px 20px", borderRadius: 8, border: "none", background: T.red, color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Rejeter</button>
+              <button onClick={() => setRejectTarget(null)} style={{ padding: "9px 20px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, fontSize: 14, cursor: "pointer" }}>{t("cancel", "Annuler")}</button>
+              <button onClick={handleRejectRequest} style={{ padding: "9px 20px", borderRadius: 8, border: "none", background: T.red, color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>{t("users.reject", "Rejeter")}</button>
             </div>
           </div>
         </div>

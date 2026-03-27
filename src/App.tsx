@@ -13,6 +13,7 @@ import { supabase } from "./supabaseClient";
 import { T } from "./theme";
 import SphereBackground from "./components/SphereBackground";
 import NotificationDropdown from "./components/NotificationDropdown";
+import { useLanguage } from "./i18n/LanguageContext";
 
 // Lazy-loaded pages (code-splitting)
 const ProductsPage = React.lazy(() => import("./ProductsPage"));
@@ -66,7 +67,7 @@ const PageLoader = () => (
   <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 300, color: T.textMid }}>
     <div style={{ textAlign: "center" }}>
       <div style={{ width: 28, height: 28, border: `2px solid ${T.border}`, borderTop: `2px solid ${T.main}`, borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 12px" }} />
-      <span style={{ fontSize: 11, letterSpacing: "0.04em" }}>Chargement...</span>
+      <span style={{ fontSize: 11, letterSpacing: "0.04em" }}>Loading...</span>
     </div>
   </div>
 );
@@ -126,61 +127,63 @@ type MenuItem = {
   permission?: string;
 };
 
-const MENU: MenuItem[] = [
-  {key:"dashboards",label:"Dashboards",icon:<I.dash/>,subs:[
-    {key:"dash_company",label:"Dashboard Compagnie",icon:<I.building/>,permission:"dashboard.company.view"},
-    {key:"dash_user",label:"Dashboard Personnel",icon:<I.user/>,permission:"dashboard.personal.view"},
-  ]},
-  {key:"ventes",label:"Ventes / Outils de vente",icon:<I.tag/>,subs:[
-    {key:"products",label:"Produits",icon:<I.cube/>,permission:"ventes.products.view"},
-    {key:"pricelist",label:"Pricelist Generator",icon:<I.tag/>,permission:"ventes.pricelist.view"},
-    {key:"margin_calculator",label:"Margin Calculator",icon:<I.dollar/>,permission:"ventes.margin_calculator.view"},
-  ]},
-  {key:"sales_performance",label:"Sales Performance",icon:<I.salesperf/>,subs:[
-    {key:"orders",label:"Commandes",icon:<I.order/>,permission:"ventes.orders.view_own"},
-    {key:"crm_pipeline_team",label:"CRM Pipeline Team",icon:<I.pipeline/>,permission:"performance.pipeline_team.view"},
-    {key:"personal_workstation",label:"Personal Workstation",icon:<I.workstation/>,permission:"performance.workstation.view"},
-    {key:"calendar",label:"Calendar",icon:<I.calendar/>,permission:"performance.calendar.view"},
-    {key:"my_team",label:"My Team",icon:<I.myteam/>,permission:"performance.my_team.view"},
-    {key:"my_clients",label:"My Clients",icon:<I.myclients/>,permission:"performance.my_clients.view"},
-    {key:"admin_samples",label:"Samples",icon:<I.sample/>,permission:"ventes.samples.view_own"},
-    {key:"commission_calculee",label:"Commissions",icon:<I.chart/>,permission:"performance.commission.view"},
-    {key:"team_leader_dashboard",label:"Chef d'Équipe",icon:<I.myteam/>,permission:"performance.team_leader.manage"},
-    {key:"team_prices",label:"Team Prices",icon:<I.tag/>,permission:"performance.team_prices.view"},
-    {key:"team_benefice",label:"Bénéfice Équipe",icon:<I.profitIcon/>,permission:"performance.team_benefice.view"},
-  ]},
-  {key:"store_ops",label:"Store OPS",icon:<I.store/>,subs:[
-    {key:"pickup_tickets",label:"Pickup Tickets",icon:<I.ticketIcon/>,permission:"storeops.pickup_tickets.view"},
-    {key:"inventaire_store",label:"Inventaire",icon:<I.box/>,permission:"storeops.inventory.view"},
-    {key:"store_prices",label:"Store Prices",icon:<I.priceTag/>,permission:"storeops.prices.view"},
-    {key:"benefice_magasin",label:"Benefice Magasin",icon:<I.profitIcon/>,permission:"storeops.benefice.view"},
-  ]},
-  {key:"disputes",label:"Disputes & Litiges",icon:<I.shield/>,permission:"disputes.view_own"},
-  {key:"admin_orders",label:"Commandes (Admin)",icon:<I.order/>,permission:"ventes.orders.view_all"},
-  {key:"to_invoice",label:"To Invoice (Admin)",icon:<I.invoiceIcon/>,permission:"storeops.to_invoice.view"},
-  {key:"admin_samples",label:"Samples (Admin)",icon:<I.sample/>,permission:"ventes.samples.view_all"},
-  {key:"admin_clients",label:"Clients (Admin)",icon:<I.users/>,permission:"performance.my_clients.manage"},
-  {key:"admin_teams",label:"Gestion d'equipes",icon:<I.myteam/>,permission:"admin.teams.view"},
-  {key:"admin_contests",label:"Concours",icon:<I.trophy/>,permission:"admin.users.view"},
-  {key:"admin_reports",label:"Rapports & Analytics",icon:<I.chart/>,permission:"reports.sales_analytics.view"},
-  {key:"manuf_section",label:"Vue Fabricant (SCI)",icon:<I.building/>,permission:"storeops.inventory.view",subs:[
-    {key:"manuf_dashboard",label:"Dashboard SCI",icon:<I.dash/>,permission:"storeops.inventory.view"},
-    {key:"manuf_inventory",label:"Inventaire",icon:<I.box/>,permission:"storeops.inventory.view"},
-    {key:"manuf_orders",label:"Commandes",icon:<I.order/>,permission:"ventes.orders.view_all"},
-    {key:"to_invoice",label:"A facturer",icon:<I.invoiceIcon/>,permission:"storeops.to_invoice.view"},
-    {key:"manuf_samples",label:"Echantillons",icon:<I.sample/>,permission:"ventes.samples.view_all"},
-    {key:"manuf_reports",label:"Rapports SCI",icon:<I.chart/>,permission:"reports.financial.view"},
-  ]},
-  {key:"admin_section",label:"Administration",icon:<I.shield/>,permission:"admin.users.view",subs:[
-    {key:"admin_users",label:"Gestion utilisateurs",icon:<I.users/>,permission:"admin.users.view"},
-    {key:"admin_stores",label:"Gestion Magasins",icon:<I.store/>,permission:"admin.stores.view"},
-    {key:"admin_dashboard",label:"Admin Dashboard",icon:<I.dash/>,permission:"admin.users.view"},
-    {key:"admin_logbook",label:"Logbook Compagnie",icon:<I.chart/>,permission:"admin.logbook.view"},
-    {key:"admin_messaging",label:"Regles messagerie",icon:<I.msg/>,permission:"admin.users.view"},
-    {key:"admin_email_settings",label:"Parametres email",icon:<I.mail/>,permission:"admin.users.view"},
-  ]},
-  {key:"settings",label:"Parametres",icon:<I.gear/>},
-];
+function buildMenu(t: (k: string, fb?: string) => string): MenuItem[] {
+  return [
+    {key:"dashboards",label:t("nav.dashboards","Dashboards"),icon:<I.dash/>,subs:[
+      {key:"dash_company",label:t("nav.dashboard_company"),icon:<I.building/>,permission:"dashboard.company.view"},
+      {key:"dash_user",label:t("nav.dashboard_personal"),icon:<I.user/>,permission:"dashboard.personal.view"},
+    ]},
+    {key:"ventes",label:t("nav.sales_tools"),icon:<I.tag/>,subs:[
+      {key:"products",label:t("nav.products"),icon:<I.cube/>,permission:"ventes.products.view"},
+      {key:"pricelist",label:t("nav.pricelist"),icon:<I.tag/>,permission:"ventes.pricelist.view"},
+      {key:"margin_calculator",label:t("nav.margin_calculator","Margin Calculator"),icon:<I.dollar/>,permission:"ventes.margin_calculator.view"},
+    ]},
+    {key:"sales_performance",label:t("nav.sales_performance","Sales Performance"),icon:<I.salesperf/>,subs:[
+      {key:"orders",label:t("nav.orders"),icon:<I.order/>,permission:"ventes.orders.view_own"},
+      {key:"crm_pipeline_team",label:t("nav.crm"),icon:<I.pipeline/>,permission:"performance.pipeline_team.view"},
+      {key:"personal_workstation",label:t("nav.workstation","Personal Workstation"),icon:<I.workstation/>,permission:"performance.workstation.view"},
+      {key:"calendar",label:t("nav.calendar"),icon:<I.calendar/>,permission:"performance.calendar.view"},
+      {key:"my_team",label:t("nav.my_team","My Team"),icon:<I.myteam/>,permission:"performance.my_team.view"},
+      {key:"my_clients",label:t("nav.my_clients"),icon:<I.myclients/>,permission:"performance.my_clients.view"},
+      {key:"admin_samples",label:t("nav.samples"),icon:<I.sample/>,permission:"ventes.samples.view_own"},
+      {key:"commission_calculee",label:t("nav.commissions","Commissions"),icon:<I.chart/>,permission:"performance.commission.view"},
+      {key:"team_leader_dashboard",label:t("nav.team_lead"),icon:<I.myteam/>,permission:"performance.team_leader.manage"},
+      {key:"team_prices",label:t("nav.team_prices","Team Prices"),icon:<I.tag/>,permission:"performance.team_prices.view"},
+      {key:"team_benefice",label:t("nav.team_profit"),icon:<I.profitIcon/>,permission:"performance.team_benefice.view"},
+    ]},
+    {key:"store_ops",label:t("nav.store_ops","Store OPS"),icon:<I.store/>,subs:[
+      {key:"pickup_tickets",label:t("nav.pickup_tickets"),icon:<I.ticketIcon/>,permission:"storeops.pickup_tickets.view"},
+      {key:"inventaire_store",label:t("nav.store_inventory"),icon:<I.box/>,permission:"storeops.inventory.view"},
+      {key:"store_prices",label:t("nav.store_prices"),icon:<I.priceTag/>,permission:"storeops.prices.view"},
+      {key:"benefice_magasin",label:t("nav.store_profit","Store Profit"),icon:<I.profitIcon/>,permission:"storeops.benefice.view"},
+    ]},
+    {key:"disputes",label:t("nav.disputes"),icon:<I.shield/>,permission:"disputes.view_own"},
+    {key:"admin_orders",label:t("nav.admin_orders","Orders (Admin)"),icon:<I.order/>,permission:"ventes.orders.view_all"},
+    {key:"to_invoice",label:t("nav.to_invoice"),icon:<I.invoiceIcon/>,permission:"storeops.to_invoice.view"},
+    {key:"admin_samples",label:t("nav.admin_samples","Samples (Admin)"),icon:<I.sample/>,permission:"ventes.samples.view_all"},
+    {key:"admin_clients",label:t("nav.admin_clients","Clients (Admin)"),icon:<I.users/>,permission:"performance.my_clients.manage"},
+    {key:"admin_teams",label:t("nav.team_management"),icon:<I.myteam/>,permission:"admin.teams.view"},
+    {key:"admin_contests",label:t("nav.contests"),icon:<I.trophy/>,permission:"admin.users.view"},
+    {key:"admin_reports",label:t("nav.reports"),icon:<I.chart/>,permission:"reports.sales_analytics.view"},
+    {key:"manuf_section",label:t("nav.manufacturer"),icon:<I.building/>,permission:"storeops.inventory.view",subs:[
+      {key:"manuf_dashboard",label:t("nav.manuf_dashboard","Dashboard SCI"),icon:<I.dash/>,permission:"storeops.inventory.view"},
+      {key:"manuf_inventory",label:t("nav.store_inventory"),icon:<I.box/>,permission:"storeops.inventory.view"},
+      {key:"manuf_orders",label:t("nav.orders"),icon:<I.order/>,permission:"ventes.orders.view_all"},
+      {key:"to_invoice",label:t("nav.to_invoice"),icon:<I.invoiceIcon/>,permission:"storeops.to_invoice.view"},
+      {key:"manuf_samples",label:t("nav.samples"),icon:<I.sample/>,permission:"ventes.samples.view_all"},
+      {key:"manuf_reports",label:t("nav.sci_reports"),icon:<I.chart/>,permission:"reports.financial.view"},
+    ]},
+    {key:"admin_section",label:t("nav.administration","Administration"),icon:<I.shield/>,permission:"admin.users.view",subs:[
+      {key:"admin_users",label:t("nav.user_management"),icon:<I.users/>,permission:"admin.users.view"},
+      {key:"admin_stores",label:t("nav.store_management"),icon:<I.store/>,permission:"admin.stores.view"},
+      {key:"admin_dashboard",label:t("nav.admin_dashboard","Admin Dashboard"),icon:<I.dash/>,permission:"admin.users.view"},
+      {key:"admin_logbook",label:t("nav.logbook"),icon:<I.chart/>,permission:"admin.logbook.view"},
+      {key:"admin_messaging",label:t("nav.messaging_rules"),icon:<I.msg/>,permission:"admin.users.view"},
+      {key:"admin_email_settings",label:t("nav.email_settings"),icon:<I.mail/>,permission:"admin.users.view"},
+    ]},
+    {key:"settings",label:t("nav.settings"),icon:<I.gear/>},
+  ];
+}
 
 const OrdersVendeur = () => <OrdersController isAdmin={false} />;
 const OrdersAdmin = () => <OrdersController isAdmin={true} />;
@@ -399,6 +402,8 @@ function AppShell({ page, onLogout }: { page: string; navigate: (key: string, pr
   const { navigate, tabs, activeTabIndex } = useApp();
   const { profile, can, user } = useAuth();
   const { isSimulating } = useSimulation();
+  const { t, lang, setLang } = useLanguage();
+  const MENU = React.useMemo(() => buildMenu(t), [t]);
   const [showNotif, setShowNotif] = useState(false);
   const [showMessaging, setShowMessaging] = useState(false);
   const [msgUnread, setMsgUnread] = useState(0);
@@ -539,7 +544,7 @@ function AppShell({ page, onLogout }: { page: string; navigate: (key: string, pr
               <div style={{width:1,height:18,background:T.border}}/>
               <div style={{display:"flex",alignItems:"center",gap:8,background:"#fff",border:`1px solid ${T.border}`,borderRadius:100,padding:"6px 14px",width:220,transition:"border-color 0.2s"}}>
                 <I.search/>
-                <input placeholder="Rechercher..." style={{border:"none",background:"transparent",outline:"none",fontSize:12,width:"100%",fontFamily:"'Inter', sans-serif",color:T.text,letterSpacing:"-0.01em"}}/>
+                <input placeholder={t("search_placeholder")} style={{border:"none",background:"transparent",outline:"none",fontSize:12,width:"100%",fontFamily:"'Inter', sans-serif",color:T.text,letterSpacing:"-0.01em"}}/>
               </div>
             </>
           )}
@@ -553,7 +558,7 @@ function AppShell({ page, onLogout }: { page: string; navigate: (key: string, pr
           )}
           <button
             onClick={() => setShowEmailInbox(true)}
-            title="Boite de reception"
+            title={t("nav.inbox")}
             style={{position:"relative",background:"none",border:"1px solid transparent",cursor:"pointer",color:T.textMid,padding: isMobile ? 8 : 7,display:"flex",alignItems:"center",justifyContent:"center",borderRadius:6,transition:"all 0.15s"}}
             onMouseEnter={e=>{e.currentTarget.style.background=T.bgHover;e.currentTarget.style.color=T.text}}
             onMouseLeave={e=>{e.currentTarget.style.background="none";e.currentTarget.style.color=T.textMid}}
@@ -563,7 +568,7 @@ function AppShell({ page, onLogout }: { page: string; navigate: (key: string, pr
           </button>
           <button
             onClick={() => setShowMessaging(true)}
-            title="Messagerie"
+            title={t("nav.messaging")}
             style={{position:"relative",background:"none",border:"1px solid transparent",cursor:"pointer",color:T.textMid,padding: isMobile ? 8 : 7,display:"flex",alignItems:"center",justifyContent:"center",borderRadius:6,transition:"all 0.15s"}}
             onMouseEnter={e=>{e.currentTarget.style.background=T.bgHover;e.currentTarget.style.color=T.text}}
             onMouseLeave={e=>{e.currentTarget.style.background="none";e.currentTarget.style.color=T.textMid}}
@@ -592,7 +597,19 @@ function AppShell({ page, onLogout }: { page: string; navigate: (key: string, pr
               <div style={{width:1,height:18,background:T.border}}/>
               <div style={{display:"flex",alignItems:"center",gap:8}}>
                 <div style={{width:28,height:28,borderRadius:100,background:"#111",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:600}}>{(profile?.full_name||"U")[0].toUpperCase()}</div>
-                <div style={{fontSize:12,color:T.textMid,letterSpacing:"-0.01em"}}><strong style={{color:T.text,fontWeight:600}}>{profile?.full_name?.split(" ")[0]||"Utilisateur"}</strong></div>
+                <div style={{fontSize:12,color:T.textMid,letterSpacing:"-0.01em"}}><strong style={{color:T.text,fontWeight:600}}>{profile?.full_name?.split(" ")[0]||t("user")}</strong></div>
+                <button
+                  onClick={() => setLang(lang === "fr" ? "en" : "fr")}
+                  style={{
+                    background: T.cardAlt, border: `1px solid ${T.border}`, borderRadius: 6,
+                    padding: "3px 8px", fontSize: 11, fontWeight: 700, cursor: "pointer",
+                    color: T.textMid, fontFamily: "inherit", letterSpacing: 0.5,
+                    transition: "all 0.15s",
+                  }}
+                  title={t("settings.language")}
+                >
+                  {lang === "fr" ? "EN" : "FR"}
+                </button>
               </div>
             </>
           )}

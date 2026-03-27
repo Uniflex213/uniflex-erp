@@ -12,6 +12,7 @@ import TeamGoalsTab from "./team/TeamGoalsTab";
 import TeamCommissionsTab from "./team/TeamCommissionsTab";
 import TeamProjectsTab from "./team/TeamProjectsTab";
 import { T } from "../theme";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const TABS: { key: TeamTab; label: string; icon: string }[] = [
   { key: "overview", label: "Vue d'ensemble", icon: "📊" },
@@ -23,6 +24,7 @@ const TABS: { key: TeamTab; label: string; icon: string }[] = [
 ];
 
 export default function MyTeamPage() {
+  const { t } = useLanguage();
   const agent = useCurrentAgent();
   const { profile } = useAuth();
   const userId = profile?.id ?? "";
@@ -94,7 +96,7 @@ export default function MyTeamPage() {
         <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
         <div style={{ textAlign: "center" }}>
           <div style={{ width: 40, height: 40, borderRadius: "50%", border: `3px solid ${T.bg}`, borderTop: `3px solid ${T.main}`, animation: "spin 0.8s linear infinite", margin: "0 auto 12px" }} />
-          <div style={{ fontSize: 13, color: T.textLight }}>Chargement...</div>
+          <div style={{ fontSize: 13, color: T.textLight }}>{t("common.loading", "Chargement...")}</div>
         </div>
       </div>
     );
@@ -120,16 +122,16 @@ export default function MyTeamPage() {
               <h1 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: T.text }}>{team.name}</h1>
               {isLeader ? (
                 <span style={{ fontSize: 11, fontWeight: 800, background: "#fef3c7", color: "#92400e", padding: "3px 10px", borderRadius: 99 }}>
-                  👑 Chef d'équipe
+                  {t("team.leader", "Chef d'équipe")}
                 </span>
               ) : (
                 <span style={{ fontSize: 11, fontWeight: 700, background: T.bg, color: T.textLight, padding: "3px 10px", borderRadius: 99 }}>
-                  Membre
+                  {t("team.member", "Membre")}
                 </span>
               )}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 5 }}>
-              <span style={{ fontSize: 12, color: T.textLight }}>{members.length} membre{members.length > 1 ? "s" : ""}</span>
+              <span style={{ fontSize: 12, color: T.textLight }}>{members.length} {t("team.member", "membre")}{members.length > 1 ? "s" : ""}</span>
               <div style={{ display: "flex" }}>
                 {members.slice(0, 6).map(m => (
                   <div key={m.id} title={m.agent_name} style={{ position: "relative", marginLeft: -6 }}>
@@ -154,22 +156,22 @@ export default function MyTeamPage() {
                   letterSpacing: 1, transition: "all 0.2s",
                 }}
               >
-                {codeCopied ? "✅ Copié !" : `Code : ${team.join_code}`}
+                {codeCopied ? t("team.copied", "Copié !") : `Code : ${team.join_code}`}
               </button>
             )}
 
             {confirmLeave ? (
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 11, color: T.red }}>Quitter l'équipe ?</span>
-                <button onClick={handleLeaveTeam} style={{ padding: "7px 14px", borderRadius: 8, border: "none", background: T.red, color: "#fff", cursor: "pointer", fontFamily: "inherit", fontSize: 11, fontWeight: 700 }}>Confirmer</button>
-                <button onClick={() => setConfirmLeave(false)} style={{ padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 11 }}>Annuler</button>
+                <span style={{ fontSize: 11, color: T.red }}>{t("team.leave_confirm", "Quitter l'équipe ?")}</span>
+                <button onClick={handleLeaveTeam} style={{ padding: "7px 14px", borderRadius: 8, border: "none", background: T.red, color: "#fff", cursor: "pointer", fontFamily: "inherit", fontSize: 11, fontWeight: 700 }}>{t("common.confirm", "Confirmer")}</button>
+                <button onClick={() => setConfirmLeave(false)} style={{ padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 11 }}>{t("cancel", "Annuler")}</button>
               </div>
             ) : (
               <button
                 onClick={() => setConfirmLeave(true)}
                 style={{ padding: "7px 14px", borderRadius: 10, border: `1px solid ${T.red}40`, background: T.bgCard, color: T.red, cursor: "pointer", fontFamily: "inherit", fontSize: 11, fontWeight: 600 }}
               >
-                Quitter l'équipe
+                {t("team.leave", "Quitter l'équipe")}
               </button>
             )}
 
@@ -177,21 +179,21 @@ export default function MyTeamPage() {
         </div>
 
         <div style={{ display: "flex", gap: 2, marginTop: 14, overflowX: "auto", paddingBottom: 2 }}>
-          {TABS.map(t => (
+          {TABS.map(tabItem => (
             <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
+              key={tabItem.key}
+              onClick={() => setTab(tabItem.key)}
               style={{
                 padding: "8px 16px", borderRadius: 10, border: "none", cursor: "pointer",
-                background: tab === t.key ? T.main : "transparent",
-                color: tab === t.key ? "#fff" : T.textLight,
+                background: tab === tabItem.key ? T.main : "transparent",
+                color: tab === tabItem.key ? "#fff" : T.textLight,
                 fontFamily: "inherit", fontSize: 12, fontWeight: 700,
                 display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap",
                 transition: "all 0.15s",
               }}
             >
-              <span>{t.icon}</span>
-              {t.label}
+              <span>{tabItem.icon}</span>
+              {tabItem.label}
             </button>
           ))}
         </div>

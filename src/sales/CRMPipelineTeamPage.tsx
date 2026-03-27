@@ -12,6 +12,7 @@ import LiveNewsBanner from "./LiveNewsBanner";
 import CRMImportModal from "./import/CRMImportModal";
 import { useApp } from "../AppContext";
 import { useAuth } from "../contexts/AuthContext";
+import { useLanguage } from "../i18n/LanguageContext";
 import { supabase } from "../supabaseClient";
 import { T } from "../theme";
 import { useStaggerReveal } from "../hooks/useStaggerReveal";
@@ -62,6 +63,7 @@ function GlassButton({ children, onClick, primary, style: extraStyle }: {
 export default function CRMPipelineTeamPage() {
   const { leads, setLeads, navigate, samples, addSample, reloadLeads, addLead, updateLead, deleteLead, addActivity: persistActivity } = useApp();
   const { profile } = useAuth();
+  const { t } = useLanguage();
   const agentName = profile?.full_name || "Agent";
   const agentInitials = agentName.split(" ").map(n => n[0]).join("").toUpperCase();
   const [filters, setFilters] = useState<CRMFilters>(DEFAULT_FILTERS);
@@ -186,20 +188,20 @@ export default function CRMPipelineTeamPage() {
               CRM Pipeline Team
             </h1>
             <p style={{ fontSize: 12, color: T.textMid, margin: 0 }}>
-              Vue partagée — {filteredLeads.length} lead{filteredLeads.length !== 1 ? "s" : ""} {filters !== DEFAULT_FILTERS ? "(filtrés)" : "au total"}
+              {t("crm.shared_view", "Vue partagée")} — {filteredLeads.length} lead{filteredLeads.length !== 1 ? "s" : ""} {filters !== DEFAULT_FILTERS ? t("crm.filtered", "(filtrés)") : t("crm.total_label", "au total")}
             </p>
           </div>
           <div style={{ display: "flex", gap: 8, ...reveal(1) }}>
             <GlassButton onClick={() => setShowImport(true)}>
               <UploadIcon size={14} color={T.main} />
-              Importer
+              {t("import", "Importer")}
             </GlassButton>
             <GlassButton onClick={handleExport}>
               <DownloadIcon size={14} color={T.textMid} />
-              Exporter
+              {t("export", "Exporter")}
             </GlassButton>
             <GlassButton onClick={() => setShowNewLead(true)} primary style={{ animation: "breatheGlow 2.5s ease-in-out infinite" }}>
-              + Nouveau Lead
+              + {t("crm.new_lead", "Nouveau lead")}
             </GlassButton>
           </div>
         </div>

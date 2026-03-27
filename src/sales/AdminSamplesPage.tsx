@@ -6,6 +6,7 @@ import SendEmailModal from "../components/email/SendEmailModal";
 import { tplSampleApproved, tplSampleDelivered } from "../lib/emailTemplates";
 import { T } from "../theme";
 import { sendNotification } from "../lib/notifications";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD", minimumFractionDigits: 0 }).format(n);
@@ -75,6 +76,7 @@ const selStyle: React.CSSProperties = { ...inpStyle, cursor: "pointer" };
 const labelStyle: React.CSSProperties = { fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 5 };
 
 export default function AdminSamplesPage() {
+  const { t } = useLanguage();
   const { reloadSamples: ctxReloadSamples } = useApp();
   const [samples, setSamples] = useState<SampleRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -210,12 +212,12 @@ export default function AdminSamplesPage() {
   });
 
   const tabs = [
-    { key: "pending", label: "À traiter", count: pendingSamples.length, pulse: pendingSamples.length > 0 },
-    { key: "inprogress", label: "En cours", count: inProgressSamples.length },
-    { key: "delivered", label: "Livrés / Suivi", count: deliveredSamples.length },
-    { key: "completed", label: "Complétés", count: completedSamples.length },
-    { key: "history", label: "Historique" },
-    { key: "analytics", label: "Analytics" },
+    { key: "pending", label: t("samples.to_process", "À traiter"), count: pendingSamples.length, pulse: pendingSamples.length > 0 },
+    { key: "inprogress", label: t("samples.in_progress", "En cours"), count: inProgressSamples.length },
+    { key: "delivered", label: t("samples.delivered_follow", "Livrés / Suivi"), count: deliveredSamples.length },
+    { key: "completed", label: t("samples.completed", "Complétés"), count: completedSamples.length },
+    { key: "history", label: t("samples.history", "Historique") },
+    { key: "analytics", label: t("samples.analytics", "Analytics") },
   ] as const;
 
   return (
@@ -223,21 +225,21 @@ export default function AdminSamplesPage() {
       <div style={{ background: T.bgCard, borderBottom: `1px solid ${T.border}`, padding: "18px 24px 0", flexShrink: 0 }}>
         <div style={{ marginBottom: 16 }}>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: T.text, margin: "0 0 4px", display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 24 }}>📦</span> Samples Management
+            <span style={{ fontSize: 24 }}>📦</span> {t("samples.title", "Samples Management")}
           </h1>
           <p style={{ fontSize: 13, color: T.textLight, margin: 0 }}>
-            {samples.length} demande{samples.length !== 1 ? "s" : ""} au total
+            {samples.length} {t("samples.request", "demande")}{samples.length !== 1 ? "s" : ""} {t("samples.total", "au total")}
           </p>
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 10, marginBottom: 16 }}>
           {[
-            { label: "En attente", value: pendingSamples.length, color: T.gold, pulse: pendingSamples.length > 0 },
-            { label: "Approuvés ce mois", value: approvedThisMonth, color: T.green },
-            { label: "En cours", value: inProgressSamples.length, color: "#0891b2" },
-            { label: "Suivi requis", value: awaitingFollowUp, color: T.red, pulse: awaitingFollowUp > 0 },
-            { label: "Coût ce mois", value: fmt(costThisMonth), color: T.main },
-            { label: "Taux conversion", value: `${conversionRate}%`, color: T.green },
+            { label: t("samples.pending", "En attente"), value: pendingSamples.length, color: T.gold, pulse: pendingSamples.length > 0 },
+            { label: t("samples.approved_month", "Approuvés ce mois"), value: approvedThisMonth, color: T.green },
+            { label: t("samples.in_progress", "En cours"), value: inProgressSamples.length, color: "#0891b2" },
+            { label: t("samples.follow_up_required", "Suivi requis"), value: awaitingFollowUp, color: T.red, pulse: awaitingFollowUp > 0 },
+            { label: t("samples.cost_month", "Coût ce mois"), value: fmt(costThisMonth), color: T.main },
+            { label: t("samples.conversion_rate", "Taux conversion"), value: `${conversionRate}%`, color: T.green },
           ].map((kpi, i) => (
             <div key={i} style={{
               background: T.bg, borderRadius: 10, padding: "12px 14px",
@@ -252,27 +254,27 @@ export default function AdminSamplesPage() {
         </div>
 
         <div style={{ display: "flex", gap: 0, borderTop: `1px solid ${T.border}` }}>
-          {tabs.map(t => (
+          {tabs.map(tabItem => (
             <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
+              key={tabItem.key}
+              onClick={() => setTab(tabItem.key)}
               style={{
                 padding: "12px 18px", border: "none", background: "none", cursor: "pointer",
-                fontSize: 13, fontWeight: tab === t.key ? 700 : 400,
-                color: tab === t.key ? T.main : T.textMid,
-                borderBottom: tab === t.key ? `2px solid ${T.main}` : "2px solid transparent",
+                fontSize: 13, fontWeight: tab === tabItem.key ? 700 : 400,
+                color: tab === tabItem.key ? T.main : T.textMid,
+                borderBottom: tab === tabItem.key ? `2px solid ${T.main}` : "2px solid transparent",
                 fontFamily: "inherit", transition: "all 0.15s",
                 display: "flex", alignItems: "center", gap: 6,
               }}
             >
-              {t.label}
-              {"count" in t && t.count !== undefined && t.count > 0 && (
+              {tabItem.label}
+              {"count" in tabItem && tabItem.count !== undefined && tabItem.count > 0 && (
                 <span style={{
                   fontSize: 10, fontWeight: 700, borderRadius: 10, padding: "1px 6px",
-                  background: t.pulse ? T.red : T.main, color: "#fff",
-                  animation: t.pulse ? "pulse 1.5s infinite" : "none",
+                  background: tabItem.pulse ? T.red : T.main, color: "#fff",
+                  animation: tabItem.pulse ? "pulse 1.5s infinite" : "none",
                 }}>
-                  {t.count}
+                  {tabItem.count}
                 </span>
               )}
             </button>
@@ -282,7 +284,7 @@ export default function AdminSamplesPage() {
 
       <div style={{ flex: 1, overflow: "auto", padding: "20px 24px" }}>
         {loading ? (
-          <div style={{ textAlign: "center", padding: 40, color: T.textLight }}>Chargement...</div>
+          <div style={{ textAlign: "center", padding: 40, color: T.textLight }}>{t("common.loading", "Chargement...")}</div>
         ) : (
           <>
             {tab === "pending" && (
@@ -340,17 +342,17 @@ export default function AdminSamplesPage() {
                   <input
                     value={search}
                     onChange={e => setSearch(e.target.value)}
-                    placeholder="Rechercher lead ou agent..."
+                    placeholder={t("samples.search_lead", "Rechercher lead ou agent...")}
                     style={{ ...inpStyle, width: 240 }}
                   />
                   <input
                     value={filterAgent}
                     onChange={e => setFilterAgent(e.target.value)}
-                    placeholder="Filtrer par agent..."
+                    placeholder={t("samples.filter_agent", "Filtrer par agent...")}
                     style={{ ...inpStyle, width: 200 }}
                   />
                   <select value={filterStatus} onChange={e => setFilterStatus(e.target.value as SampleStatus | "")} style={{ ...selStyle, width: 200 }}>
-                    <option value="">Tous les statuts</option>
+                    <option value="">{t("samples.all_statuses", "Tous les statuts")}</option>
                     {(["En attente d'approbation", "Approuvé", "En préparation", "Envoyé", "Livré", "Follow-up requis", "Follow-up complété", "Rejeté"] as SampleStatus[]).map(s => (
                       <option key={s} value={s}>{s}</option>
                     ))}
@@ -389,9 +391,9 @@ export default function AdminSamplesPage() {
       )}
       {deliverModal && (
         <ConfirmModal
-          title="Marquer comme livré"
+          title={t("samples.mark_delivered", "Marquer comme livré")}
           message={`Confirmer la livraison du sample pour ${deliverModal.lead_company_name || "ce lead"} ? Le timer 72h de follow-up démarrera immédiatement.`}
-          confirmLabel="Confirmer la livraison"
+          confirmLabel={t("samples.confirm_delivery", "Confirmer la livraison")}
           confirmColor={T.green}
           onClose={() => setDeliverModal(null)}
           onConfirm={() => handleDeliver(deliverModal)}
@@ -472,7 +474,7 @@ function CompletedTab({ samples, onViewDetail }: { samples: SampleRequest[]; onV
         <input
           value={searchCompleted}
           onChange={e => setSearchCompleted(e.target.value)}
-          placeholder="Rechercher lead ou agent..."
+          placeholder={t("samples.search_lead", "Rechercher lead ou agent...")}
           style={{ ...inpStyle, width: 240 }}
         />
         <select
@@ -787,6 +789,7 @@ function ApproveModal({ sample, onClose, onConfirm }: {
   onClose: () => void;
   onConfirm: (s: SampleRequest, eta: string, notes: string, cost: number) => void;
 }) {
+  const { t } = useLanguage();
   const [eta, setEta] = useState(sample.eta_delivery || "");
   const [notes, setNotes] = useState("");
   const [cost, setCost] = useState("0");
@@ -808,7 +811,7 @@ function ApproveModal({ sample, onClose, onConfirm }: {
         </div>
       </div>
       <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 20 }}>
-        <button onClick={onClose} style={{ padding: "10px 20px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 13 }}>Annuler</button>
+        <button onClick={onClose} style={{ padding: "10px 20px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 13 }}>{t("cancel", "Annuler")}</button>
         <button
           onClick={() => eta && onConfirm(sample, eta, notes, parseFloat(cost) || 0)}
           disabled={!eta}
@@ -826,6 +829,7 @@ function ShipModal({ sample, onClose, onConfirm }: {
   onClose: () => void;
   onConfirm: (s: SampleRequest, transporteur: string, tracking: string, eta: string, notes: string) => void;
 }) {
+  const { t } = useLanguage();
   const [transporteur, setTransporteur] = useState(TRANSPORTEURS[0]);
   const [tracking, setTracking] = useState("");
   const [eta, setEta] = useState(sample.eta_delivery || "");
@@ -854,7 +858,7 @@ function ShipModal({ sample, onClose, onConfirm }: {
         </div>
       </div>
       <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 20 }}>
-        <button onClick={onClose} style={{ padding: "10px 20px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 13 }}>Annuler</button>
+        <button onClick={onClose} style={{ padding: "10px 20px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 13 }}>{t("cancel", "Annuler")}</button>
         <button
           onClick={() => onConfirm(sample, transporteur, tracking, eta, notes)}
           style={{ padding: "10px 20px", borderRadius: 8, border: "none", background: T.main, color: "#fff", cursor: "pointer", fontFamily: "inherit", fontSize: 13, fontWeight: 700 }}
@@ -871,6 +875,7 @@ function RejectModal({ sample, onClose, onConfirm }: {
   onClose: () => void;
   onConfirm: (s: SampleRequest, reason: string) => void;
 }) {
+  const { t } = useLanguage();
   const [reason, setReason] = useState("");
   return (
     <Modal title="❌ Rejeter la demande" onClose={onClose}>
@@ -880,7 +885,7 @@ function RejectModal({ sample, onClose, onConfirm }: {
         <textarea value={reason} onChange={e => setReason(e.target.value)} placeholder="Expliquez pourquoi la demande est rejetée..." style={{ ...inpStyle, height: 100, paddingTop: 10, resize: "vertical" }} />
       </div>
       <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 20 }}>
-        <button onClick={onClose} style={{ padding: "10px 20px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 13 }}>Annuler</button>
+        <button onClick={onClose} style={{ padding: "10px 20px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 13 }}>{t("cancel", "Annuler")}</button>
         <button
           onClick={() => reason.trim() && onConfirm(sample, reason)}
           disabled={!reason.trim()}
@@ -901,7 +906,7 @@ function ConfirmModal({ title, message, confirmLabel, confirmColor, onClose, onC
     <Modal title={title} onClose={onClose}>
       <p style={{ fontSize: 14, color: T.text, margin: "0 0 20px", lineHeight: 1.6 }}>{message}</p>
       <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-        <button onClick={onClose} style={{ padding: "10px 20px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 13 }}>Annuler</button>
+        <button onClick={onClose} style={{ padding: "10px 20px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 13 }}>{t("cancel", "Annuler")}</button>
         <button onClick={onConfirm} style={{ padding: "10px 20px", borderRadius: 8, border: "none", background: confirmColor, color: "#fff", cursor: "pointer", fontFamily: "inherit", fontSize: 13, fontWeight: 700 }}>{confirmLabel}</button>
       </div>
     </Modal>
@@ -943,6 +948,7 @@ function SampleSummary({ sample }: { sample: SampleRequest }) {
 }
 
 function SampleDetailModal({ sample, onClose }: { sample: SampleRequest; onClose: () => void }) {
+  const { t } = useLanguage();
   const steps: SampleStatus[] = ["En attente d'approbation", "Approuvé", "En préparation", "Envoyé", "Livré", "Follow-up requis", "Follow-up complété"];
   const currentIdx = steps.indexOf(sample.status);
   return (
@@ -1089,6 +1095,7 @@ function DField({ label, value, col2 }: { label: string; value: React.ReactNode;
 }
 
 function AnalyticsTab({ samples }: { samples: SampleRequest[] }) {
+  const { t } = useLanguage();
   const now = new Date();
   const months = Array.from({ length: 6 }, (_, i) => {
     const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
@@ -1225,7 +1232,7 @@ function AnalyticsTab({ samples }: { samples: SampleRequest[] }) {
         <div style={{ background: T.bgCard, borderRadius: 12, padding: "20px", border: `1px solid ${T.border}` }}>
           <h3 style={{ margin: "0 0 16px", fontSize: 14, fontWeight: 700, color: T.text }}>Produits les plus demandés</h3>
           {topProducts.length === 0 ? (
-            <div style={{ color: T.textLight, fontSize: 13 }}>Aucune donnée</div>
+            <div style={{ color: T.textLight, fontSize: 13 }}>{t("common.no_data", "Aucune donnée")}</div>
           ) : topProducts.map(([name, count], i) => (
             <div key={i} style={{ marginBottom: 10 }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
@@ -1242,7 +1249,7 @@ function AnalyticsTab({ samples }: { samples: SampleRequest[] }) {
         <div style={{ background: T.bgCard, borderRadius: 12, padding: "20px", border: `1px solid ${T.border}` }}>
           <h3 style={{ margin: "0 0 16px", fontSize: 14, fontWeight: 700, color: T.text }}>Motifs de demande</h3>
           {topReasons.length === 0 ? (
-            <div style={{ color: T.textLight, fontSize: 13 }}>Aucune donnée</div>
+            <div style={{ color: T.textLight, fontSize: 13 }}>{t("common.no_data", "Aucune donnée")}</div>
           ) : topReasons.map(([reason, count], i) => (
             <div key={i} style={{ marginBottom: 10 }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>

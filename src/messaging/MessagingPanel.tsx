@@ -4,6 +4,7 @@ import { Conversation, UserProfile, MessagingRule } from "./messagingTypes";
 import ConversationList from "./ConversationList";
 import MessageThread from "./MessageThread";
 import NewConversationModal from "./NewConversationModal";
+import { useLanguage } from "../i18n/LanguageContext";
 
 interface Props {
   isOpen: boolean;
@@ -15,6 +16,7 @@ interface Props {
 const PANEL_W = 740;
 
 export default function MessagingPanel({ isOpen, onClose, currentUser, onUnreadChange }: Props) {
+  const { t } = useLanguage();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -186,7 +188,7 @@ export default function MessagingPanel({ isOpen, onClose, currentUser, onUnreadC
         <div style={{ height: 56, background: "#fff", borderBottom: "1px solid rgba(0,0,0,0.08)", display: "flex", alignItems: "center", padding: "0 16px", gap: 10, flexShrink: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1 }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-            <span style={{ fontSize: 15, fontWeight: 800, color: "#111" }}>Messagerie</span>
+            <span style={{ fontSize: 15, fontWeight: 800, color: "#111" }}>{t("messaging.title", "Messagerie")}</span>
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#6b6b6b", display: "flex", padding: 6, borderRadius: 6 }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -217,15 +219,15 @@ export default function MessagingPanel({ isOpen, onClose, currentUser, onUnreadC
               <div style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#9ca3af", gap: 12 }}>
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" opacity="0.3"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
                 <div style={{ textAlign: "center" }}>
-                  <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#6b6b6b", opacity: 0.6 }}>Sélectionnez une conversation</p>
-                  <p style={{ margin: "6px 0 0", fontSize: 12, opacity: 0.4 }}>ou créez-en une nouvelle</p>
+                  <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#6b6b6b", opacity: 0.6 }}>{t("messaging.select_conversation", "Sélectionnez une conversation")}</p>
+                  <p style={{ margin: "6px 0 0", fontSize: 12, opacity: 0.4 }}>{t("messaging.or_create_new", "ou créez-en une nouvelle")}</p>
                 </div>
                 <button
                   onClick={() => setShowNewConv(true)}
                   style={{ display: "flex", alignItems: "center", gap: 6, background: "#111", color: "#fff", border: "none", borderRadius: 8, padding: "9px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", marginTop: 6 }}
                 >
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                  Nouvelle conversation
+                  {t("messaging.new_conversation", "Nouvelle conversation")}
                 </button>
               </div>
             )}

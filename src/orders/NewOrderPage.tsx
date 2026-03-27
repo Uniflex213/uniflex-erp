@@ -7,6 +7,7 @@ import { supabase } from "../supabaseClient";
 import { T } from "../theme";
 import { fmt, detectDestination, detectProvince, computeTaxLines } from "./orderTaxUtils";
 import ClientCard, { LockIcon } from "./OrderClientCard";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const BackIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -51,6 +52,7 @@ type ProductRow = {
 };
 
 export default function NewOrderPage({ onBack, onSubmit, prefill }: Props) {
+  const { t } = useLanguage();
   const { products: ctxProducts } = useApp();
   const { profile } = useAuth();
 
@@ -231,18 +233,18 @@ export default function NewOrderPage({ onBack, onSubmit, prefill }: Props) {
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
         <button onClick={onBack} style={{ display: "flex", alignItems: "center", gap: 6, background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 13, color: T.textMid, fontFamily: "inherit" }}>
-          <BackIcon /> Retour
+          <BackIcon /> {t("back")}
         </button>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Nouvelle commande</h2>
+            <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>{t("orders.new")}</h2>
             {hasTeamPrices && (
               <span style={{ fontSize: 11, padding: "3px 8px", borderRadius: 20, background: "rgba(99,102,241,0.12)", color: "#6366f1", fontWeight: 700 }}>
-                ✓ Prix équipe actifs
+                {t("orders.team_prices_active", "✓ Prix équipe actifs")}
               </span>
             )}
           </div>
-          <p style={{ margin: 0, color: T.textMid, fontSize: 13 }}>Remplir le contexte puis construire la commande</p>
+          <p style={{ margin: 0, color: T.textMid, fontSize: 13 }}>{t("orders.fill_context", "Remplir le contexte puis construire la commande")}</p>
         </div>
       </div>
 
@@ -261,7 +263,7 @@ export default function NewOrderPage({ onBack, onSubmit, prefill }: Props) {
                 )}
               </div>
               <div>
-                <div style={{ fontWeight: 800, fontSize: 15 }}>Contexte de la commande</div>
+                <div style={{ fontWeight: 800, fontSize: 15 }}>{t("orders.order_context", "Contexte de la commande")}</div>
                 {step === "builder" && (
                   <div style={{ fontSize: 12, color: T.textMid, marginTop: 2 }}>
                     {ctx.motif} · {selectedClient?.company_name} · {ctx.destination} · {ctx.label} · {ctx.deliveryType}
@@ -269,20 +271,20 @@ export default function NewOrderPage({ onBack, onSubmit, prefill }: Props) {
                 )}
               </div>
             </div>
-            {step === "builder" && <span style={{ fontSize: 11, color: T.main, fontWeight: 700 }}>Modifier</span>}
+            {step === "builder" && <span style={{ fontSize: 11, color: T.main, fontWeight: 700 }}>{t("edit")}</span>}
           </div>
 
           {step === "context" && (
             <div style={{ padding: 24 }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 10 }}>Motif de la commande *</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 10 }}>{t("orders.motif")} *</div>
                   <div style={{ display: "flex", flexDirection: "column" }}>
                     {(["Restock", "Dropship client", "Sample", "Gros client", "Autre"] as OrderMotif[]).map(m => (
                       <div key={m}>
                         {radioOpt(m, m, "motif")}
                         {m === "Autre" && ctx.motif === "Autre" && (
-                          <input value={ctx.motifAutre} onChange={e => setCtx(p => ({ ...p, motifAutre: e.target.value }))} placeholder="Préciser..." style={{ ...inputStyle, marginTop: 6, marginLeft: 26 }} />
+                          <input value={ctx.motifAutre} onChange={e => setCtx(p => ({ ...p, motifAutre: e.target.value }))} placeholder={t("orders.specify", "Préciser...")} style={{ ...inputStyle, marginTop: 6, marginLeft: 26 }} />
                         )}
                       </div>
                     ))}
@@ -294,7 +296,7 @@ export default function NewOrderPage({ onBack, onSubmit, prefill }: Props) {
                     <div style={{ flex: 1, minWidth: 160 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 8 }}>
                         <LockIcon />
-                        <span style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4 }}>Code vendeur</span>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4 }}>{t("orders.vendor_code")}</span>
                       </div>
                       <div style={{ ...inputStyle, background: "#f4f5f9", color: "#9ca3af", cursor: "default" }}>
                         {profile?.vendeur_code || "—"}
@@ -304,7 +306,7 @@ export default function NewOrderPage({ onBack, onSubmit, prefill }: Props) {
                       <div style={{ flex: 1, minWidth: 160 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 8 }}>
                           <LockIcon />
-                          <span style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4 }}>Équipe</span>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4 }}>{t("team")}</span>
                         </div>
                         <div style={{ ...inputStyle, background: "#f4f5f9", color: "#9ca3af", cursor: "default" }}>
                           {teamName}
@@ -313,13 +315,14 @@ export default function NewOrderPage({ onBack, onSubmit, prefill }: Props) {
                     )}
                   </div>
                   <div>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 8 }}>Client *</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 8 }}>{t("client")} *</div>
                     <div style={{ position: "relative" }} ref={clientRef}>
                       <input
                         value={selectedClient ? selectedClient.company_name : clientSearch}
                         onChange={e => { setClientSearch(e.target.value); setCtx(p => ({ ...p, clientId: "" })); setShowClientDrop(true); }}
                         onFocus={() => setShowClientDrop(true)}
-                        placeholder="Rechercher un client..."
+                        placeholder={t("orders.search_client", "Rechercher un client...")}
+
                         style={inputStyle}
                       />
                       {showClientDrop && filteredClients.length > 0 && !ctx.clientId && (
@@ -336,7 +339,7 @@ export default function NewOrderPage({ onBack, onSubmit, prefill }: Props) {
                       )}
                       {showClientDrop && filteredClients.length === 0 && clientSearch && !ctx.clientId && (
                         <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 20, padding: "12px 14px", fontSize: 13, color: T.textLight }}>
-                          Aucun client trouvé
+                          {t("clients.no_clients", "Aucun client trouvé")}
                         </div>
                       )}
                     </div>
@@ -344,24 +347,24 @@ export default function NewOrderPage({ onBack, onSubmit, prefill }: Props) {
                 </div>
 
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 10 }}>Destination *</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 10 }}>{t("orders.destination")} *</div>
                   {(["CANADA", "USA", "AUTRE"] as OrderDestination[]).map(d => (
                     <div key={d}>
                       {radioOpt(d, d, "destination")}
                       {d === "AUTRE" && ctx.destination === "AUTRE" && (
-                        <input value={ctx.destinationAutre} onChange={e => setCtx(p => ({ ...p, destinationAutre: e.target.value }))} placeholder="Préciser le pays..." style={{ ...inputStyle, marginTop: 6, marginLeft: 26 }} />
+                        <input value={ctx.destinationAutre} onChange={e => setCtx(p => ({ ...p, destinationAutre: e.target.value }))} placeholder={t("orders.specify_country", "Préciser le pays...")} style={{ ...inputStyle, marginTop: 6, marginLeft: 26 }} />
                       )}
                     </div>
                   ))}
 
                   <div style={{ marginTop: 16 }}>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 8 }}>Type de livraison *</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 8 }}>{t("orders.delivery_type")} *</div>
                     <div style={{ display: "flex", flexDirection: "column" }}>
                       {(["Pickup", "Shipping Client", "Add Shipping"] as DeliveryType[]).map(dt => {
                         const labels: Record<string, string> = {
-                          "Pickup": "Pickup — Le client vient chercher",
-                          "Shipping Client": "Shipping Client — À la charge du client",
-                          "Add Shipping": "Add Shipping — Uniflex prend en charge",
+                          "Pickup": `Pickup — ${t("orders.pickup_desc", "Le client vient chercher")}`,
+                          "Shipping Client": `Shipping Client — ${t("orders.shipping_client_desc", "À la charge du client")}`,
+                          "Add Shipping": `Add Shipping — ${t("orders.add_shipping_desc", "Uniflex prend en charge")}`,
                         };
                         const checked = ctx.deliveryType === dt;
                         return (
@@ -378,7 +381,7 @@ export default function NewOrderPage({ onBack, onSubmit, prefill }: Props) {
                                   <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: T.textMid, pointerEvents: "none" }}>$</span>
                                   <input type="number" min="0" step="0.01" value={ctx.shippingCost} onChange={e => setCtx(p => ({ ...p, shippingCost: e.target.value }))} placeholder="0.00" style={{ ...inputStyle, paddingLeft: 22 }} />
                                 </div>
-                                <div style={{ fontSize: 11, color: T.textLight, marginTop: 3 }}>Coût total du shipping (frais et taxes inclus)</div>
+                                <div style={{ fontSize: 11, color: T.textLight, marginTop: 3 }}>{t("orders.shipping_cost_note", "Coût total du shipping (frais et taxes inclus)")}</div>
                               </div>
                             )}
                           </div>
@@ -388,23 +391,23 @@ export default function NewOrderPage({ onBack, onSubmit, prefill }: Props) {
                   </div>
 
                   <div style={{ marginTop: 16 }}>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 8 }}>Adresse de livraison *</div>
-                    <textarea value={ctx.deliveryAddress} onChange={e => setCtx(p => ({ ...p, deliveryAddress: e.target.value }))} placeholder="Adresse de livraison..." rows={2} style={{ ...inputStyle, resize: "vertical" }} />
+                    <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 8 }}>{t("orders.delivery_address")} *</div>
+                    <textarea value={ctx.deliveryAddress} onChange={e => setCtx(p => ({ ...p, deliveryAddress: e.target.value }))} placeholder={t("orders.delivery_address_placeholder", "Adresse de livraison...")} rows={2} style={{ ...inputStyle, resize: "vertical" }} />
                     {ctx.clientId && (
-                      <div style={{ fontSize: 11, color: "#059669", marginTop: 4 }}>Adresse pré-remplie depuis la fiche client — modifiable</div>
+                      <div style={{ fontSize: 11, color: "#059669", marginTop: 4 }}>{t("orders.address_prefilled", "Adresse pré-remplie depuis la fiche client — modifiable")}</div>
                     )}
                   </div>
                 </div>
 
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 10 }}>Label *</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 10 }}>{t("orders.label")} *</div>
                   {(["UNIFLEX", "PRIVATE LABEL", "BLANK"] as OrderLabel[]).map(l => radioOpt(l, l, "label"))}
                 </div>
               </div>
 
               <div style={{ marginTop: 24, display: "flex", justifyContent: "flex-end" }}>
                 <button onClick={() => ctxValid && setStep("builder")} disabled={!ctxValid} style={{ background: ctxValid ? T.main : "#e5e7eb", color: ctxValid ? "#fff" : "#9ca3af", border: "none", borderRadius: 10, padding: "12px 28px", fontSize: 14, fontWeight: 800, cursor: ctxValid ? "pointer" : "not-allowed", fontFamily: "inherit", transition: "all 0.2s" }}>
-                  NEXT →
+                  {t("next").toUpperCase()} →
                 </button>
               </div>
             </div>
@@ -428,25 +431,25 @@ export default function NewOrderPage({ onBack, onSubmit, prefill }: Props) {
                 <div style={{ width: 28, height: 28, borderRadius: "50%", background: `${T.main}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <span style={{ fontSize: 13, fontWeight: 800, color: T.main }}>2</span>
                 </div>
-                <div style={{ fontWeight: 800, fontSize: 15 }}>Builder de commande</div>
+                <div style={{ fontWeight: 800, fontSize: 15 }}>{t("orders.order_builder", "Builder de commande")}</div>
               </div>
 
               <div style={{ background: "#f8f9fb", borderRadius: 10, padding: 16, marginBottom: 20, border: `1px solid ${T.border}` }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 12 }}>Ajouter un produit</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 12 }}>{t("orders.add_product")}</div>
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-end" }}>
                   <div style={{ flex: "2 1 160px" }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>Produit</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>{t("product")}</div>
                     <select value={newRow.product} onChange={e => setNewRow(p => ({ ...p, product: e.target.value }))} style={{ border: `1px solid ${T.border}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, fontFamily: "inherit", outline: "none", background: T.bgCard, color: newRow.product ? T.text : T.textLight, width: "100%", cursor: "pointer" }}>
-                      <option value="">Sélectionner...</option>
+                      <option value="">{t("select_placeholder")}</option>
                       {ctxProducts.filter(p => p.is_active).sort((a, b) => a.name.localeCompare(b.name)).map(p => <option key={p.id} value={p.name}>{p.name}</option>)}
                     </select>
                   </div>
                   <div style={{ flex: "1 1 80px" }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>Qté</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>{t("orders.qty")}</div>
                     <input type="number" min="1" value={newRow.qty} onChange={e => setNewRow(p => ({ ...p, qty: e.target.value }))} placeholder="0" style={{ border: `1px solid ${T.border}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, fontFamily: "inherit", outline: "none", background: T.bgCard, width: "100%", boxSizing: "border-box" as const }} />
                   </div>
                   <div style={{ flex: "1 1 120px" }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>Prix négocié</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>{t("orders.negotiated_price", "Prix négocié")}</div>
                     <div style={{ display: "flex", gap: 6 }}>
                       <input type="number" min="0" value={newRow.price} onChange={e => setNewRow(p => ({ ...p, price: e.target.value }))} placeholder="0.00" style={{ border: `1px solid ${T.border}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, fontFamily: "inherit", outline: "none", background: T.bgCard, flex: 1, boxSizing: "border-box" as const }} />
                       <select value={newRow.unit} onChange={e => setNewRow(p => ({ ...p, unit: e.target.value as "/KIT" | "/GAL" }))} style={{ border: `1px solid ${T.border}`, borderRadius: 8, padding: "9px 8px", fontSize: 12, fontFamily: "inherit", outline: "none", background: T.bgCard, cursor: "pointer", flexShrink: 0 }}>
@@ -456,14 +459,14 @@ export default function NewOrderPage({ onBack, onSubmit, prefill }: Props) {
                     </div>
                   </div>
                   <div style={{ flex: "2 1 160px" }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>Format</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>{t("orders.format")}</div>
                     <select value={newRow.format} onChange={e => setNewRow(p => ({ ...p, format: e.target.value }))} style={{ border: `1px solid ${T.border}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, fontFamily: "inherit", outline: "none", background: T.bgCard, color: newRow.format ? T.text : T.textLight, width: "100%", cursor: "pointer" }}>
-                      <option value="">Sélectionner...</option>
+                      <option value="">{t("select_placeholder")}</option>
                       {["Common Kit (1GAL, 2GAL, 3GAL)", "Large Kit (5GAL, 10GAL, 15GAL)", "BARREL KIT (55 GAL per Barrel)", "TOTE KIT (250 GAL per Tote)", "SPECIAL (see with HO for options)"].map(f => <option key={f} value={f}>{f}</option>)}
                     </select>
                   </div>
                   <button onClick={addLine} disabled={!rowValid} style={{ background: rowValid ? T.main : "#e5e7eb", color: rowValid ? "#fff" : "#9ca3af", border: "none", borderRadius: 8, padding: "10px 18px", fontSize: 13, fontWeight: 700, cursor: rowValid ? "pointer" : "not-allowed", fontFamily: "inherit", whiteSpace: "nowrap", transition: "all 0.2s" }}>
-                    + AJOUTER
+                    + {t("add", "AJOUTER").toUpperCase()}
                   </button>
                 </div>
               </div>
@@ -472,14 +475,14 @@ export default function NewOrderPage({ onBack, onSubmit, prefill }: Props) {
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                   <thead>
                     <tr style={{ background: "#f8f9fb" }}>
-                      {["Produit", "Quantité", "Prix négocié", "Unité", "Format", "Sous-total", ""].map(h => (
+                      {[t("product"), t("quantity"), t("orders.negotiated_price", "Prix négocié"), t("orders.unit"), t("orders.format"), t("subtotal"), ""].map(h => (
                         <th key={h} style={{ padding: "10px 14px", textAlign: h === "Quantité" || h === "Prix négocié" || h === "Sous-total" ? "right" : "left", fontWeight: 700, fontSize: 11, textTransform: "uppercase", letterSpacing: 0.3, color: T.textLight, borderBottom: `1px solid ${T.border}` }}>{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {orderLines.length === 0 ? (
-                      <tr><td colSpan={7} style={{ padding: "32px 16px", textAlign: "center", color: T.textLight, fontSize: 13 }}>Aucun produit ajouté</td></tr>
+                      <tr><td colSpan={7} style={{ padding: "32px 16px", textAlign: "center", color: T.textLight, fontSize: 13 }}>{t("orders.no_products_added", "Aucun produit ajouté")}</td></tr>
                     ) : orderLines.map((line, i) => (
                       <tr key={line.id} style={{ borderBottom: i < orderLines.length - 1 ? `1px solid ${T.border}` : "none" }}>
                         <td style={{ padding: "12px 14px", fontWeight: 700 }}>{line.product}</td>
@@ -500,14 +503,14 @@ export default function NewOrderPage({ onBack, onSubmit, prefill }: Props) {
               </div>
 
               <div style={{ background: "#f8f9fb", border: `1px solid ${T.border}`, borderRadius: 12, padding: "18px 20px", marginBottom: 16 }}>
-                <div style={{ fontSize: 11, fontWeight: 800, color: T.textLight, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 12 }}>Résumé de la commande</div>
+                <div style={{ fontSize: 11, fontWeight: 800, color: T.textLight, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 12 }}>{t("orders.order_summary", "Résumé de la commande")}</div>
 
-                <TotalRow label="Sous-total produits" value={fmt(subtotal)} bold />
+                <TotalRow label={t("orders.product_subtotal", "Sous-total produits")} value={fmt(subtotal)} bold />
 
                 <div style={{ padding: "6px 0" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ fontSize: 13, color: T.textMid }}>Rabais</span>
+                      <span style={{ fontSize: 13, color: T.textMid }}>{t("discount")}</span>
                       <div style={{ display: "flex", borderRadius: 6, overflow: "hidden", border: `1px solid ${T.border}` }}>
                         {(["%", "$"] as const).map(t => (
                           <button key={t} onClick={() => setDiscountType(t)} style={{ padding: "3px 9px", fontSize: 12, fontWeight: 700, border: "none", cursor: "pointer", fontFamily: "inherit", background: discountType === t ? T.main : "#fff", color: discountType === t ? "#fff" : T.textMid, transition: "all 0.15s" }}>{t}</button>
@@ -522,7 +525,7 @@ export default function NewOrderPage({ onBack, onSubmit, prefill }: Props) {
                 </div>
 
                 <Divider />
-                <TotalRow label="Sous-total après rabais" value={fmt(subtotalAfterDiscount)} bold />
+                <TotalRow label={t("orders.subtotal_after_discount")} value={fmt(subtotalAfterDiscount)} bold />
 
                 <TotalRow
                   label="Shipping"
@@ -539,11 +542,11 @@ export default function NewOrderPage({ onBack, onSubmit, prefill }: Props) {
                           <TotalRow key={t.label} label={t.label} value={fmt(t.amount)} />
                         ))
                       ) : (
-                        <TotalRow label="Taxes" value="N/A" muted />
+                        <TotalRow label={t("taxes")} value="N/A" muted />
                       )
                     ) : (
                       <div style={{ fontSize: 12, color: "#b45309", background: "#fef3c7", borderRadius: 6, padding: "6px 10px", marginBottom: 4 }}>
-                        Province non détectée — préciser la province dans l'adresse pour calculer les taxes
+                        {t("orders.province_not_detected", "Province non détectée — préciser la province dans l'adresse pour calculer les taxes")}
                       </div>
                     )}
                   </>
@@ -552,7 +555,7 @@ export default function NewOrderPage({ onBack, onSubmit, prefill }: Props) {
                 {ctx.destination === "USA" || ctx.destination === "AUTRE" ? (
                   <>
                     <Divider />
-                    <TotalRow label="Taxes" value="N/A — Hors Canada" muted />
+                    <TotalRow label={t("taxes")} value={t("orders.taxes_outside_canada", "N/A — Hors Canada")} muted />
                   </>
                 ) : null}
 
@@ -560,12 +563,12 @@ export default function NewOrderPage({ onBack, onSubmit, prefill }: Props) {
                 <div style={{ padding: "6px 0" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ fontSize: 13, color: T.textMid }}>Extra fees</span>
+                      <span style={{ fontSize: 13, color: T.textMid }}>{t("orders.extra_fees")}</span>
                       <div style={{ position: "relative" }}>
                         <span style={{ position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)", fontSize: 12, color: T.textMid, pointerEvents: "none" }}>$</span>
                         <input type="number" min="0" step="0.01" value={extraFees} onChange={e => setExtraFees(e.target.value)} placeholder="0.00" style={{ border: `1px solid ${T.border}`, borderRadius: 6, padding: "4px 9px 4px 18px", fontSize: 13, fontFamily: "inherit", outline: "none", background: T.bgCard, width: 90 }} />
                       </div>
-                      <span style={{ fontSize: 11, color: T.textLight }}>manutention, douanes…</span>
+                      <span style={{ fontSize: 11, color: T.textLight }}>{t("orders.extra_fees_examples", "manutention, douanes…")}</span>
                     </div>
                     <span style={{ fontSize: 13, fontWeight: 700, color: extraFeesAmt > 0 ? T.text : T.textLight }}>
                       {extraFeesAmt > 0 ? fmt(extraFeesAmt) : "—"}
@@ -581,7 +584,7 @@ export default function NewOrderPage({ onBack, onSubmit, prefill }: Props) {
 
               <div style={{ display: "flex", justifyContent: "flex-end" }}>
                 <button onClick={() => orderLines.length > 0 && setShowConfirm(true)} disabled={orderLines.length === 0} style={{ background: orderLines.length > 0 ? T.main : "#e5e7eb", color: orderLines.length > 0 ? "#fff" : "#9ca3af", border: "none", borderRadius: 10, padding: "13px 28px", fontSize: 14, fontWeight: 800, cursor: orderLines.length > 0 ? "pointer" : "not-allowed", fontFamily: "inherit", letterSpacing: 0.3, transition: "all 0.2s" }}>
-                  SEND TO HEAD OFFICE →
+                  {t("orders.send_to_head_office", "SEND TO HEAD OFFICE")} →
                 </button>
               </div>
             </div>
@@ -592,21 +595,21 @@ export default function NewOrderPage({ onBack, onSubmit, prefill }: Props) {
       {showConfirm && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }}>
           <div style={{ background: T.bgCard, borderRadius: 16, padding: 32, maxWidth: 480, width: "90%", boxShadow: "0 24px 64px rgba(0,0,0,0.2)" }}>
-            <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 16 }}>Confirmer l'envoi</div>
+            <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 16 }}>{t("orders.confirm_send", "Confirmer l'envoi")}</div>
             <div style={{ fontSize: 13, color: T.textMid, lineHeight: 1.8, marginBottom: 20 }}>
-              <div><strong style={{ color: T.text }}>Client :</strong> {selectedClient?.company_name}</div>
-              <div><strong style={{ color: T.text }}>Motif :</strong> {ctx.motif}</div>
-              <div><strong style={{ color: T.text }}>Destination :</strong> {ctx.destination}{province ? ` (${province})` : ""}</div>
-              <div><strong style={{ color: T.text }}>Livraison :</strong> {ctx.deliveryType}</div>
-              {discountAmt > 0 && <div><strong style={{ color: T.text }}>Rabais :</strong> -{fmt(discountAmt)}</div>}
+              <div><strong style={{ color: T.text }}>{t("client")} :</strong> {selectedClient?.company_name}</div>
+              <div><strong style={{ color: T.text }}>{t("orders.motif")} :</strong> {ctx.motif}</div>
+              <div><strong style={{ color: T.text }}>{t("orders.destination")} :</strong> {ctx.destination}{province ? ` (${province})` : ""}</div>
+              <div><strong style={{ color: T.text }}>{t("orders.delivery_type")} :</strong> {ctx.deliveryType}</div>
+              {discountAmt > 0 && <div><strong style={{ color: T.text }}>{t("discount")} :</strong> -{fmt(discountAmt)}</div>}
               {ctx.deliveryType === "Add Shipping" && <div><strong style={{ color: T.text }}>Shipping :</strong> {fmt(shippingAmt)}</div>}
-              {taxTotal > 0 && <div><strong style={{ color: T.text }}>Taxes :</strong> {fmt(taxTotal)}</div>}
-              {extraFeesAmt > 0 && <div><strong style={{ color: T.text }}>Extra fees :</strong> {fmt(extraFeesAmt)}</div>}
+              {taxTotal > 0 && <div><strong style={{ color: T.text }}>{t("taxes")} :</strong> {fmt(taxTotal)}</div>}
+              {extraFeesAmt > 0 && <div><strong style={{ color: T.text }}>{t("orders.extra_fees")} :</strong> {fmt(extraFeesAmt)}</div>}
             </div>
-            <div style={{ fontWeight: 800, fontSize: 18, color: T.main, marginBottom: 24 }}>Total : {fmt(total)}</div>
+            <div style={{ fontWeight: 800, fontSize: 18, color: T.main, marginBottom: 24 }}>{t("total")} : {fmt(total)}</div>
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-              <button onClick={() => setShowConfirm(false)} style={{ background: "#f4f5f9", color: T.textMid, border: `1px solid ${T.border}`, borderRadius: 8, padding: "10px 20px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>Annuler</button>
-              <button onClick={handleSubmit} style={{ background: T.main, color: "#fff", border: "none", borderRadius: 8, padding: "10px 24px", fontSize: 13, fontWeight: 800, cursor: "pointer", fontFamily: "inherit" }}>Confirmer</button>
+              <button onClick={() => setShowConfirm(false)} style={{ background: "#f4f5f9", color: T.textMid, border: `1px solid ${T.border}`, borderRadius: 8, padding: "10px 20px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>{t("cancel")}</button>
+              <button onClick={handleSubmit} style={{ background: T.main, color: "#fff", border: "none", borderRadius: 8, padding: "10px 24px", fontSize: 13, fontWeight: 800, cursor: "pointer", fontFamily: "inherit" }}>{t("confirm")}</button>
             </div>
           </div>
         </div>

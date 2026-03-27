@@ -5,6 +5,7 @@ import { ClientDispute, DisputeStatus, DisputePriority, DISPUTE_STATUS_COLORS, D
 import { log } from "../../lib/activityLogger";
 import { T } from "../../theme";
 import { sendNotification } from "../../lib/notifications";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 const PRIORITY_COLORS: Record<DisputePriority, { bg: string; color: string }> = {
   Haute:   { bg: T.redBg,    color: T.red },
@@ -32,6 +33,7 @@ interface NewDisputeForm {
 }
 
 export default function DisputesPage() {
+  const { t } = useLanguage();
   const { profile, can } = useAuth();
   const canViewAll = can("disputes.view_all");
   const canCreate  = can("disputes.create");
@@ -163,15 +165,15 @@ export default function DisputesPage() {
             </svg>
           </div>
           <div>
-            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: T.text }}>Disputes & Litiges</h1>
-            <p style={{ margin: 0, fontSize: 13, color: T.textLight }}>Suivi des conflits clients, paiements en litige et résolutions</p>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: T.text }}>{t("disputes.title", "Disputes & Litiges")}</h1>
+            <p style={{ margin: 0, fontSize: 13, color: T.textLight }}>{t("disputes.subtitle", "Suivi des conflits clients, paiements en litige et résolutions")}</p>
           </div>
         </div>
         {canCreate && (
           <button onClick={() => setShowNew(true)}
             style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 8, background: T.main, color: "#fff", border: "none", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Nouvelle dispute
+            {t("disputes.new_dispute", "Nouvelle dispute")}
           </button>
         )}
       </div>
@@ -179,10 +181,10 @@ export default function DisputesPage() {
       {/* KPIs */}
       <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
         {[
-          { label: "Ouvertes", value: kpis.open, color: T.red, bg: T.redBg },
-          { label: "En cours", value: kpis.inprog, color: T.orange, bg: T.orangeBg },
-          { label: "Résolues", value: kpis.resolved, color: T.green, bg: T.greenBg },
-          { label: "Priorité haute", value: kpis.high, color: "#be185d", bg: "#fce7f3" },
+          { label: t("disputes.open", "Ouvertes"), value: kpis.open, color: T.red, bg: T.redBg },
+          { label: t("disputes.in_progress", "En cours"), value: kpis.inprog, color: T.orange, bg: T.orangeBg },
+          { label: t("disputes.resolved", "Résolues"), value: kpis.resolved, color: T.green, bg: T.greenBg },
+          { label: t("disputes.high_priority", "Priorité haute"), value: kpis.high, color: "#be185d", bg: "#fce7f3" },
         ].map(k => (
           <div key={k.label} style={{ background: k.bg, borderRadius: 10, padding: "14px 20px", flex: "1 1 140px", border: `1px solid ${T.border}` }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: k.color, textTransform: "uppercase", letterSpacing: 0.5 }}>{k.label}</div>
@@ -193,16 +195,16 @@ export default function DisputesPage() {
 
       {/* Filtres */}
       <div style={{ background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: "12px 16px", marginBottom: 16, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher..."
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t("common.search", "Rechercher...")}
           style={{ flex: "1 1 180px", padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, outline: "none", fontFamily: "inherit" }}/>
         <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as DisputeStatus | "all")}
           style={{ padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, fontFamily: "inherit", cursor: "pointer" }}>
-          <option value="all">Tous les statuts</option>
+          <option value="all">{t("disputes.all_statuses", "Tous les statuts")}</option>
           {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
         <select value={priorityFilter} onChange={e => setPriorityFilter(e.target.value as DisputePriority | "all")}
           style={{ padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, fontFamily: "inherit", cursor: "pointer" }}>
-          <option value="all">Toutes priorités</option>
+          <option value="all">{t("disputes.all_priorities", "Toutes priorités")}</option>
           {DISPUTE_PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
         </select>
       </div>
@@ -212,8 +214,8 @@ export default function DisputesPage() {
         {/* Colonne liste */}
         <div style={{ flex: selected ? "0 0 380px" : "1", minWidth: 0 }}>
           <div style={{ background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, overflow: "hidden" }}>
-            {loading && <div style={{ padding: "32px 16px", textAlign: "center", color: T.textLight, fontSize: 13 }}>Chargement...</div>}
-            {!loading && filtered.length === 0 && <div style={{ padding: "32px 16px", textAlign: "center", color: T.textLight, fontSize: 13 }}>Aucune dispute</div>}
+            {loading && <div style={{ padding: "32px 16px", textAlign: "center", color: T.textLight, fontSize: 13 }}>{t("common.loading", "Chargement...")}</div>}
+            {!loading && filtered.length === 0 && <div style={{ padding: "32px 16px", textAlign: "center", color: T.textLight, fontSize: 13 }}>{t("disputes.no_disputes", "Aucune dispute")}</div>}
             {filtered.map((d, i) => {
               const statusColor = DISPUTE_STATUS_COLORS[d.status] ?? "#8e8e93";
               const priorityStyle = PRIORITY_COLORS[d.priority];
@@ -250,9 +252,9 @@ export default function DisputesPage() {
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 18, fontWeight: 800, color: T.text, marginBottom: 4 }}>{selected.subject}</div>
                   <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                    <span style={{ fontSize: 12, color: T.textMid }}>Client : <strong>{selected.client_name ?? "—"}</strong></span>
-                    {selected.order_ref && <span style={{ fontSize: 12, color: T.textMid }}>Commande : <strong style={{ color: T.main }}>{selected.order_ref}</strong></span>}
-                    {selected.invoice_ref && <span style={{ fontSize: 12, color: T.textMid }}>Facture : <strong style={{ color: T.red }}>{selected.invoice_ref}</strong></span>}
+                    <span style={{ fontSize: 12, color: T.textMid }}>{t("disputes.client", "Client")} : <strong>{selected.client_name ?? "—"}</strong></span>
+                    {selected.order_ref && <span style={{ fontSize: 12, color: T.textMid }}>{t("disputes.order", "Commande")} : <strong style={{ color: T.main }}>{selected.order_ref}</strong></span>}
+                    {selected.invoice_ref && <span style={{ fontSize: 12, color: T.textMid }}>{t("disputes.invoice", "Facture")} : <strong style={{ color: T.red }}>{selected.invoice_ref}</strong></span>}
                     {selected.amount_disputed != null && <span style={{ fontSize: 12, color: T.red, fontWeight: 700 }}>{fmtCad(selected.amount_disputed)}</span>}
                   </div>
                 </div>
@@ -264,7 +266,7 @@ export default function DisputesPage() {
               {/* Statut + actions */}
               {(canManage || can("disputes.resolve")) && (
                 <div style={{ padding: "12px 20px", borderBottom: `1px solid ${T.border}`, display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <span style={{ fontSize: 13, color: T.textMid, alignSelf: "center" }}>Statut :</span>
+                  <span style={{ fontSize: 13, color: T.textMid, alignSelf: "center" }}>{t("disputes.status", "Statut")} :</span>
                   {STATUS_OPTIONS.map(s => (
                     <button key={s} onClick={() => handleStatusChange(selected, s)}
                       style={{ padding: "6px 14px", borderRadius: 20, border: `1.5px solid ${selected.status === s ? DISPUTE_STATUS_COLORS[s] : T.border}`, background: selected.status === s ? `${DISPUTE_STATUS_COLORS[s]}18` : "transparent", color: selected.status === s ? DISPUTE_STATUS_COLORS[s] : T.textMid, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
@@ -284,7 +286,7 @@ export default function DisputesPage() {
               {/* Messages */}
               <div style={{ padding: "14px 20px", maxHeight: 260, overflowY: "auto" }}>
                 {(!selected.dispute_messages || selected.dispute_messages.length === 0) && (
-                  <div style={{ textAlign: "center", color: T.textLight, fontSize: 13, padding: "16px 0" }}>Aucun message</div>
+                  <div style={{ textAlign: "center", color: T.textLight, fontSize: 13, padding: "16px 0" }}>{t("disputes.no_messages", "Aucun message")}</div>
                 )}
                 {(selected.dispute_messages ?? []).map(m => (
                   <div key={m.id} style={{ marginBottom: 12, padding: "10px 14px", background: m.sender_id === profile?.id ? `${T.main}10` : "#f8f9fc", borderRadius: 8, borderLeft: `3px solid ${m.sender_id === profile?.id ? T.main : T.border}` }}>
@@ -299,10 +301,10 @@ export default function DisputesPage() {
                 <div style={{ padding: "12px 20px", borderTop: `1px solid ${T.border}`, display: "flex", gap: 10 }}>
                   <input value={newMessage} onChange={e => setNewMessage(e.target.value)}
                     onKeyDown={e => e.key === "Enter" && !e.shiftKey && handleSendMessage()}
-                    placeholder="Ajouter une note ou message..."
+                    placeholder={t("disputes.add_note", "Ajouter une note ou message...")}
                     style={{ flex: 1, padding: "8px 12px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, outline: "none", fontFamily: "inherit" }}/>
                   <button onClick={handleSendMessage} style={{ padding: "8px 16px", borderRadius: 8, background: T.main, color: "#fff", border: "none", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-                    Envoyer
+                    {t("send", "Envoyer")}
                   </button>
                 </div>
               )}
@@ -316,16 +318,16 @@ export default function DisputesPage() {
         <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000 }}>
           <div style={{ background: T.card, borderRadius: 12, padding: 28, width: 520, maxWidth: "95vw", maxHeight: "90vh", overflowY: "auto" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
-              <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800 }}>Nouvelle dispute</h3>
+              <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800 }}>{t("disputes.new_dispute", "Nouvelle dispute")}</h3>
               <button onClick={() => setShowNew(false)} style={{ background: "none", border: "none", cursor: "pointer", color: T.textLight }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
             </div>
             {[
-              { label: "Sujet *", field: "subject", type: "text", placeholder: "Ex: Facture non payée - Commande #123" },
-              { label: "Référence commande", field: "order_ref", type: "text", placeholder: "ORD-2026-001" },
-              { label: "Référence facture", field: "invoice_ref", type: "text", placeholder: "INV-2026-001" },
-              { label: "Montant en litige ($)", field: "amount_disputed", type: "number", placeholder: "0.00" },
+              { label: t("disputes.subject", "Sujet") + " *", field: "subject", type: "text", placeholder: "Ex: Facture non payée - Commande #123" },
+              { label: t("disputes.order_ref", "Référence commande"), field: "order_ref", type: "text", placeholder: "ORD-2026-001" },
+              { label: t("disputes.invoice_ref", "Référence facture"), field: "invoice_ref", type: "text", placeholder: "INV-2026-001" },
+              { label: t("disputes.amount_disputed", "Montant en litige ($)"), field: "amount_disputed", type: "number", placeholder: "0.00" },
             ].map(({ label, field, type, placeholder }) => (
               <div key={field} style={{ marginBottom: 14 }}>
                 <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 4 }}>{label}</label>
@@ -334,15 +336,15 @@ export default function DisputesPage() {
               </div>
             ))}
             <div style={{ marginBottom: 14 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 4 }}>Client *</label>
+              <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 4 }}>{t("disputes.client", "Client")} *</label>
               <select value={form.client_id} onChange={e => setForm(p => ({ ...p, client_id: e.target.value }))}
                 style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, fontFamily: "inherit", cursor: "pointer", boxSizing: "border-box" }}>
-                <option value="">Sélectionner un client...</option>
+                <option value="">{t("disputes.select_client", "Sélectionner un client...")}</option>
                 {clients.map(c => <option key={c.id} value={c.id}>{c.company_name}</option>)}
               </select>
             </div>
             <div style={{ marginBottom: 14 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 4 }}>Priorité</label>
+              <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 4 }}>{t("disputes.priority", "Priorité")}</label>
               <div style={{ display: "flex", gap: 8 }}>
                 {DISPUTE_PRIORITIES.map(p => (
                   <button key={p} onClick={() => setForm(prev => ({ ...prev, priority: p }))}
@@ -353,15 +355,15 @@ export default function DisputesPage() {
               </div>
             </div>
             <div style={{ marginBottom: 20 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 4 }}>Description</label>
-              <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={3} placeholder="Décrivez le problème..."
+              <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 4 }}>{t("disputes.description", "Description")}</label>
+              <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={3} placeholder={t("disputes.describe_issue", "Décrivez le problème...")}
                 style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, fontFamily: "inherit", resize: "vertical", outline: "none", boxSizing: "border-box" }}/>
             </div>
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-              <button onClick={() => setShowNew(false)} style={{ padding: "10px 20px", borderRadius: 8, border: `1px solid ${T.border}`, background: "transparent", fontSize: 14, cursor: "pointer", fontFamily: "inherit" }}>Annuler</button>
+              <button onClick={() => setShowNew(false)} style={{ padding: "10px 20px", borderRadius: 8, border: `1px solid ${T.border}`, background: "transparent", fontSize: 14, cursor: "pointer", fontFamily: "inherit" }}>{t("cancel", "Annuler")}</button>
               <button onClick={handleCreate} disabled={saving || !form.subject.trim() || !form.client_id}
                 style={{ padding: "10px 20px", borderRadius: 8, background: T.main, color: "#fff", border: "none", fontSize: 14, fontWeight: 600, cursor: saving ? "wait" : "pointer", fontFamily: "inherit", opacity: saving ? 0.7 : 1 }}>
-                {saving ? "Création..." : "Créer la dispute"}
+                {saving ? t("common.creating", "Création...") : t("disputes.create_dispute", "Créer la dispute")}
               </button>
             </div>
           </div>

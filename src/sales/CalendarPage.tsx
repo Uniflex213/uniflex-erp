@@ -15,6 +15,7 @@ import AgendaView from "./calendar/AgendaView";
 import EventModal from "./calendar/EventModal";
 import EventDetailModal from "./calendar/EventDetailModal";
 import { T } from "../theme";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const VIEWS: { key: CalendarView; label: string }[] = [
   { key: "month", label: "Mois" },
@@ -53,9 +54,9 @@ function GoogleConnectModal({ onConnect, onClose }: { onConnect: () => void; onC
                 <path fill="#EA4335" d="M44.5 20H24v8.5h11.7c-.8 2.1-2.2 3.9-4 5.1l6.6 5.4C42 35.9 44.7 30.4 44.7 24c0-1.3-.1-2.7-.2-4z"/>
               </svg>
             </div>
-            <h3 style={{ margin: "0 0 8px", fontSize: 17, fontWeight: 800, color: T.text }}>Connecter Google Calendar</h3>
+            <h3 style={{ margin: "0 0 8px", fontSize: 17, fontWeight: 800, color: T.text }}>{t("calendar.connect_google", "Connecter Google Calendar")}</h3>
             <p style={{ fontSize: 13, color: T.textLight, margin: "0 0 20px", lineHeight: 1.5 }}>
-              Synchronisez vos événements Google Calendar avec la plateforme Uniflex pour une vue unifiée de votre agenda.
+              {t("calendar.sync_description", "Synchronisez vos événements Google Calendar avec la plateforme Uniflex pour une vue unifiée de votre agenda.")}
             </p>
             <button
               onClick={handleConnect}
@@ -65,21 +66,21 @@ function GoogleConnectModal({ onConnect, onClose }: { onConnect: () => void; onC
                 cursor: "pointer", fontFamily: "inherit",
               }}
             >
-              Autoriser l'accès Google Calendar
+              {t("calendar.authorize_google", "Autoriser l'accès Google Calendar")}
             </button>
             <button
               onClick={onClose}
               style={{ marginTop: 10, width: "100%", padding: "10px", borderRadius: 10, border: `1px solid ${T.border}`, background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 13 }}
             >
-              Annuler
+              {t("cancel", "Annuler")}
             </button>
           </>
         )}
         {step === "connecting" && (
           <>
             <div style={{ fontSize: 40, marginBottom: 14 }}>⏳</div>
-            <h3 style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 700, color: T.text }}>Connexion à Google Calendar...</h3>
-            <p style={{ fontSize: 13, color: T.textLight }}>Authentification en cours, veuillez patienter.</p>
+            <h3 style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 700, color: T.text }}>{t("calendar.connecting", "Connexion à Google Calendar...")}</h3>
+            <p style={{ fontSize: 13, color: T.textLight }}>{t("calendar.authenticating", "Authentification en cours, veuillez patienter.")}</p>
             <div style={{ display: "flex", justifyContent: "center", marginTop: 16 }}>
               <div style={{
                 width: 32, height: 32, borderRadius: "50%",
@@ -92,8 +93,8 @@ function GoogleConnectModal({ onConnect, onClose }: { onConnect: () => void; onC
         {step === "done" && (
           <>
             <div style={{ fontSize: 40, marginBottom: 14 }}>✅</div>
-            <h3 style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 700, color: "#16a34a" }}>Google Calendar connecté !</h3>
-            <p style={{ fontSize: 13, color: T.textLight }}>Vos événements Google seront affichés sur votre calendrier.</p>
+            <h3 style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 700, color: "#16a34a" }}>{t("calendar.connected", "Google Calendar connecté !")}</h3>
+            <p style={{ fontSize: 13, color: T.textLight }}>{t("calendar.events_displayed", "Vos événements Google seront affichés sur votre calendrier.")}</p>
           </>
         )}
       </div>
@@ -157,6 +158,7 @@ const MOCK_GOOGLE_EVENTS: Omit<CalendarEvent, "id" | "created_at" | "updated_at"
 ];
 
 export default function CalendarPage() {
+  const { t } = useLanguage();
   const { profile, realProfile } = useAuth();
   const ownerId = realProfile?.id ?? profile?.id ?? null;
   const [view, setView] = useState<CalendarView>("month");
@@ -361,7 +363,7 @@ export default function CalendarPage() {
             background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 12, fontWeight: 600, color: T.text,
           }}
         >
-          Aujourd'hui
+          {t("calendar.today", "Aujourd'hui")}
         </button>
 
         <div style={{ display: "flex", borderRadius: 10, overflow: "hidden", border: `1px solid ${T.border}`, flexShrink: 0 }}>
@@ -387,13 +389,13 @@ export default function CalendarPage() {
           {googleConnected ? (
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <div style={{ fontSize: 12, color: "#16a34a", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
-                <span style={{ fontSize: 14 }}>✅</span> Google Calendar connecté
+                <span style={{ fontSize: 14 }}>✅</span> {t("calendar.google_connected", "Google Calendar connecté")}
               </div>
               <button
                 onClick={() => setGoogleConnected(false)}
                 style={{ fontSize: 11, color: T.textLight, background: "none", border: `1px solid ${T.border}`, borderRadius: 6, padding: "3px 8px", cursor: "pointer", fontFamily: "inherit" }}
               >
-                Déconnecter
+                {t("calendar.disconnect", "Déconnecter")}
               </button>
             </div>
           ) : (
@@ -408,7 +410,7 @@ export default function CalendarPage() {
               <svg width="14" height="14" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path fill="#4285F4" d="M44.5 20H24v8.5h11.7C34.3 33.1 29.7 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l6.1-6.1C34.5 5.9 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-7.7 19.7-20 0-1.3-.1-2.7-.2-4z"/>
               </svg>
-              Connecter Google Calendar
+              {t("calendar.connect_google", "Connecter Google Calendar")}
             </button>
           )}
 
@@ -424,7 +426,7 @@ export default function CalendarPage() {
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = "0.9"; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
           >
-            + NOUVEL ÉVÉNEMENT
+            + {t("calendar.new_event", "NOUVEL ÉVÉNEMENT")}
           </button>
         </div>
       </div>

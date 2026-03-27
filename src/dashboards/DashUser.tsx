@@ -5,6 +5,7 @@ import { useUserPreferences } from '../hooks/useUserPreferences';
 import { Info } from 'lucide-react';
 import { T } from '../theme';
 import PeriodToggle from '../components/PeriodToggle';
+import { useLanguage } from "../i18n/LanguageContext";
 
 const fmt = (n: number) => new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 
@@ -20,6 +21,7 @@ const WIDGET_DEFS = [
 ];
 
 export default function DashUser() {
+  const { t } = useLanguage();
   const { profile, user } = useAuth();
   const userId = user?.id;
   const { prefs, loaded: prefsLoaded, updatePref } = useUserPreferences();
@@ -185,7 +187,7 @@ export default function DashUser() {
     switch (wid) {
       case 'w_sales': return wrap(<>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-          <div style={{ fontWeight: 800, fontSize: 15 }}>Mes Ventes</div>
+          <div style={{ fontWeight: 800, fontSize: 15 }}>{t('dash_user.my_sales', 'Mes Ventes')}</div>
           <PeriodToggle value={salesP} onChange={updateSalesP} options={[{ key: 'annual', label: 'An.' }, { key: 'monthly', label: 'Mois' }, { key: 'weekly', label: 'Sem.' }]} />
         </div>
         <div style={{ fontSize: 32, fontWeight: 800, color: T.main, marginBottom: 4 }}>{fmt(salesValue)}</div>
@@ -206,7 +208,7 @@ export default function DashUser() {
       </>);
 
       case 'w_clients': return wrap(<>
-        <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 14 }}>Mes Clients</div>
+        <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 14 }}>{t('dash_user.my_clients', 'Mes Clients')}</div>
         <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
           <div style={{ flex: 1, background: `${T.main}08`, borderRadius: 8, padding: 12, textAlign: 'center' }}>
             <div style={{ fontSize: 28, fontWeight: 800, color: T.main }}>{myClients.active}</div>
@@ -227,7 +229,7 @@ export default function DashUser() {
       </>);
 
       case 'w_commission': return wrap(<>
-        <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 14 }}>Mes Commissions</div>
+        <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 14 }}>{t('dash_user.my_commissions', 'Mes Commissions')}</div>
         <div style={{ background: `${T.main}06`, borderRadius: 10, padding: 20, textAlign: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 12 }}>
             <Info size={18} color={T.main} />
@@ -240,7 +242,7 @@ export default function DashUser() {
       </>);
 
       case 'w_ranking': return wrap(<>
-        <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 14 }}>Mon Classement</div>
+        <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 14 }}>{t('dash_user.my_ranking', 'Mon Classement')}</div>
         <div style={{ textAlign: 'center', padding: '12px 0', marginBottom: 12 }}>
           <div style={{ width: 60, height: 60, borderRadius: '50%', background: `linear-gradient(135deg,${T.main},${T.mainLight})`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 800, color: '#fff', marginBottom: 8 }}>#{myRank}</div>
           <div style={{ fontSize: 14, fontWeight: 700, color: T.text }}>sur {totalAgents} agents</div>
@@ -255,9 +257,9 @@ export default function DashUser() {
       </>);
 
       case 'w_orders': return wrap(<>
-        <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 14 }}>Commandes Recentes</div>
+        <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 14 }}>{t('dash_user.recent_orders', 'Commandes Récentes')}</div>
         {recentOrders.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: 20, color: T.textLight, fontSize: 13 }}>Aucune commande</div>
+          <div style={{ textAlign: 'center', padding: 20, color: T.textLight, fontSize: 13 }}>{t('dash_user.no_orders', 'Aucune commande')}</div>
         ) : (
           recentOrders.map((o, i) => (
             <div key={o.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: i < recentOrders.length - 1 ? `1px solid ${T.border}` : 'none' }}>
@@ -276,7 +278,7 @@ export default function DashUser() {
 
       case 'w_goals': {
         return wrap(<>
-          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 14 }}>Objectifs mensuels</div>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 14 }}>{t('dash_user.monthly_goals', 'Objectifs mensuels')}</div>
           <div style={{ textAlign: 'center', marginBottom: 16 }}>
             <div style={{ position: 'relative', width: 120, height: 120, margin: '0 auto' }}>
               <svg width="120" height="120" viewBox="0 0 120 120">
@@ -303,7 +305,7 @@ export default function DashUser() {
       case 'w_contests': return wrap(<>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
           <span style={{ color: '#ffd700', fontSize: 18 }}>&#9733;</span>
-          <span style={{ fontWeight: 800, fontSize: 15 }}>Concours</span>
+          <span style={{ fontWeight: 800, fontSize: 15 }}>{t('dash_user.contests', 'Concours')}</span>
         </div>
         {contestData ? (
           <>
@@ -316,16 +318,16 @@ export default function DashUser() {
             <div style={{ fontSize: 11, color: T.textLight, marginTop: 4 }}>Fin: {contestData.endDate}</div>
           </>
         ) : (
-          <div style={{ textAlign: 'center', padding: 20, color: T.textLight, fontSize: 13 }}>Aucun concours actif</div>
+          <div style={{ textAlign: 'center', padding: 20, color: T.textLight, fontSize: 13 }}>{t('dash_user.no_contest', 'Aucun concours actif')}</div>
         )}
       </>);
 
       case 'w_notes': return wrap(<>
-        <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 10 }}>Notes personnelles</div>
+        <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 10 }}>{t('dash_user.personal_notes', 'Notes personnelles')}</div>
         <textarea
           value={personalNotes}
           onChange={e => updateNotes(e.target.value)}
-          placeholder="Écrivez vos notes ici..."
+          placeholder={t("dash_user.write_notes", "Écrivez vos notes ici...")}
           style={{
             flex: 1, width: '100%', minHeight: 120, border: `1px solid ${T.border}`, borderRadius: 8,
             padding: 12, fontSize: 13, fontFamily: 'inherit', resize: 'vertical',
@@ -341,8 +343,8 @@ export default function DashUser() {
   if (loading) {
     return (
       <div>
-        <h2 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 800, color: T.text }}>Mon Dashboard</h2>
-        <p style={{ margin: 0, color: T.textMid, fontSize: 14 }}>Chargement...</p>
+        <h2 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 800, color: T.text }}>{t('dash_user.title', 'Mon Dashboard')}</h2>
+        <p style={{ margin: 0, color: T.textMid, fontSize: 14 }}>{t('common.loading', 'Chargement...')}</p>
       </div>
     );
   }
@@ -351,17 +353,16 @@ export default function DashUser() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div>
-          <h2 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 800, color: T.text }}>Mon Dashboard</h2>
-          <p style={{ margin: 0, color: T.textMid, fontSize: 14 }}>Bienvenue, {userName} -- vos chiffres personnels</p>
+          <h2 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 800, color: T.text }}>{t('dash_user.title', 'Mon Dashboard')}</h2>
+          <p style={{ margin: 0, color: T.textMid, fontSize: 14 }}>{t('dash_user.welcome', 'Bienvenue')}, {userName}</p>
         </div>
-        <button onClick={() => setShowConfig(!showConfig)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600, fontFamily: 'inherit', padding: '8px 16px', fontSize: 13, background: T.silverLight, color: T.text }}>
-          Configurer widgets
+        <button onClick={() => setShowConfig(!showConfig)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600, fontFamily: 'inherit', padding: '8px 16px', fontSize: 13, background: T.silverLight, color: T.text }}>{t("dash_user.configure_widgets", "Configurer widgets")}
         </button>
       </div>
 
       {showConfig && (
         <div style={{ background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: 16, marginBottom: 20 }}>
-          <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 12 }}>Widgets affiches</div>
+          <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 12 }}>{t("dash_user.displayed_widgets", "Widgets affichés")}</div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {WIDGET_DEFS.map(w => (
               <button key={w.id} onClick={() => toggle(w.id)} style={{

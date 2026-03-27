@@ -7,6 +7,7 @@ import { useStaggerReveal } from '../hooks/useStaggerReveal';
 import GlassCard from '../components/GlassCard';
 import PeriodToggle from '../components/PeriodToggle';
 import type { PeriodOption } from '../components/PeriodToggle';
+import { useLanguage } from "../i18n/LanguageContext";
 
 const fmt = (n: number) => new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 const fmtShort = (n: number) => n >= 1000000 ? `$${(n / 1000000).toFixed(1)}M` : n >= 1000 ? `$${(n / 1000).toFixed(0)}k` : `$${n}`;
@@ -219,7 +220,7 @@ function PixelGridOverlay({ show, onDone }: { show: boolean; onDone: () => void 
 // ── Sales Bar Chart (SVG pure) ──
 function SalesChart({ data, period }: { data: { label: string; value: number }[]; period: string }) {
   const max = Math.max(...data.map(d => d.value), 1);
-  if (data.length === 0) return <div style={{ textAlign: 'center', padding: 32, color: T.textLight, fontSize: 13 }}>Aucune donnée pour cette période</div>;
+  if (data.length === 0) return <div style={{ textAlign: 'center', padding: 32, color: T.textLight, fontSize: 13 }}>{t("dash_company.no_data_period", "Aucune donnée pour cette période")}</div>;
   return (
     <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 160, padding: '8px 0' }}>
       {data.map((d, i) => {
@@ -250,6 +251,7 @@ function SalesChart({ data, period }: { data: { label: string; value: number }[]
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════
 export default function DashCompany() {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [kpis, setKpis] = useState<KpiData>({ grossYtd: 0, salesMonth: 0, activeOrders: 0, clientsClosed: 0, activeAgents: 0 });
   const [salesData, setSalesData] = useState<{ label: string; value: number }[]>([]);
@@ -322,7 +324,7 @@ export default function DashCompany() {
       const d = l.details || {};
       return `${d.user_name || ''} ${l.action} ${l.entity_type || ''} ${d.description || ''}`.trim();
     }).filter((n: string) => n.length > 5);
-    setFlashNews(news.length > 0 ? news : ['Bienvenue sur le dashboard Uniflex']);
+    setFlashNews(news.length > 0 ? news : [t('dash_company.welcome', 'Bienvenue sur le dashboard Uniflex')]);
 
     await Promise.all([loadSalesChart(), loadLeaderboard(), loadProductSales()]);
     setLoading(false);
@@ -408,8 +410,7 @@ export default function DashCompany() {
   if (loading) {
     return (
       <div style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-        <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: T.textLight, marginBottom: 6 }}>
-          Dashboard Compagnie
+        <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: T.textLight, marginBottom: 6 }}>{t("dash_company.title", "Dashboard Compagnie")}
         </div>
         <div style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap' }}>
           {[1, 2, 3, 4, 5].map(i => (
@@ -446,11 +447,11 @@ export default function DashCompany() {
         }}>
           <div style={{ pointerEvents: 'auto' }}>
             <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: T.textLight, marginBottom: 4 }}>
-              Dashboard Compagnie
+              {t("dash_company.title", "Dashboard Compagnie")}
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 16 }}>
               <h2 style={{ margin: 0, fontSize: 28, fontWeight: 800, color: T.text, letterSpacing: -1 }}>
-                Uniflex Distribution
+                {t("dash_company.uniflex", "Uniflex Distribution")}
               </h2>
               <span style={{ fontSize: 12, color: T.textMid }}>
                 [{new Date().toLocaleDateString('fr-CA')}]
@@ -460,7 +461,7 @@ export default function DashCompany() {
             {/* Big animated counter */}
             <div style={{ marginBottom: 12 }}>
               <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: T.textLight, marginBottom: 8 }}>
-                Ventes totales YTD
+                {t("dash_company.total_sales_ytd", "Ventes totales YTD")}
               </div>
               <div style={{ fontSize: 48, fontWeight: 800, letterSpacing: -2, color: T.text, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
                 {fmt(animatedGrossYtd)}
@@ -473,7 +474,7 @@ export default function DashCompany() {
             {/* Top Agents list */}
             <div>
               <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: T.textLight, marginBottom: 8 }}>
-                Top vendeurs
+                {t("dash_company.top_sellers", "Top vendeurs")}
               </div>
               {leaders.slice(0, 5).map((a, i) => (
                 <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, fontSize: 12 }}>
@@ -490,10 +491,10 @@ export default function DashCompany() {
 
       {/* ── KPI ROW ── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 8, marginBottom: 16, marginTop: -100, position: 'relative', zIndex: 2 }}>
-        <KpiCard label="Ventes ce mois" value={kpis.salesMonth} isMonetary index={3} reveal={reveal} />
-        <KpiCard label="Commandes actives" value={kpis.activeOrders} isMonetary={false} index={4} reveal={reveal} />
-        <KpiCard label="Clients fermés" value={kpis.clientsClosed} isMonetary={false} index={5} reveal={reveal} />
-        <KpiCard label="Agents actifs" value={kpis.activeAgents} isMonetary={false} index={6} reveal={reveal} />
+        <KpiCard label={t("dash_company.sales_month", "Ventes ce mois")} value={kpis.salesMonth} isMonetary index={3} reveal={reveal} />
+        <KpiCard label={t("dash_company.active_orders", "Commandes actives")} value={kpis.activeOrders} isMonetary={false} index={4} reveal={reveal} />
+        <KpiCard label={t("dash_company.closed_clients", "Clients fermés")} value={kpis.clientsClosed} isMonetary={false} index={5} reveal={reveal} />
+        <KpiCard label={t("dash_company.active_agents", "Agents actifs")} value={kpis.activeAgents} isMonetary={false} index={6} reveal={reveal} />
       </div>
 
       {/* ── STATS GRID (3 columns) ── */}
@@ -503,7 +504,7 @@ export default function DashCompany() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <GlassCard style={{ padding: 16, ...reveal(7) }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <div style={{ fontWeight: 700, fontSize: 13, color: T.text }}>Ventes</div>
+              <div style={{ fontWeight: 700, fontSize: 13, color: T.text }}>{t("dash_company.sales", "Ventes")}</div>
               <PeriodToggle value={salesPeriod} onChange={setSalesPeriod} options={salesPeriodOpts} />
             </div>
             <SalesChart data={salesData} period={salesPeriod} />
@@ -511,11 +512,11 @@ export default function DashCompany() {
 
           <GlassCard style={{ padding: 16, ...reveal(8) }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <div style={{ fontWeight: 700, fontSize: 13, color: T.text }}>Produits top</div>
+              <div style={{ fontWeight: 700, fontSize: 13, color: T.text }}>{t("dash_company.top_products", "Produits top")}</div>
               <PeriodToggle value={prodPeriod} onChange={setProdPeriod} options={periodOpts} />
             </div>
             {productSales.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: 24, color: T.textLight, fontSize: 12 }}>Aucune donnée</div>
+              <div style={{ textAlign: 'center', padding: 24, color: T.textLight, fontSize: 12 }}>{t("dash_company.no_data", "Aucune donnée")}</div>
             ) : (
               productSales.slice(0, 5).map(p => (
                 <div key={p.name} style={{ marginBottom: 8 }}>
@@ -542,12 +543,12 @@ export default function DashCompany() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ color: '#d97706', fontSize: 16 }}>★</span>
-                <span style={{ fontWeight: 700, fontSize: 13, color: T.text }}>Leaderboard</span>
+                <span style={{ fontWeight: 700, fontSize: 13, color: T.text }}>{t("dash_company.leaderboard", "Leaderboard")}</span>
               </div>
               <PeriodToggle value={leaderPeriod} onChange={setLeaderPeriod} options={periodOpts} />
             </div>
             {leaders.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: 24, color: T.textLight, fontSize: 12 }}>Aucun agent</div>
+              <div style={{ textAlign: 'center', padding: 24, color: T.textLight, fontSize: 12 }}>{t("dash_company.no_agents", "Aucun agent")}</div>
             ) : (
               leaders.slice(0, 8).map((a, i) => (
                 <div key={a.id} style={{
@@ -580,11 +581,11 @@ export default function DashCompany() {
           <GlassCard style={{ padding: 16, ...reveal(10) }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
               <div style={{ width: 6, height: 6, borderRadius: '50%', background: T.green }} />
-              <span style={{ fontWeight: 700, fontSize: 13, color: T.text }}>Clients fermés ce mois</span>
+              <span style={{ fontWeight: 700, fontSize: 13, color: T.text }}>{t("dash_company.closed_clients_month", "Clients fermés ce mois")}</span>
               <span style={{ background: T.greenBg, color: T.green, padding: '1px 6px', borderRadius: 8, fontSize: 10, fontWeight: 700 }}>{closedClients.length}</span>
             </div>
             {closedClients.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: 16, color: T.textLight, fontSize: 12 }}>Aucun client fermé ce mois</div>
+              <div style={{ textAlign: 'center', padding: 16, color: T.textLight, fontSize: 12 }}>{t("dash_company.no_closed_clients", "Aucun client fermé ce mois")}</div>
             ) : (
               closedClients.slice(0, 4).map((c, i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', borderBottom: i < closedClients.length - 1 ? `1px solid ${T.border}` : 'none' }}>
@@ -608,7 +609,7 @@ export default function DashCompany() {
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
               <span style={{ color: '#d97706', fontSize: 16 }}>★</span>
-              <span style={{ fontWeight: 700, fontSize: 13, color: T.text }}>Concours actif</span>
+              <span style={{ fontWeight: 700, fontSize: 13, color: T.text }}>{t("dash_company.active_contest", "Concours actif")}</span>
             </div>
             {contest ? (
               <>
@@ -635,7 +636,7 @@ export default function DashCompany() {
                 ))}
               </>
             ) : (
-              <div style={{ padding: 20, textAlign: 'center', color: T.textLight, fontSize: 12 }}>Aucun concours actif</div>
+              <div style={{ padding: 20, textAlign: 'center', color: T.textLight, fontSize: 12 }}>{t("dash_company.no_contest", "Aucun concours actif")}</div>
             )}
           </GlassCard>
 
@@ -650,7 +651,7 @@ export default function DashCompany() {
                 padding: '3px 8px', borderRadius: 3, marginRight: 12, flexShrink: 0,
                 textTransform: 'uppercase', letterSpacing: 1,
                 animation: 'pulseGlow 2s ease-in-out infinite',
-              }}>EN DIRECT</div>
+              }}>{t("dash_company.live", "EN DIRECT")}</div>
               <div style={{ flex: 1, overflow: 'hidden', position: 'relative', height: 40, display: 'flex', alignItems: 'center' }}>
                 <div key={flashIdx} style={{ color: T.text, fontSize: 11, fontWeight: 500, whiteSpace: 'nowrap', animation: 'slideIn 0.5s ease' }}>
                   {flashNews[flashIdx]}

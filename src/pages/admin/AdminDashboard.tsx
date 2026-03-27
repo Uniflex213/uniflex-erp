@@ -7,6 +7,7 @@ import { AdminProfile } from "./adminTypes";
 import { Profile } from "../../contexts/AuthContext";
 import AdminUserStats from "./AdminUserStats";
 import { T } from "../../theme";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 const ROLE_LABELS: Record<string, string> = {
   god_admin: "God Admin", admin: "Admin", vendeur: "Vendeur",
@@ -37,6 +38,7 @@ function Avatar({ name, avatarUrl, size = 36 }: { name: string; avatarUrl?: stri
 }
 
 export default function AdminDashboard() {
+  const { t } = useLanguage();
   const { realProfile } = useAuth();
   const { startSimulation } = useSimulation();
   const [users, setUsers] = useState<AdminProfile[]>([]);
@@ -102,14 +104,14 @@ export default function AdminDashboard() {
         <div style={{ padding: "16px 16px 12px", borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
             <Shield size={16} color={T.main} />
-            <span style={{ fontSize: 14, fontWeight: 800, color: T.text }}>Tableau de bord admin</span>
+            <span style={{ fontSize: 14, fontWeight: 800, color: T.text }}>{t("admin.dashboard_title", "Tableau de bord admin")}</span>
           </div>
           <div style={{ position: "relative", marginBottom: 8 }}>
             <Search size={13} color={T.light} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)" }} />
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Rechercher un utilisateur..."
+              placeholder={t("admin.search_user", "Rechercher un utilisateur...")}
               style={{
                 width: "100%", boxSizing: "border-box", padding: "8px 10px 8px 30px",
                 border: `1px solid ${T.border}`, borderRadius: 8, fontSize: 12,
@@ -122,16 +124,16 @@ export default function AdminDashboard() {
             onChange={e => setRoleFilter(e.target.value)}
             style={{ width: "100%", padding: "7px 10px", border: `1px solid ${T.border}`, borderRadius: 8, fontSize: 12, fontFamily: "inherit", color: roleFilter ? T.text : T.light, outline: "none" }}
           >
-            <option value="">Tous les rôles</option>
+            <option value="">{t("users.all_roles", "Tous les rôles")}</option>
             {Object.entries(ROLE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
           </select>
         </div>
 
         <div style={{ flex: 1, overflow: "auto" }}>
           {loading ? (
-            <div style={{ padding: 20, textAlign: "center", color: T.light, fontSize: 13 }}>Chargement...</div>
+            <div style={{ padding: 20, textAlign: "center", color: T.light, fontSize: 13 }}>{t("common.loading", "Chargement...")}</div>
           ) : filtered.length === 0 ? (
-            <div style={{ padding: 20, textAlign: "center", color: T.light, fontSize: 13 }}>Aucun utilisateur</div>
+            <div style={{ padding: 20, textAlign: "center", color: T.light, fontSize: 13 }}>{t("admin.no_users", "Aucun utilisateur")}</div>
           ) : (
             filtered.map(u => {
               const isSelected = selectedUser?.id === u.id;
@@ -158,14 +160,14 @@ export default function AdminDashboard() {
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 2 }}>
                       <RoleBadge role={u.role} />
-                      {!u.is_active && <span style={{ fontSize: 10, color: T.light }}>Inactif</span>}
-                      {u.is_suspended && <span style={{ fontSize: 10, color: T.orange }}>Suspendu</span>}
+                      {!u.is_active && <span style={{ fontSize: 10, color: T.light }}>{t("status.inactive", "Inactif")}</span>}
+                      {u.is_suspended && <span style={{ fontSize: 10, color: T.orange }}>{t("status.suspended", "Suspendu")}</span>}
                     </div>
                   </div>
                   {isGodAdmin && !isSelf && (isSelected || isHovered) && (
                     <button
                       onClick={e => { e.stopPropagation(); handleSimulate(u); }}
-                      title="Simuler cet utilisateur"
+                      title={t("admin.simulate_user", "Simuler cet utilisateur")}
                       style={{
                         display: "flex", alignItems: "center", gap: 4, padding: "4px 8px",
                         border: "none", borderRadius: 6, background: T.main, color: "#fff",
@@ -174,7 +176,7 @@ export default function AdminDashboard() {
                       }}
                     >
                       <Play size={10} />
-                      Simuler
+                      {t("admin.simulate", "Simuler")}
                     </button>
                   )}
                 </div>
@@ -184,7 +186,7 @@ export default function AdminDashboard() {
         </div>
 
         <div style={{ padding: "10px 14px", borderTop: `1px solid ${T.border}`, fontSize: 11, color: T.light, flexShrink: 0 }}>
-          {filtered.length} utilisateur{filtered.length !== 1 ? "s" : ""}
+          {filtered.length} {t("admin.user_count", "utilisateur")}{filtered.length !== 1 ? "s" : ""}
         </div>
       </div>
 
@@ -192,7 +194,7 @@ export default function AdminDashboard() {
         {!selectedUser ? (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", color: T.light, gap: 12 }}>
             <User size={40} color={T.border} />
-            <span style={{ fontSize: 14 }}>Sélectionnez un utilisateur</span>
+            <span style={{ fontSize: 14 }}>{t("admin.select_user", "Sélectionnez un utilisateur")}</span>
           </div>
         ) : (
           <>
@@ -202,12 +204,12 @@ export default function AdminDashboard() {
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span style={{ fontSize: 16, fontWeight: 800, color: T.text }}>{selectedUser.full_name}</span>
                   <RoleBadge role={selectedUser.role} />
-                  {!selectedUser.is_active && <span style={{ fontSize: 11, padding: "2px 7px", borderRadius: 4, background: "#f3f4f6", color: T.light, fontWeight: 600 }}>Inactif</span>}
-                  {selectedUser.is_suspended && <span style={{ fontSize: 11, padding: "2px 7px", borderRadius: 4, background: "#fef3c7", color: T.orange, fontWeight: 600 }}>Suspendu</span>}
+                  {!selectedUser.is_active && <span style={{ fontSize: 11, padding: "2px 7px", borderRadius: 4, background: "#f3f4f6", color: T.light, fontWeight: 600 }}>{t("status.inactive", "Inactif")}</span>}
+                  {selectedUser.is_suspended && <span style={{ fontSize: 11, padding: "2px 7px", borderRadius: 4, background: "#fef3c7", color: T.orange, fontWeight: 600 }}>{t("status.suspended", "Suspendu")}</span>}
                 </div>
                 <div style={{ fontSize: 12, color: T.mid, marginTop: 2 }}>
                   {selectedUser.email}
-                  {selectedUser.last_login_at && <span style={{ marginLeft: 12 }}>Dernière connexion: {new Date(selectedUser.last_login_at).toLocaleDateString("fr-CA")}</span>}
+                  {selectedUser.last_login_at && <span style={{ marginLeft: 12 }}>{t("admin.last_login", "Dernière connexion")}: {new Date(selectedUser.last_login_at).toLocaleDateString("fr-CA")}</span>}
                 </div>
               </div>
               {isGodAdmin && selectedUser.id !== realProfile?.id && (
@@ -220,7 +222,7 @@ export default function AdminDashboard() {
                   }}
                 >
                   <Play size={13} />
-                  Simuler la session
+                  {t("admin.simulate_session", "Simuler la session")}
                 </button>
               )}
             </div>

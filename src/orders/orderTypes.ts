@@ -9,6 +9,7 @@ export type OrderStatus =
 
 export type OrderMotif = "Restock" | "Dropship client" | "Sample" | "Gros client" | "Autre";
 export type OrderBillingStatus = "unbilled" | "sent" | "billed_by_sci";
+// TODO: These labels should be translated at render time using t() from useLanguage()
 export const ORDER_BILLING_LABELS: Record<OrderBillingStatus, string> = {
   unbilled: "Non-facturé",
   sent: "Envoyé à SCI",
@@ -84,6 +85,8 @@ export type Order = {
   team_id?: string | null;
 };
 
+// TODO: These labels are static French strings. They should be translated at render time
+// using t() from useLanguage() in the components that consume them.
 export const STATUS_CONFIG: Record<OrderStatus, { label: string; color: string; bg: string }> = {
   pending_approval: { label: "À confirmer", color: "#b45309", bg: "#fef3c7" },
   en_revision: { label: "En révision", color: "#c2410c", bg: "#ffedd5" },

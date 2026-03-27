@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { InventaireProduct, StockMovement } from "./inventaireTypes";
 import { T } from "../../theme";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 const fmt = (n: number) => new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 const fmtDate = (s: string | null) => s ? new Date(s).toLocaleDateString("fr-CA", { day: "2-digit", month: "short", year: "numeric" }) : "—";
@@ -83,6 +84,7 @@ function KpiCard({ label, value, subvalue, color, bgColor, onClick }: KpiCardPro
 }
 
 export default function InventaireKpiBar({ products, movements }: Props) {
+  const { t } = useLanguage();
   const [modal, setModal] = useState<string | null>(null);
 
   const kpi: KpiData = {
@@ -113,63 +115,63 @@ export default function InventaireKpiBar({ products, movements }: Props) {
     <>
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 20 }}>
         <KpiCard
-          label="Valeur consignation SCI"
+          label={t("inventory.kpi_consignment_value", "Valeur consignation SCI")}
           value={fmt(kpi.totalValue)}
-          subvalue="stock × coût"
+          subvalue={t("inventory.kpi_stock_x_cost", "stock × coût")}
           onClick={() => setModal('value')}
         />
         <KpiCard
-          label="Produits en stock"
+          label={t("inventory.kpi_products_in_stock", "Produits en stock")}
           value={String(kpi.inStockCount)}
-          subvalue={`/${products.filter(p => p.is_active).length} SKUs actifs`}
+          subvalue={`/${products.filter(p => p.is_active).length} ${t("inventory.kpi_active_skus", "SKUs actifs")}`}
           onClick={() => setModal('instock')}
         />
         <KpiCard
-          label="Unités totales"
+          label={t("inventory.total_units", "Unités totales")}
           value={kpi.totalUnits.toLocaleString("fr-CA")}
-          subvalue="toutes catégories"
+          subvalue={t("inventory.kpi_all_categories", "toutes catégories")}
           onClick={() => setModal('units')}
         />
         <KpiCard
-          label="Stocks bas"
+          label={t("inventory.kpi_low_stock", "Stocks bas")}
           value={String(kpi.lowStockCount)}
           color={kpi.lowStockCount > 0 ? T.orange : T.text}
-          subvalue={kpi.lowStockCount > 0 ? "en alerte" : "aucune alerte"}
+          subvalue={kpi.lowStockCount > 0 ? t("inventory.kpi_in_alert", "en alerte") : t("inventory.kpi_no_alert", "aucune alerte")}
           bgColor={kpi.lowStockCount > 0 ? T.orangeBg : undefined}
           onClick={() => setModal('low')}
         />
         <KpiCard
-          label="Ruptures"
+          label={t("inventory.kpi_out_of_stock", "Ruptures")}
           value={String(kpi.outOfStockCount)}
           color={kpi.outOfStockCount > 0 ? T.red : T.text}
-          subvalue={kpi.outOfStockCount > 0 ? "stock épuisé" : "aucune rupture"}
+          subvalue={kpi.outOfStockCount > 0 ? t("inventory.kpi_stock_depleted", "stock épuisé") : t("inventory.kpi_no_outage", "aucune rupture")}
           bgColor={kpi.outOfStockCount > 0 ? T.redBg : undefined}
           onClick={() => setModal('out')}
         />
         <KpiCard
-          label="Unités réservées"
+          label={t("inventory.kpi_reserved_units", "Unités réservées")}
           value={String(kpi.reservedUnits)}
-          subvalue="tickets en attente"
+          subvalue={t("inventory.kpi_pending_tickets", "tickets en attente")}
           color={kpi.reservedUnits > 0 ? T.main : T.text}
           onClick={() => setModal('reserved')}
         />
         <KpiCard
-          label="Dernière réception"
+          label={t("inventory.kpi_last_reception", "Dernière réception")}
           value={kpi.lastReceptionDate ? fmtDate(kpi.lastReceptionDate) : "—"}
-          subvalue="entrée de stock"
+          subvalue={t("inventory.kpi_stock_entry", "entrée de stock")}
           onClick={() => setModal('lastrecep')}
         />
         <KpiCard
-          label="Mouvements ce mois"
+          label={t("inventory.kpi_monthly_movements", "Mouvements ce mois")}
           value={String(kpi.monthlyMovementsValue)}
-          subvalue="unités entrées/sorties"
+          subvalue={t("inventory.kpi_units_in_out", "unités entrées/sorties")}
           onClick={() => setModal('monthmov')}
         />
       </div>
 
       {modal === 'value' && (
-        <KpiModal title="Valeur de la consignation SCI" onClose={() => setModal(null)}>
-          <div style={{ fontSize: 13, color: T.textMid, marginBottom: 16 }}>Valeur théorique du stock en consignation, calculée sur la base du prix coûtant de chaque produit.</div>
+        <KpiModal title={t("inventory.modal_consignment_value", "Valeur de la consignation SCI")} onClose={() => setModal(null)}>
+          <div style={{ fontSize: 13, color: T.textMid, marginBottom: 16 }}>{t("inventory.modal_consignment_desc", "Valeur théorique du stock en consignation, calculée sur la base du prix coûtant de chaque produit.")}</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {products.filter(p => p.stock_qty > 0 && p.cost_price > 0).map(p => (
               <div key={p.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "8px 0", borderBottom: `1px solid ${T.border}` }}>
@@ -179,23 +181,23 @@ export default function InventaireKpiBar({ products, movements }: Props) {
             ))}
             {products.filter(p => p.stock_qty > 0 && p.cost_price === 0).length > 0 && (
               <div style={{ fontSize: 12, color: T.orange, padding: "8px 0" }}>
-                {products.filter(p => p.stock_qty > 0 && p.cost_price === 0).length} produit(s) sans prix coûtant défini — non comptabilisés.
+                {products.filter(p => p.stock_qty > 0 && p.cost_price === 0).length} {t("inventory.modal_no_cost_price", "produit(s) sans prix coûtant défini — non comptabilisés.")}
               </div>
             )}
           </div>
           <div style={{ marginTop: 16, paddingTop: 12, borderTop: `2px solid ${T.border}`, display: "flex", justifyContent: "space-between", fontSize: 15, fontWeight: 800 }}>
-            <span>Total</span><span style={{ color: T.main }}>{fmt(kpi.totalValue)}</span>
+            <span>{t("total", "Total")}</span><span style={{ color: T.main }}>{fmt(kpi.totalValue)}</span>
           </div>
         </KpiModal>
       )}
 
       {modal === 'instock' && (
-        <KpiModal title="Produits en stock" onClose={() => setModal(null)}>
+        <KpiModal title={t("inventory.kpi_products_in_stock", "Produits en stock")} onClose={() => setModal(null)}>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {products.filter(p => p.stock_qty > 0).map(p => (
               <div key={p.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "6px 0", borderBottom: `1px solid ${T.border}` }}>
                 <span style={{ fontWeight: 600 }}>{p.name}</span>
-                <span style={{ color: T.green, fontWeight: 700 }}>{p.stock_qty} unités</span>
+                <span style={{ color: T.green, fontWeight: 700 }}>{p.stock_qty} {t("inventory.units_label", "unités")}</span>
               </div>
             ))}
           </div>
@@ -203,15 +205,15 @@ export default function InventaireKpiBar({ products, movements }: Props) {
       )}
 
       {modal === 'low' && (
-        <KpiModal title="Produits en stock bas" onClose={() => setModal(null)}>
+        <KpiModal title={t("inventory.modal_low_stock", "Produits en stock bas")} onClose={() => setModal(null)}>
           {lowProducts.length === 0 ? (
-            <div style={{ textAlign: "center", color: T.textMid, padding: "20px 0" }}>Aucun produit en alerte.</div>
+            <div style={{ textAlign: "center", color: T.textMid, padding: "20px 0" }}>{t("inventory.no_alert_products", "Aucun produit en alerte.")}</div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {lowProducts.map(p => (
                 <div key={p.id} style={{ background: T.orangeBg, borderRadius: 8, padding: "10px 14px" }}>
                   <div style={{ fontWeight: 700, color: T.text }}>{p.name}</div>
-                  <div style={{ fontSize: 12, color: T.orange, marginTop: 2 }}>Stock actuel: {p.stock_qty} — Minimum: {p.min_stock}</div>
+                  <div style={{ fontSize: 12, color: T.orange, marginTop: 2 }}>{t("inventory.current_stock", "Stock actuel")}: {p.stock_qty} — {t("inventory.minimum", "Minimum")}: {p.min_stock}</div>
                 </div>
               ))}
             </div>
@@ -220,15 +222,15 @@ export default function InventaireKpiBar({ products, movements }: Props) {
       )}
 
       {modal === 'out' && (
-        <KpiModal title="Produits en rupture de stock" onClose={() => setModal(null)}>
+        <KpiModal title={t("inventory.modal_out_of_stock", "Produits en rupture de stock")} onClose={() => setModal(null)}>
           {outProducts.length === 0 ? (
-            <div style={{ textAlign: "center", color: T.textMid, padding: "20px 0" }}>Aucune rupture.</div>
+            <div style={{ textAlign: "center", color: T.textMid, padding: "20px 0" }}>{t("inventory.no_outage", "Aucune rupture.")}</div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {outProducts.map(p => (
                 <div key={p.id} style={{ background: T.redBg, borderRadius: 8, padding: "10px 14px" }}>
                   <div style={{ fontWeight: 700, color: T.red }}>{p.name}</div>
-                  <div style={{ fontSize: 12, color: T.textMid, marginTop: 2 }}>Stock: 0 unités — Minimum requis: {p.min_stock}</div>
+                  <div style={{ fontSize: 12, color: T.textMid, marginTop: 2 }}>{t("products.stock", "Stock")}: 0 {t("inventory.units_label", "unités")} — {t("inventory.min_required", "Minimum requis")}: {p.min_stock}</div>
                 </div>
               ))}
             </div>
@@ -237,16 +239,16 @@ export default function InventaireKpiBar({ products, movements }: Props) {
       )}
 
       {modal === 'reserved' && (
-        <KpiModal title="Unités réservées" onClose={() => setModal(null)}>
-          <div style={{ fontSize: 13, color: T.textMid, marginBottom: 14 }}>Unités réservées par des pickup tickets en statut "Préparé" ou "Prêt au ramassage" (non encore récupérés).</div>
+        <KpiModal title={t("inventory.kpi_reserved_units", "Unités réservées")} onClose={() => setModal(null)}>
+          <div style={{ fontSize: 13, color: T.textMid, marginBottom: 14 }}>{t("inventory.reserved_desc", "Unités réservées par des pickup tickets en statut \"Préparé\" ou \"Prêt au ramassage\" (non encore récupérés).")}</div>
           {reservedProducts.length === 0 ? (
-            <div style={{ textAlign: "center", color: T.textMid, padding: "20px 0" }}>Aucune réservation active.</div>
+            <div style={{ textAlign: "center", color: T.textMid, padding: "20px 0" }}>{t("inventory.no_active_reservation", "Aucune réservation active.")}</div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {reservedProducts.map(p => (
                 <div key={p.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "6px 0", borderBottom: `1px solid ${T.border}` }}>
                   <span style={{ fontWeight: 600 }}>{p.name}</span>
-                  <span><strong style={{ color: T.orange }}>{p.reserved_qty}</strong> réservé(s) / {p.available_qty} disponible(s)</span>
+                  <span><strong style={{ color: T.orange }}>{p.reserved_qty}</strong> {t("inventory.reserved_count", "réservé(s)")} / {p.available_qty} {t("inventory.available_count", "disponible(s)")}</span>
                 </div>
               ))}
             </div>
@@ -255,27 +257,27 @@ export default function InventaireKpiBar({ products, movements }: Props) {
       )}
 
       {modal === 'lastrecep' && (
-        <KpiModal title="Dernière réception de stock" onClose={() => setModal(null)}>
+        <KpiModal title={t("inventory.modal_last_reception", "Dernière réception de stock")} onClose={() => setModal(null)}>
           {kpi.lastReceptionDate ? (
             <div>
               <div style={{ fontSize: 28, fontWeight: 900, color: T.main, marginBottom: 8 }}>{fmtDate(kpi.lastReceptionDate)}</div>
-              <div style={{ fontSize: 13, color: T.textMid }}>Dernière entrée de stock enregistrée dans le système.</div>
+              <div style={{ fontSize: 13, color: T.textMid }}>{t("inventory.last_entry_desc", "Dernière entrée de stock enregistrée dans le système.")}</div>
             </div>
           ) : (
-            <div style={{ textAlign: "center", color: T.textMid, padding: "20px 0" }}>Aucune réception enregistrée.</div>
+            <div style={{ textAlign: "center", color: T.textMid, padding: "20px 0" }}>{t("inventory.no_reception_recorded", "Aucune réception enregistrée.")}</div>
           )}
         </KpiModal>
       )}
 
       {modal === 'monthmov' && (
-        <KpiModal title="Mouvements ce mois" onClose={() => setModal(null)}>
-          <div style={{ fontSize: 13, color: T.textMid, marginBottom: 14 }}>Total des unités entrées (réceptions) et sorties (pickups, commandes, échantillons) ce mois-ci.</div>
-          <div style={{ fontSize: 28, fontWeight: 900, color: T.main }}>{kpi.monthlyMovementsValue} unités</div>
+        <KpiModal title={t("inventory.kpi_monthly_movements", "Mouvements ce mois")} onClose={() => setModal(null)}>
+          <div style={{ fontSize: 13, color: T.textMid, marginBottom: 14 }}>{t("inventory.monthly_movements_desc", "Total des unités entrées (réceptions) et sorties (pickups, commandes, échantillons) ce mois-ci.")}</div>
+          <div style={{ fontSize: 28, fontWeight: 900, color: T.main }}>{kpi.monthlyMovementsValue} {t("inventory.units_label", "unités")}</div>
         </KpiModal>
       )}
 
       {(modal === 'units') && (
-        <KpiModal title="Unités totales en stock" onClose={() => setModal(null)}>
+        <KpiModal title={t("inventory.modal_total_units", "Unités totales en stock")} onClose={() => setModal(null)}>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {products.filter(p => p.stock_qty > 0).map(p => (
               <div key={p.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "6px 0", borderBottom: `1px solid ${T.border}` }}>
@@ -285,7 +287,7 @@ export default function InventaireKpiBar({ products, movements }: Props) {
             ))}
           </div>
           <div style={{ marginTop: 12, paddingTop: 10, borderTop: `2px solid ${T.border}`, display: "flex", justifyContent: "space-between", fontWeight: 800, fontSize: 14 }}>
-            <span>Total</span><span style={{ color: T.main }}>{kpi.totalUnits}</span>
+            <span>{t("total", "Total")}</span><span style={{ color: T.main }}>{kpi.totalUnits}</span>
           </div>
         </KpiModal>
       )}

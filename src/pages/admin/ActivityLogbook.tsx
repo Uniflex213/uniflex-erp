@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { supabase } from "../../supabaseClient";
 import { LOG_COLORS, ACTION_LABELS } from "../../lib/activityLogger";
 import { T } from "../../theme";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface LogRow {
   id: string;
@@ -24,6 +25,7 @@ const MODULE_FILTERS = [
 const PAGE_SIZE = 50;
 
 export default function ActivityLogbook() {
+  const { t } = useLanguage();
   const [logs, setLogs] = useState<LogRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [moduleFilter, setModuleFilter] = useState("all");
@@ -97,8 +99,8 @@ export default function ActivityLogbook() {
             </svg>
           </div>
           <div>
-            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: T.text }}>Logbook Compagnie</h1>
-            <p style={{ margin: 0, fontSize: 13, color: T.textLight }}>Toutes les actions — connexions exclues</p>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: T.text }}>{t("logbook.title", "Logbook Compagnie")}</h1>
+            <p style={{ margin: 0, fontSize: 13, color: T.textLight }}>{t("logbook.subtitle", "Toutes les actions — connexions exclues")}</p>
           </div>
         </div>
       </div>
@@ -106,11 +108,11 @@ export default function ActivityLogbook() {
       {/* KPI bar */}
       <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
         <div style={{ background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: "12px 20px", flex: "1 1 140px" }}>
-          <div style={{ fontSize: 11, color: T.textLight, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5 }}>Aujourd'hui</div>
+          <div style={{ fontSize: 11, color: T.textLight, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5 }}>{t("logbook.today", "Aujourd'hui")}</div>
           <div style={{ fontSize: 28, fontWeight: 800, color: T.main }}>{todayCount}</div>
         </div>
         <div style={{ background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: "12px 20px", flex: "1 1 140px" }}>
-          <div style={{ fontSize: 11, color: T.textLight, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5 }}>Chargés</div>
+          <div style={{ fontSize: 11, color: T.textLight, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5 }}>{t("logbook.loaded", "Chargés")}</div>
           <div style={{ fontSize: 28, fontWeight: 800, color: T.text }}>{logs.length}</div>
         </div>
         {moduleBreakdown.slice(0, 3).map(([mod, count]) => {
@@ -129,7 +131,7 @@ export default function ActivityLogbook() {
       <div style={{ background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: "14px 16px", marginBottom: 16, display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
         <input
           value={search} onChange={e => setSearch(e.target.value)}
-          placeholder="Rechercher par entité..."
+          placeholder={t("logbook.search_entity", "Rechercher par entité...")}
           style={{ flex: "1 1 200px", padding: "8px 12px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, outline: "none", fontFamily: "inherit" }}
         />
         <select value={moduleFilter} onChange={e => setModuleFilter(e.target.value)}
@@ -138,12 +140,12 @@ export default function ActivityLogbook() {
         </select>
         <select value={userFilter} onChange={e => setUserFilter(e.target.value)}
           style={{ padding: "8px 12px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, fontFamily: "inherit", cursor: "pointer" }}>
-          <option value="all">Tous les utilisateurs</option>
+          <option value="all">{t("logbook.all_users", "Tous les utilisateurs")}</option>
           {users.map(u => <option key={u.id} value={u.id}>{u.full_name}</option>)}
         </select>
         <button onClick={() => { setModuleFilter("all"); setUserFilter("all"); setSearch(""); }}
           style={{ padding: "8px 14px", borderRadius: 8, border: `1px solid ${T.border}`, background: "transparent", fontSize: 13, cursor: "pointer", color: T.textMid, fontFamily: "inherit" }}>
-          Réinitialiser
+          {t("logbook.reset", "Réinitialiser")}
         </button>
       </div>
 
@@ -161,20 +163,20 @@ export default function ActivityLogbook() {
       {/* Table */}
       <div style={{ background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, overflow: "hidden" }}>
         <div style={{ display: "grid", gridTemplateColumns: "160px 1fr 140px 100px 120px 36px", gap: 0, padding: "10px 16px", background: "#f8f9fc", borderBottom: `1px solid ${T.border}`, fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5 }}>
-          <span>Horodatage</span>
-          <span>Action</span>
-          <span>Utilisateur</span>
-          <span>Module</span>
-          <span>Entité</span>
+          <span>{t("logbook.timestamp", "Horodatage")}</span>
+          <span>{t("logbook.action", "Action")}</span>
+          <span>{t("logbook.user", "Utilisateur")}</span>
+          <span>{t("logbook.module", "Module")}</span>
+          <span>{t("logbook.entity", "Entité")}</span>
           <span></span>
         </div>
 
         {loading && logs.length === 0 && (
-          <div style={{ padding: "40px 16px", textAlign: "center", color: T.textLight, fontSize: 13 }}>Chargement...</div>
+          <div style={{ padding: "40px 16px", textAlign: "center", color: T.textLight, fontSize: 13 }}>{t("common.loading", "Chargement...")}</div>
         )}
 
         {!loading && logs.length === 0 && (
-          <div style={{ padding: "40px 16px", textAlign: "center", color: T.textLight, fontSize: 13 }}>Aucune action trouvée</div>
+          <div style={{ padding: "40px 16px", textAlign: "center", color: T.textLight, fontSize: 13 }}>{t("logbook.no_actions", "Aucune action trouvée")}</div>
         )}
 
         {logs.map((log, i) => {
@@ -228,10 +230,10 @@ export default function ActivityLogbook() {
               {isExpanded && (
                 <div style={{ padding: "12px 16px 16px 36px", background: `${mod.bg}40`, borderBottom: `1px solid ${T.border}` }}>
                   <div style={{ display: "flex", gap: 24, flexWrap: "wrap", fontSize: 12 }}>
-                    <div><span style={{ color: T.textLight }}>Action brute : </span><code style={{ background: "rgba(0,0,0,0.05)", padding: "1px 6px", borderRadius: 4 }}>{log.action}</code></div>
-                    {log.entity_type && <div><span style={{ color: T.textLight }}>Type : </span><strong>{log.entity_type}</strong></div>}
-                    {log.entity_id && <div><span style={{ color: T.textLight }}>ID : </span><code style={{ background: "rgba(0,0,0,0.05)", padding: "1px 6px", borderRadius: 4 }}>{log.entity_id}</code></div>}
-                    {log.profile?.role && <div><span style={{ color: T.textLight }}>Rôle : </span><strong>{getRoleLabel(log.profile.role)}</strong></div>}
+                    <div><span style={{ color: T.textLight }}>{t("logbook.raw_action", "Action brute")} : </span><code style={{ background: "rgba(0,0,0,0.05)", padding: "1px 6px", borderRadius: 4 }}>{log.action}</code></div>
+                    {log.entity_type && <div><span style={{ color: T.textLight }}>{t("logbook.type", "Type")} : </span><strong>{log.entity_type}</strong></div>}
+                    {log.entity_id && <div><span style={{ color: T.textLight }}>{t("logbook.id", "ID")} : </span><code style={{ background: "rgba(0,0,0,0.05)", padding: "1px 6px", borderRadius: 4 }}>{log.entity_id}</code></div>}
+                    {log.profile?.role && <div><span style={{ color: T.textLight }}>{t("logbook.role", "Rôle")} : </span><strong>{getRoleLabel(log.profile.role)}</strong></div>}
                     {Object.keys(log.details ?? {}).filter(k => !["entity_type","entity_id","entity_name"].includes(k)).map(k => (
                       <div key={k}><span style={{ color: T.textLight }}>{k} : </span><strong>{String(log.details[k])}</strong></div>
                     ))}
@@ -247,7 +249,7 @@ export default function ActivityLogbook() {
             <button
               onClick={() => { setPage(p => p + 1); fetchLogs(false); }}
               style={{ padding: "8px 24px", borderRadius: 8, border: `1px solid ${T.border}`, background: "transparent", fontSize: 13, cursor: "pointer", color: T.textMid, fontFamily: "inherit" }}>
-              Charger plus
+              {t("logbook.load_more", "Charger plus")}
             </button>
           </div>
         )}

@@ -3,6 +3,7 @@ import { supabase } from "../../supabaseClient";
 import { useAuth } from "../../contexts/AuthContext";
 import { Eye, EyeOff, Send, CheckCircle, AlertCircle } from "lucide-react";
 import { T } from "../../theme";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
@@ -45,6 +46,7 @@ interface EditForm {
 }
 
 export default function EmailSettingsPage() {
+  const { t } = useLanguage();
   const { session } = useAuth();
   const [configs, setConfigs] = useState<SmtpConfig[]>([]);
   const [logs, setLogs] = useState<EmailLog[]>([]);
@@ -105,7 +107,7 @@ export default function EmailSettingsPage() {
       setConfigError(error.message);
     } else {
       setConfigs(prev => prev.map(c => c.id === editModal.id ? { ...c, from_email: editForm.from_email, from_name: editForm.from_name, is_active: editForm.is_active } : c));
-      setConfigMsg("Configuration sauvegardée");
+      setConfigMsg(t("email.config_saved", "Configuration sauvegardée"));
       setTimeout(() => { setEditModal(null); setConfigMsg(""); }, 1500);
     }
     setSavingConfig(false);
@@ -144,14 +146,14 @@ export default function EmailSettingsPage() {
   return (
     <div style={{ fontFamily: "'Outfit', sans-serif" }}>
       <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 900, color: T.text, margin: "0 0 6px" }}>Paramètres email</h1>
-        <p style={{ margin: 0, fontSize: 13, color: T.textMid }}>Gérez les configurations SMTP système et consultez les journaux d'envoi.</p>
+        <h1 style={{ fontSize: 24, fontWeight: 900, color: T.text, margin: "0 0 6px" }}>{t("email.settings_title", "Paramètres email")}</h1>
+        <p style={{ margin: 0, fontSize: 13, color: T.textMid }}>{t("email.settings_subtitle", "Gérez les configurations SMTP système et consultez les journaux d'envoi.")}</p>
       </div>
 
       <div style={{ marginBottom: 28 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 800, color: T.text, margin: "0 0 14px" }}>Configurations SMTP système</h2>
+        <h2 style={{ fontSize: 16, fontWeight: 800, color: T.text, margin: "0 0 14px" }}>{t("email.smtp_configs", "Configurations SMTP système")}</h2>
         {loadingConfigs ? (
-          <div style={{ padding: 32, textAlign: "center", color: T.textLight, fontSize: 13 }}>Chargement...</div>
+          <div style={{ padding: 32, textAlign: "center", color: T.textLight, fontSize: 13 }}>{t("common.loading", "Chargement...")}</div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 14 }}>
             {Object.keys(CONFIG_LABELS).map(key => {
@@ -165,7 +167,7 @@ export default function EmailSettingsPage() {
                     </div>
                     {cfg && (
                       <span style={{ fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 5, background: cfg.is_active ? T.greenBg : T.bg, color: cfg.is_active ? T.green : T.textLight }}>
-                        {cfg.is_active ? "Actif" : "Inactif"}
+                        {cfg.is_active ? t("status.active", "Actif") : t("status.inactive", "Inactif")}
                       </span>
                     )}
                   </div>
@@ -174,15 +176,15 @@ export default function EmailSettingsPage() {
                       <div style={{ fontSize: 12, color: T.textMid, marginBottom: 4 }}><strong style={{ color: T.text }}>De :</strong> {cfg.from_name || "—"}</div>
                       <div style={{ fontSize: 12, color: T.textMid, marginBottom: 14 }}><strong style={{ color: T.text }}>Email :</strong> {cfg.from_email || "—"}</div>
                       <button onClick={() => openEdit(cfg)} style={{ width: "100%", padding: "8px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, color: T.text, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-                        Modifier
+                        {t("common.edit", "Modifier")}
                       </button>
                       {(() => {
                         const t = getTest(key);
                         return (
                           <div style={{ marginTop: 12, borderTop: `1px solid ${T.border}`, paddingTop: 12 }}>
-                            <div style={{ fontSize: 11, fontWeight: 700, color: T.textMid, marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.4 }}>Tester l'envoi</div>
+                            <div style={{ fontSize: 11, fontWeight: 700, color: T.textMid, marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.4 }}>{t("email.test_send", "Tester l'envoi")}</div>
                             {!cfg.from_email ? (
-                              <div style={{ fontSize: 11, color: T.textLight, fontStyle: "italic" }}>Configurez l'adresse email d'abord via "Modifier"</div>
+                              <div style={{ fontSize: 11, color: T.textLight, fontStyle: "italic" }}>{t("email.configure_first", "Configurez l'adresse email d'abord via \"Modifier\"")}</div>
                             ) : (
                               <>
                                 <div style={{ display: "flex", gap: 6 }}>
@@ -215,7 +217,7 @@ export default function EmailSettingsPage() {
                       })()}
                     </>
                   ) : (
-                    <div style={{ fontSize: 12, color: T.textLight, fontStyle: "italic" }}>Non configuré</div>
+                    <div style={{ fontSize: 12, color: T.textLight, fontStyle: "italic" }}>{t("email.not_configured", "Non configuré")}</div>
                   )}
                 </div>
               );
@@ -226,10 +228,10 @@ export default function EmailSettingsPage() {
 
       <div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 800, color: T.text, margin: 0 }}>Journaux d'envoi</h2>
+          <h2 style={{ fontSize: 16, fontWeight: 800, color: T.text, margin: 0 }}>{t("email.send_logs", "Journaux d'envoi")}</h2>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <select value={filterKey} onChange={e => { setFilterKey(e.target.value); setLogsPage(0); }} style={{ padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, fontFamily: "inherit", outline: "none", background: T.bgCard, cursor: "pointer" }}>
-              <option value="">Tous les modules</option>
+              <option value="">{t("email.all_modules", "Tous les modules")}</option>
               {Object.entries(CONFIG_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
             </select>
           </div>
@@ -239,16 +241,16 @@ export default function EmailSettingsPage() {
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ background: "#f8f9fb" }}>
-                  {["Date", "Module", "Template", "Destinataire", "Référence", "Statut"].map(h => (
+                  {[t("email.date", "Date"), t("email.module", "Module"), "Template", t("email.recipient", "Destinataire"), t("email.reference", "Référence"), t("email.status", "Statut")].map(h => (
                     <th key={h} style={{ padding: "11px 14px", textAlign: "left", fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap" }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {loadingLogs ? (
-                  <tr><td colSpan={6} style={{ padding: 40, textAlign: "center", color: T.textLight, fontSize: 13 }}>Chargement...</td></tr>
+                  <tr><td colSpan={6} style={{ padding: 40, textAlign: "center", color: T.textLight, fontSize: 13 }}>{t("common.loading", "Chargement...")}</td></tr>
                 ) : logs.length === 0 ? (
-                  <tr><td colSpan={6} style={{ padding: 40, textAlign: "center", color: T.textLight, fontSize: 13 }}>Aucun journal trouvé.</td></tr>
+                  <tr><td colSpan={6} style={{ padding: 40, textAlign: "center", color: T.textLight, fontSize: 13 }}>{t("email.no_logs", "Aucun journal trouvé.")}</td></tr>
                 ) : logs.map((log, i) => (
                   <tr key={log.id} style={{ background: i % 2 === 0 ? "#fff" : "#fafbfc" }}>
                     <td style={{ padding: "11px 14px", fontSize: 12, color: T.textMid, borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap" }}>{fmtDate(log.created_at)}</td>
@@ -264,7 +266,7 @@ export default function EmailSettingsPage() {
                     <td style={{ padding: "11px 14px", fontSize: 12, color: T.textMid, borderBottom: `1px solid ${T.border}` }}>{log.reference_type ?? "—"}</td>
                     <td style={{ padding: "11px 14px", borderBottom: `1px solid ${T.border}` }}>
                       <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 4, background: log.success ? T.greenBg : T.redBg, color: log.success ? T.green : T.red }}>
-                        {log.success ? "Envoyé" : "Échec"}
+                        {log.success ? t("email.sent", "Envoyé") : t("email.failed", "Échec")}
                       </span>
                     </td>
                   </tr>
@@ -276,8 +278,8 @@ export default function EmailSettingsPage() {
             <div style={{ padding: "10px 16px", borderTop: `1px solid ${T.border}`, background: "#f8f9fb", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ fontSize: 12, color: T.textLight }}>{logsTotal} entrée{logsTotal !== 1 ? "s" : ""} au total</span>
               <div style={{ display: "flex", gap: 8 }}>
-                <button disabled={logsPage === 0} onClick={() => setLogsPage(p => p - 1)} style={{ padding: "6px 14px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, fontSize: 12, cursor: logsPage === 0 ? "not-allowed" : "pointer", opacity: logsPage === 0 ? 0.5 : 1, fontFamily: "inherit" }}>Précédent</button>
-                <button disabled={(logsPage + 1) * PER_PAGE >= logsTotal} onClick={() => setLogsPage(p => p + 1)} style={{ padding: "6px 14px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>Suivant</button>
+                <button disabled={logsPage === 0} onClick={() => setLogsPage(p => p - 1)} style={{ padding: "6px 14px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, fontSize: 12, cursor: logsPage === 0 ? "not-allowed" : "pointer", opacity: logsPage === 0 ? 0.5 : 1, fontFamily: "inherit" }}>{t("common.previous", "Précédent")}</button>
+                <button disabled={(logsPage + 1) * PER_PAGE >= logsTotal} onClick={() => setLogsPage(p => p + 1)} style={{ padding: "6px 14px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>{t("common.next", "Suivant")}</button>
               </div>
             </div>
           )}
@@ -289,7 +291,7 @@ export default function EmailSettingsPage() {
           <div style={{ background: T.card, borderRadius: 16, width: "100%", maxWidth: 480, boxShadow: "0 24px 60px rgba(0,0,0,0.2)", fontFamily: "'Outfit', sans-serif" }}>
             <div style={{ padding: "18px 22px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div>
-                <div style={{ fontSize: 16, fontWeight: 800, color: T.text }}>Modifier la config SMTP</div>
+                <div style={{ fontSize: 16, fontWeight: 800, color: T.text }}>{t("email.edit_smtp", "Modifier la config SMTP")}</div>
                 <div style={{ fontSize: 11, color: T.textMid }}>{CONFIG_LABELS[editModal.config_key] ?? editModal.config_key}</div>
               </div>
               <button onClick={() => setEditModal(null)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 18, color: T.textMid }}>✕</button>
@@ -299,17 +301,17 @@ export default function EmailSettingsPage() {
                 Serveur : smtp.hostinger.com · Port : 465 · SSL
               </div>
               <div>
-                <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, display: "block", marginBottom: 5 }}>Adresse d'envoi *</label>
+                <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, display: "block", marginBottom: 5 }}>{t("email.from_address", "Adresse d'envoi")} *</label>
                 <input value={editForm.from_email} onChange={e => setEditForm(p => ({ ...p, from_email: e.target.value }))} type="email" style={iStyle} />
               </div>
               <div>
-                <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, display: "block", marginBottom: 5 }}>Nom affiché</label>
+                <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, display: "block", marginBottom: 5 }}>{t("email.display_name", "Nom affiché")}</label>
                 <input value={editForm.from_name} onChange={e => setEditForm(p => ({ ...p, from_name: e.target.value }))} style={iStyle} />
               </div>
               <div>
-                <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, display: "block", marginBottom: 5 }}>Mot de passe SMTP</label>
+                <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, display: "block", marginBottom: 5 }}>{t("email.smtp_password", "Mot de passe SMTP")}</label>
                 <div style={{ position: "relative" }}>
-                  <input type={showPw ? "text" : "password"} value={editForm.smtp_password} onChange={e => setEditForm(p => ({ ...p, smtp_password: e.target.value }))} placeholder="Laisser vide pour ne pas modifier" style={{ ...iStyle, paddingRight: 36 }} />
+                  <input type={showPw ? "text" : "password"} value={editForm.smtp_password} onChange={e => setEditForm(p => ({ ...p, smtp_password: e.target.value }))} placeholder={t("email.leave_blank", "Laisser vide pour ne pas modifier")} style={{ ...iStyle, paddingRight: 36 }} />
                   <button type="button" onClick={() => setShowPw(!showPw)} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: T.textMid }}>
                     {showPw ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
@@ -317,15 +319,15 @@ export default function EmailSettingsPage() {
               </div>
               <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
                 <input type="checkbox" checked={editForm.is_active} onChange={e => setEditForm(p => ({ ...p, is_active: e.target.checked }))} style={{ width: 16, height: 16, cursor: "pointer" }} />
-                <span style={{ fontSize: 13, color: T.text, fontWeight: 600 }}>Configuration active</span>
+                <span style={{ fontSize: 13, color: T.text, fontWeight: 600 }}>{t("email.config_active", "Configuration active")}</span>
               </label>
               {configError && <div style={{ fontSize: 12, color: T.red, fontWeight: 600 }}>{configError}</div>}
               {configMsg && <div style={{ fontSize: 12, color: T.green, fontWeight: 600 }}>{configMsg}</div>}
             </div>
             <div style={{ padding: "14px 22px", borderTop: `1px solid ${T.border}`, background: "#f8f9fb", display: "flex", gap: 10, justifyContent: "flex-end" }}>
-              <button onClick={() => setEditModal(null)} style={{ padding: "9px 18px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>Annuler</button>
+              <button onClick={() => setEditModal(null)} style={{ padding: "9px 18px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>{t("cancel", "Annuler")}</button>
               <button onClick={saveConfig} disabled={savingConfig || !editForm.from_email} style={{ padding: "9px 22px", borderRadius: 8, border: "none", background: savingConfig || !editForm.from_email ? "#9ca3af" : T.main, color: "#fff", fontSize: 13, fontWeight: 700, cursor: savingConfig || !editForm.from_email ? "not-allowed" : "pointer", fontFamily: "inherit" }}>
-                {savingConfig ? "Sauvegarde..." : "Sauvegarder"}
+                {savingConfig ? t("common.saving", "Sauvegarde...") : t("common.save", "Sauvegarder")}
               </button>
             </div>
           </div>

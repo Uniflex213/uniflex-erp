@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { InventaireProduct, StockStatus, STOCK_STATUS_LABELS, STOCK_STATUS_COLORS, getStockStatus } from "./inventaireTypes";
 import { T } from "../../theme";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 const fmtDate = (s: string | null) => s ? new Date(s).toLocaleDateString("fr-CA", { day: "2-digit", month: "short" }) : "—";
 
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export default function InventaireTable({ products, onReception, onAdjustment, onHistory }: Props) {
+  const { t } = useLanguage();
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<StockStatus | 'all'>('all');
   const [sortKey, setSortKey] = useState<SortKey>('name');
@@ -79,11 +81,11 @@ export default function InventaireTable({ products, onReception, onAdjustment, o
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="Rechercher par nom ou SKU…"
+          placeholder={t("inventory.search_placeholder", "Rechercher par nom ou SKU…")}
           style={{ padding: "8px 12px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, fontFamily: "inherit", outline: "none", width: 240 }}
         />
         <div style={{ display: "flex", gap: 6 }}>
-          {([['all', 'Tous'], ['in_stock', 'En stock'], ['ok', 'Stock correct'], ['low', 'Stock bas'], ['out_of_stock', 'Rupture']] as const).map(([key, label]) => {
+          {([['all', t("all", "Tous")], ['in_stock', t("products.in_stock", "En stock")], ['ok', t("inventory.stock_ok", "Stock correct")], ['low', t("products.low_stock", "Stock bas")], ['out_of_stock', t("inventory.out_of_stock", "Rupture")]] as [typeof filterStatus, string][]).map(([key, label]) => {
             const active = filterStatus === key;
             const colors = key !== 'all' ? STOCK_STATUS_COLORS[key as StockStatus] : null;
             return (
@@ -103,26 +105,26 @@ export default function InventaireTable({ products, onReception, onAdjustment, o
             );
           })}
         </div>
-        <div style={{ marginLeft: "auto", fontSize: 12, color: T.textLight }}>{filtered.length} produit(s)</div>
+        <div style={{ marginLeft: "auto", fontSize: 12, color: T.textLight }}>{filtered.length} {t("inventory.product_count", "produit(s)")}</div>
       </div>
 
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr>
-              {([['name', 'Produit'], ['stock_qty', 'Stock actuel'], ['reserved_qty', 'Réservé'], ['available_qty', 'Disponible'], ['min_stock', 'Min. stock'], ['status', 'Statut']] as [SortKey, string][]).map(([k, label]) => (
+              {([['name', t("inventory.product", "Produit")], ['stock_qty', t("inventory.current_stock", "Stock actuel")], ['reserved_qty', t("inventory.reserved", "Réservé")], ['available_qty', t("inventory.available", "Disponible")], ['min_stock', t("inventory.min_stock", "Min. stock")], ['status', t("status", "Statut")]] as [SortKey, string][]).map(([k, label]) => (
                 <th key={k} style={thStyle(k)} onClick={() => handleSort(k)}>
                   {label}<SortArrow k={k} />
                 </th>
               ))}
-              <th style={{ padding: "10px 12px", textAlign: "left", fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.8, borderBottom: `1px solid ${T.border}` }}>Dernière entrée</th>
-              <th style={{ padding: "10px 12px", textAlign: "left", fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.8, borderBottom: `1px solid ${T.border}` }}>Unités/palette</th>
+              <th style={{ padding: "10px 12px", textAlign: "left", fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.8, borderBottom: `1px solid ${T.border}` }}>{t("inventory.last_entry", "Dernière entrée")}</th>
+              <th style={{ padding: "10px 12px", textAlign: "left", fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.8, borderBottom: `1px solid ${T.border}` }}>{t("inventory.units_per_pallet", "Unités/palette")}</th>
               <th style={{ padding: "10px 12px", borderBottom: `1px solid ${T.border}` }}></th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
-              <tr><td colSpan={9} style={{ textAlign: "center", padding: "40px 0", color: T.textLight, fontSize: 13 }}>Aucun produit trouvé.</td></tr>
+              <tr><td colSpan={9} style={{ textAlign: "center", padding: "40px 0", color: T.textLight, fontSize: 13 }}>{t("products.no_products", "Aucun produit trouvé.")}</td></tr>
             ) : (
               filtered.map(p => {
                 const status = getStockStatus(p);
@@ -147,9 +149,9 @@ export default function InventaireTable({ products, onReception, onAdjustment, o
                     <td style={{ padding: "12px", fontSize: 12, color: T.textMid }}>{p.units_per_pallet ?? "—"}</td>
                     <td style={{ padding: "12px" }}>
                       <div style={{ display: "flex", gap: 5 }}>
-                        <ActionBtn color={T.green} bg="#d1f5db" label="Entrée" onClick={() => onReception(p)} />
-                        <ActionBtn color={T.main} bg="#e8eaff" label="Ajust." onClick={() => onAdjustment(p)} />
-                        <ActionBtn color={T.textMid} bg={T.cardAlt} label="Historique" onClick={() => onHistory(p)} />
+                        <ActionBtn color={T.green} bg="#d1f5db" label={t("inventory.entry_btn", "Entrée")} onClick={() => onReception(p)} />
+                        <ActionBtn color={T.main} bg="#e8eaff" label={t("inventory.adjust_btn", "Ajust.")} onClick={() => onAdjustment(p)} />
+                        <ActionBtn color={T.textMid} bg={T.cardAlt} label={t("inventory.history_btn", "Historique")} onClick={() => onHistory(p)} />
                       </div>
                     </td>
                   </tr>

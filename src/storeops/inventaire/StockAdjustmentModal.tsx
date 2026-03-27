@@ -4,6 +4,7 @@ import { InventaireProduct, ADJUSTMENT_REASONS } from "./inventaireTypes";
 import { useAuth } from "../../contexts/AuthContext";
 import { useApp } from "../../AppContext";
 import { T } from "../../theme";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 const inputStyle: React.CSSProperties = {
   padding: "9px 12px", borderRadius: 8, border: `1px solid ${T.border}`,
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export default function StockAdjustmentModal({ product, onClose, onDone }: Props) {
+  const { t } = useLanguage();
   const { storeCode } = useAuth();
   const { reloadProducts } = useApp();
   const [newQty, setNewQty] = useState<number | "">(product.stock_qty);
@@ -71,7 +73,7 @@ export default function StockAdjustmentModal({ product, onClose, onDone }: Props
       <div style={{ background: T.card, borderRadius: 16, padding: 32, width: "100%", maxWidth: 480, boxShadow: "0 24px 60px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
           <div>
-            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: T.text }}>Ajustement d'inventaire</h2>
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: T.text }}>{t("inventory.adjustment", "Ajustement d'inventaire")}</h2>
             <div style={{ fontSize: 13, color: T.textMid, marginTop: 3 }}>{product.name}</div>
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 22, color: T.textMid }}>×</button>
@@ -79,12 +81,12 @@ export default function StockAdjustmentModal({ product, onClose, onDone }: Props
 
         <div style={{ background: T.cardAlt, borderRadius: 10, padding: "14px 16px", marginBottom: 20, display: "flex", justifyContent: "space-between" }}>
           <div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.7 }}>Stock actuel</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.7 }}>{t("inventory.current_stock", "Stock actuel")}</div>
             <div style={{ fontSize: 28, fontWeight: 900, color: T.text }}>{product.stock_qty}</div>
           </div>
           {diff !== 0 && (
             <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.7 }}>Différence</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.7 }}>{t("inventory.difference", "Différence")}</div>
               <div style={{ fontSize: 28, fontWeight: 900, color: diff > 0 ? T.green : T.red }}>
                 {diff > 0 ? '+' : ''}{diff}
               </div>
@@ -94,7 +96,7 @@ export default function StockAdjustmentModal({ product, onClose, onDone }: Props
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div>
-            <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 6 }}>Nouveau stock (quantité réelle)</label>
+            <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 6 }}>{t("inventory.new_stock_qty", "Nouveau stock (quantité réelle)")}</label>
             <input
               type="number" min={0} value={newQty}
               onChange={e => setNewQty(e.target.value === "" ? "" : Number(e.target.value))}
@@ -103,39 +105,39 @@ export default function StockAdjustmentModal({ product, onClose, onDone }: Props
           </div>
 
           <div>
-            <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 6 }}>Raison de l'ajustement *</label>
+            <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 6 }}>{t("inventory.adjustment_reason", "Raison de l'ajustement")} *</label>
             <select value={reason} onChange={e => setReason(e.target.value)} style={inputStyle}>
-              <option value="">Sélectionner une raison…</option>
+              <option value="">{t("inventory.select_reason", "Sélectionner une raison…")}</option>
               {ADJUSTMENT_REASONS.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
           </div>
 
           {reason === 'Autre' && (
             <div>
-              <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 6 }}>Préciser</label>
-              <input value={reasonOther} onChange={e => setReasonOther(e.target.value)} style={inputStyle} placeholder="Décrire la raison…" />
+              <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 6 }}>{t("inventory.specify", "Préciser")}</label>
+              <input value={reasonOther} onChange={e => setReasonOther(e.target.value)} style={inputStyle} placeholder={t("inventory.describe_reason", "Décrire la raison…")} />
             </div>
           )}
 
           <div>
-            <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 6 }}>Notes (optionnel)</label>
-            <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3} style={{ ...inputStyle, resize: "vertical" }} placeholder="Observations, contexte…" />
+            <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 6 }}>{t("notes", "Notes")} ({t("optional", "optionnel")})</label>
+            <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3} style={{ ...inputStyle, resize: "vertical" }} placeholder={t("inventory.observations_placeholder", "Observations, contexte…")} />
           </div>
         </div>
 
         {diff !== 0 && newQty !== "" && (
           <div style={{ background: diff > 0 ? T.greenBg : T.redBg, borderRadius: 8, padding: "10px 14px", marginTop: 16, fontSize: 13 }}>
-            <strong>Résumé :</strong> Le stock va passer de <strong>{product.stock_qty}</strong> à <strong>{newQty}</strong> unités ({diff > 0 ? '+' : ''}{diff}).
+            <strong>{t("inventory.summary_label", "Résumé")} :</strong> {t("inventory.stock_will_change", "Le stock va passer de")} <strong>{product.stock_qty}</strong> {t("to", "à")} <strong>{newQty}</strong> {t("inventory.units_label", "unités")} ({diff > 0 ? '+' : ''}{diff}).
           </div>
         )}
 
         <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
           <button onClick={onClose} style={{ flex: 1, padding: "11px 0", borderRadius: 10, border: `1px solid ${T.border}`, background: "transparent", color: T.textMid, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-            Annuler
+            {t("cancel", "Annuler")}
           </button>
           <button onClick={handleConfirm} disabled={!canSave || saving}
             style={{ flex: 2, padding: "11px 0", borderRadius: 10, border: "none", background: canSave ? T.main : "#e5e7eb", color: canSave ? "#fff" : "#9ca3af", fontSize: 13, fontWeight: 700, cursor: canSave ? "pointer" : "default", fontFamily: "inherit" }}>
-            {saving ? "Enregistrement…" : "Confirmer l'ajustement"}
+            {saving ? t("inventory.saving", "Enregistrement…") : t("inventory.confirm_adjustment", "Confirmer l'ajustement")}
           </button>
         </div>
       </div>

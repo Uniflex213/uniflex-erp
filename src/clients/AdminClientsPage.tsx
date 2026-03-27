@@ -11,6 +11,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { MOCK_PRICELISTS } from "../pricelist/pricelistTypes";
 import { useTeamAgents } from "../hooks/useAgents";
 import { useTeams } from "./agentTeamData";
+import { useLanguage } from "../i18n/LanguageContext";
 import { T } from "../theme";
 
 const fmtDate = (iso?: string) => iso ? new Date(iso).toLocaleDateString("fr-CA", { month: "short", day: "numeric", year: "numeric" }) : "—";
@@ -32,7 +33,7 @@ function KpiCard({ label, value, sub, accent }: { label: string; value: string |
 }
 
 function downloadCSV(clients: Client[]) {
-  const headers = ["Code","Compagnie","Contact","Email","Téléphone","Type","Tier","Région","Agent","Conditions paiement","Devise","Source","Créé le","Notes"];
+  const headers = ["Code","Company","Contact","Email","Phone","Type","Tier","Region","Agent","Payment Terms","Currency","Source","Created","Notes"];
   const rows = clients.map(c => [
     c.client_code, c.company_name,
     `${c.contact_first_name} ${c.contact_last_name}`,
@@ -51,6 +52,7 @@ function downloadCSV(clients: Client[]) {
 export default function AdminClientsPage() {
   const { navigate } = useApp();
   const { profile, realProfile } = useAuth();
+  const { t } = useLanguage();
   const ALL_AGENTS = useTeamAgents();
   const SALES_TEAMS = useTeams();
   const ownerId = realProfile?.id ?? profile?.id ?? null;
@@ -238,36 +240,36 @@ export default function AdminClientsPage() {
     <div style={{ fontFamily: "'Outfit', sans-serif", color: T.text }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 22 }}>
         <div>
-          <h2 style={{ margin: "0 0 5px", fontSize: 24, fontWeight: 900 }}>Répertoire Clients — Administration</h2>
+          <h2 style={{ margin: "0 0 5px", fontSize: 24, fontWeight: 900 }}>{t("clients.admin_directory", "Répertoire Clients — Administration")}</h2>
           <p style={{ margin: 0, color: T.textMid, fontSize: 14 }}>
-            <strong style={{ color: T.main }}>{kpis.total}</strong> clients total sur la plateforme
+            <strong style={{ color: T.main }}>{kpis.total}</strong> {t("clients.total_on_platform", "clients total sur la plateforme")}
           </p>
         </div>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <button onClick={() => downloadCSV(filtered)} style={{ padding: "9px 16px", borderRadius: 8, border: `1.5px solid ${T.border}`, background: T.bgCard, color: T.textMid, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
-            Exporter CSV
+            {t("clients.export_csv", "Exporter CSV")}
           </button>
           <button onClick={load} style={{ padding: "9px 16px", borderRadius: 8, border: `1.5px solid ${T.border}`, background: T.bgCard, color: T.text, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
-            Actualiser
+            {t("refresh", "Actualiser")}
           </button>
           <button onClick={() => setShowForm(true)} style={{ padding: "11px 22px", borderRadius: 10, border: "none", background: T.main, color: "#fff", fontSize: 13, fontWeight: 800, cursor: "pointer", fontFamily: "inherit" }}>
-            + AJOUTER UN CLIENT
+            + {t("clients.add_client", "AJOUTER UN CLIENT")}
           </button>
         </div>
       </div>
 
       <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
-        <KpiCard label="Total clients" value={kpis.total} accent={T.main} />
-        <KpiCard label="Clients actifs" value={kpis.active} accent={T.green} />
-        <KpiCard label="Clients inactifs" value={kpis.inactive} accent={T.orange} sub="+60j sans commande" />
-        <KpiCard label="Nouveaux ce mois" value={kpis.newThisMonth} accent={T.blue} />
-        <KpiCard label="Disputes ouvertes" value={allDisputes.filter(d => d.status === "Ouverte").length} accent={T.red} />
-        <KpiCard label="Notes crédit en attente" value={allCreditNotes.filter(cn => cn.status === "En attente").length} accent={T.gold} />
+        <KpiCard label={t("clients.total_clients", "Total clients")} value={kpis.total} accent={T.main} />
+        <KpiCard label={t("clients.active_clients", "Clients actifs")} value={kpis.active} accent={T.green} />
+        <KpiCard label={t("clients.inactive_clients", "Clients inactifs")} value={kpis.inactive} accent={T.orange} sub={t("clients.60_days_short", "+60j sans commande")} />
+        <KpiCard label={t("clients.new_this_month", "Nouveaux ce mois")} value={kpis.newThisMonth} accent={T.blue} />
+        <KpiCard label={t("clients.open_disputes", "Disputes ouvertes")} value={allDisputes.filter(d => d.status === "Ouverte").length} accent={T.red} />
+        <KpiCard label={t("clients.pending_credit_notes", "Notes crédit en attente")} value={allCreditNotes.filter(cn => cn.status === "En attente").length} accent={T.gold} />
       </div>
 
       <div style={{ background: T.card, borderRadius: 12, padding: "10px 14px", marginBottom: 18, border: `1px solid ${T.border}` }}>
         <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>
-          Clients par équipe
+          {t("clients.per_team", "Clients par équipe")}
         </div>
         <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
           {SALES_TEAMS.map(t => {
@@ -285,12 +287,12 @@ export default function AdminClientsPage() {
       </div>
 
       <div style={{ display: "flex", gap: 0, padding: "0 2px", marginBottom: 0, background: T.card, borderRadius: "12px 12px 0 0", borderBottom: `1px solid ${T.border}`, borderTop: `1px solid ${T.border}`, borderLeft: `1px solid ${T.border}`, borderRight: `1px solid ${T.border}` }}>
-        {([["clients", `Clients (${kpis.total})`], ["disputes", `Disputes (${allDisputes.filter(d => d.status !== "Fermée").length > 0 ? "🔴 " + allDisputes.length : allDisputes.length})`], ["credit_notes", `Notes crédit (${allCreditNotes.filter(cn => cn.status === "En attente").length > 0 ? "🟡 " + allCreditNotes.length : allCreditNotes.length})`]] as [AdminTab, string][]).map(([t, label]) => (
-          <button key={t} onClick={() => setTab(t)} style={{
+        {([["clients", `${t("nav.clients", "Clients")} (${kpis.total})`], ["disputes", `${t("clients.disputes", "Disputes")} (${allDisputes.filter(d => d.status !== "Fermée").length > 0 ? "🔴 " + allDisputes.length : allDisputes.length})`], ["credit_notes", `${t("clients.credit_notes", "Notes crédit")} (${allCreditNotes.filter(cn => cn.status === "En attente").length > 0 ? "🟡 " + allCreditNotes.length : allCreditNotes.length})`]] as [AdminTab, string][]).map(([tabKey, label]) => (
+          <button key={tabKey} onClick={() => setTab(tabKey)} style={{
             padding: "12px 20px", border: "none", background: "none", cursor: "pointer",
-            fontSize: 13, fontWeight: tab === t ? 700 : 400,
-            color: tab === t ? T.main : T.textMid,
-            borderBottom: tab === t ? `2px solid ${T.main}` : "2px solid transparent",
+            fontSize: 13, fontWeight: tab === tabKey ? 700 : 400,
+            color: tab === tabKey ? T.main : T.textMid,
+            borderBottom: tab === tabKey ? `2px solid ${T.main}` : "2px solid transparent",
             fontFamily: "inherit",
           }}>{label}</button>
         ))}
@@ -299,53 +301,53 @@ export default function AdminClientsPage() {
       {tab === "clients" && (
         <div style={{ background: T.card, border: `1px solid ${T.border}`, borderTop: "none", borderRadius: "0 0 12px 12px" }}>
           <div style={{ padding: "14px 16px", borderBottom: `1px solid ${T.border}`, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-            <input style={{ ...selectStyle, flex: "2 1 200px", minWidth: 180 }} placeholder="Rechercher par nom, email, code client..." value={search} onChange={e => setSearch(e.target.value)} />
+            <input style={{ ...selectStyle, flex: "2 1 200px", minWidth: 180 }} placeholder={t("clients.search_admin", "Rechercher par nom, email, code client...")} value={search} onChange={e => setSearch(e.target.value)} />
             <select style={{ ...selectStyle, flex: "1 1 140px" }} value={filterTeam} onChange={e => setFilterTeam(e.target.value)}>
-              <option value="">Toutes les équipes</option>
+              <option value="">{t("clients.all_teams", "Toutes les équipes")}</option>
               {SALES_TEAMS.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
             </select>
             <select style={{ ...selectStyle, flex: "1 1 140px" }} value={filterAgent} onChange={e => setFilterAgent(e.target.value)}>
-              <option value="">Tous les agents</option>
+              <option value="">{t("clients.all_agents", "Tous les agents")}</option>
               {ALL_AGENTS.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
             </select>
-            <input style={{ ...selectStyle, flex: "1 1 110px" }} placeholder="Région..." value={filterRegion} onChange={e => setFilterRegion(e.target.value)} />
+            <input style={{ ...selectStyle, flex: "1 1 110px" }} placeholder={t("clients.region_placeholder", "Région...")} value={filterRegion} onChange={e => setFilterRegion(e.target.value)} />
             <select style={{ ...selectStyle, flex: "1 1 120px" }} value={filterType} onChange={e => setFilterType(e.target.value)}>
-              <option value="">Tous types</option>
+              <option value="">{t("clients.all_types", "Tous types")}</option>
               {CLIENT_TYPES.map(t => <option key={t}>{t}</option>)}
             </select>
             <select style={{ ...selectStyle, flex: "0 1 100px" }} value={filterTier} onChange={e => setFilterTier(e.target.value)}>
-              <option value="">Tiers</option>
+              <option value="">{t("clients.tiers", "Tiers")}</option>
               {CLIENT_TIERS.map(t => <option key={t}>{t}</option>)}
             </select>
             <select style={{ ...selectStyle, flex: "0 1 100px" }} value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-              <option value="">Statut</option>
-              <option>Actif</option>
-              <option>Inactif</option>
+              <option value="">{t("clients.status", "Statut")}</option>
+              <option value="Actif">{t("active", "Actif")}</option>
+              <option value="Inactif">{t("inactive", "Inactif")}</option>
             </select>
-            <input type="date" style={{ ...selectStyle, flex: "0 1 130px" }} value={filterDateFrom} onChange={e => setFilterDateFrom(e.target.value)} title="Date de création — depuis" />
-            <input type="date" style={{ ...selectStyle, flex: "0 1 130px" }} value={filterDateTo} onChange={e => setFilterDateTo(e.target.value)} title="Date de création — jusqu'à" />
+            <input type="date" style={{ ...selectStyle, flex: "0 1 130px" }} value={filterDateFrom} onChange={e => setFilterDateFrom(e.target.value)} title={t("clients.date_from", "Date de création — depuis")} />
+            <input type="date" style={{ ...selectStyle, flex: "0 1 130px" }} value={filterDateTo} onChange={e => setFilterDateTo(e.target.value)} title={t("clients.date_to", "Date de création — jusqu'à")} />
             {hasFilters && (
               <button onClick={resetFilters} style={{ padding: "9px 14px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, color: T.textMid, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
-                Réinitialiser
+                {t("reset", "Réinitialiser")}
               </button>
             )}
 
             <div style={{ marginLeft: "auto", display: "flex", gap: 2, background: '#f5f4f0', borderRadius: 6, padding: 2 }}>
               <button onClick={() => setViewMode("grouped")} style={{ padding: "3px 8px", borderRadius: 4, border: 'none', background: viewMode === "grouped" ? '#fff' : 'transparent', color: viewMode === "grouped" ? '#111' : '#999', fontSize: 10, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", boxShadow: viewMode === "grouped" ? '0 1px 2px rgba(0,0,0,0.06)' : 'none', transition: 'all 0.15s ease', lineHeight: 1.4 }}>
-                Groupé
+                {t("clients.grouped", "Groupé")}
               </button>
               <button onClick={() => setViewMode("flat")} style={{ padding: "3px 8px", borderRadius: 4, border: 'none', background: viewMode === "flat" ? '#fff' : 'transparent', color: viewMode === "flat" ? '#111' : '#999', fontSize: 10, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", boxShadow: viewMode === "flat" ? '0 1px 2px rgba(0,0,0,0.06)' : 'none', transition: 'all 0.15s ease', lineHeight: 1.4 }}>
-                Liste
+                {t("clients.list", "Liste")}
               </button>
             </div>
           </div>
 
           {loading ? (
-            <div style={{ textAlign: "center", padding: 48, color: T.textLight }}>Chargement...</div>
+            <div style={{ textAlign: "center", padding: 48, color: T.textLight }}>{t("loading_dots", "Chargement...")}</div>
           ) : viewMode === "grouped" ? (
             <div>
               {groupedByTeam.length === 0 ? (
-                <div style={{ textAlign: "center", padding: 40, color: T.textLight }}>Aucun client pour ces filtres.</div>
+                <div style={{ textAlign: "center", padding: 40, color: T.textLight }}>{t("clients.no_results_filters", "Aucun client pour ces filtres.")}</div>
               ) : groupedByTeam.map(({ team, clients: teamClients }) => {
                 const collapsed = collapsedTeams.has(team.id);
                 return (
@@ -362,7 +364,7 @@ export default function AdminClientsPage() {
                       <span style={{ fontSize: 14, color: T.textMid, transition: "transform 0.2s", display: "inline-block", transform: collapsed ? "rotate(-90deg)" : "rotate(0)" }}>▼</span>
                       <div style={{ flex: 1 }}>
                         <span style={{ fontWeight: 800, fontSize: 14, color: T.text }}>{team.name}</span>
-                        {team.chef !== "—" && <span style={{ fontSize: 12, color: T.textMid, marginLeft: 12 }}>Chef : {team.chef}</span>}
+                        {team.chef !== "—" && <span style={{ fontSize: 12, color: T.textMid, marginLeft: 12 }}>{t("clients.chef", "Chef")} : {team.chef}</span>}
                       </div>
                       <span style={{ fontSize: 13, fontWeight: 700, color: team.color }}>
                         {teamClients.length} client{teamClients.length !== 1 ? "s" : ""}
@@ -395,7 +397,7 @@ export default function AdminClientsPage() {
           )}
 
           <div style={{ padding: "10px 16px", borderTop: `1px solid ${T.border}`, fontSize: 11, color: T.textLight, textAlign: "right" }}>
-            {filtered.length} client{filtered.length !== 1 ? "s" : ""} affiché{filtered.length !== 1 ? "s" : ""}
+            {filtered.length} {t("client", "client")}{filtered.length !== 1 ? "s" : ""} {t("clients.displayed", "affiché")}{filtered.length !== 1 ? "s" : ""}
           </div>
         </div>
       )}
@@ -445,6 +447,7 @@ function ClientTable({
   onSort?: (k: string) => void;
   isAdmin?: boolean;
 }) {
+  const { t } = useLanguage();
   const isInactive = (c: Client) => Math.floor((Date.now() - new Date(c.created_at).getTime()) / 86400000) > 60;
 
   return (
@@ -452,16 +455,16 @@ function ClientTable({
       <thead>
         <tr style={{ background: T.bg }}>
           {[
-            { key: "company_name", label: "Compagnie" },
-            { key: null, label: "Contact" },
-            { key: "client_type", label: "Type" },
+            { key: "company_name", label: t("clients.company", "Compagnie") },
+            { key: null, label: t("crm.contact", "Contact") },
+            { key: "client_type", label: t("type", "Type") },
             { key: "tier", label: "Tier" },
-            { key: "agent_name", label: "Agent" },
-            { key: "region", label: "Région" },
-            { key: "source", label: "Source" },
-            { key: "created_at", label: "Créé le" },
-            { key: null, label: "Statut" },
-            ...(isAdmin ? [{ key: null, label: "Actions" }] : []),
+            { key: "agent_name", label: t("agent", "Agent") },
+            { key: "region", label: t("crm.region", "Région") },
+            { key: "source", label: t("crm.source", "Source") },
+            { key: "created_at", label: t("clients.created_on", "Créé le") },
+            { key: null, label: t("status", "Statut") },
+            ...(isAdmin ? [{ key: null, label: t("actions", "Actions") }] : []),
           ].map(({ key, label }) => (
             <th
               key={label}
@@ -480,7 +483,7 @@ function ClientTable({
       </thead>
       <tbody>
         {clients.length === 0 ? (
-          <tr><td colSpan={10} style={{ textAlign: "center", padding: 28, color: T.textLight }}>Aucun client.</td></tr>
+          <tr><td colSpan={10} style={{ textAlign: "center", padding: 28, color: T.textLight }}>{t("clients.no_clients", "Aucun client.")}</td></tr>
         ) : clients.map(c => (
           <tr key={c.id}
             style={{ borderBottom: `1px solid ${T.border}`, cursor: "pointer" }}
@@ -505,19 +508,19 @@ function ClientTable({
             <td style={{ padding: "12px 14px", fontSize: 12, color: T.textMid }} onClick={() => onSelect(c)}>{fmtDate(c.created_at)}</td>
             <td style={{ padding: "12px 14px" }} onClick={() => onSelect(c)}>
               {isInactive(c) ? (
-                <span style={{ fontSize: 10, fontWeight: 700, background: "rgba(245,158,11,0.12)", color: T.orange, padding: "2px 8px", borderRadius: 10 }}>Inactif</span>
+                <span style={{ fontSize: 10, fontWeight: 700, background: "rgba(245,158,11,0.12)", color: T.orange, padding: "2px 8px", borderRadius: 10 }}>{t("inactive", "Inactif")}</span>
               ) : (
-                <span style={{ fontSize: 10, fontWeight: 700, background: "rgba(34,197,94,0.12)", color: T.green, padding: "2px 8px", borderRadius: 10 }}>Actif</span>
+                <span style={{ fontSize: 10, fontWeight: 700, background: "rgba(34,197,94,0.12)", color: T.green, padding: "2px 8px", borderRadius: 10 }}>{t("active", "Actif")}</span>
               )}
             </td>
             {isAdmin && (
               <td style={{ padding: "12px 14px" }}>
                 <div style={{ display: "flex", gap: 5 }}>
                   <button onClick={e => { e.stopPropagation(); onReassign?.(c); }} style={{ padding: "4px 9px", borderRadius: 6, border: `1px solid ${T.border}`, background: T.bgCard, color: T.textMid, fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}>
-                    Réassigner
+                    {t("clients.reassign", "Réassigner")}
                   </button>
                   <button onClick={e => { e.stopPropagation(); onDelete?.(c); }} style={{ padding: "4px 9px", borderRadius: 6, border: `1px solid ${T.red}33`, background: `${T.red}08`, color: T.red, fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
-                    Supprimer
+                    {t("delete", "Supprimer")}
                   </button>
                 </div>
               </td>
@@ -530,6 +533,7 @@ function ClientTable({
 }
 
 function ResolveDisputeModal({ dispute, onClose, onResolve }: { dispute: any; onClose: () => void; onResolve: (disputeId: string, resolution: string, creditNote?: { amount: number; reason: string }) => void }) {
+  const { t } = useLanguage();
   const [resolution, setResolution] = useState("");
   const [createCreditNote, setCreateCreditNote] = useState(false);
   const [cnAmount, setCnAmount] = useState("");
@@ -555,17 +559,17 @@ function ResolveDisputeModal({ dispute, onClose, onResolve }: { dispute: any; on
     <>
       <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999 }} onClick={onClose} />
       <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 480, background: T.bgCard, borderRadius: 16, padding: 28, zIndex: 10000, boxShadow: "0 24px 80px rgba(0,0,0,0.22)", fontFamily: "'Outfit', sans-serif" }}>
-        <div style={{ fontSize: 18, fontWeight: 900, color: T.text, marginBottom: 6 }}>Résoudre la dispute</div>
+        <div style={{ fontSize: 18, fontWeight: 900, color: T.text, marginBottom: 6 }}>{t("clients.resolve_dispute", "Résoudre la dispute")}</div>
         <p style={{ fontSize: 13, color: T.textMid, marginBottom: 18 }}>
           <strong>{dispute.company_name}</strong> — {dispute.subject}
         </p>
         <div style={{ marginBottom: 14 }}>
-          <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6, display: "block" }}>Résolution *</label>
+          <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6, display: "block" }}>{t("clients.resolution_required", "Résolution *")}</label>
           <textarea
             style={{ ...inputStyle, minHeight: 80, resize: "vertical" }}
             value={resolution}
             onChange={e => setResolution(e.target.value)}
-            placeholder="Décrivez la résolution..."
+            placeholder={t("clients.describe_resolution", "Décrivez la résolution...")}
           />
         </div>
         <div style={{ marginBottom: 14 }}>
@@ -576,31 +580,31 @@ function ResolveDisputeModal({ dispute, onClose, onResolve }: { dispute: any; on
               onChange={e => setCreateCreditNote(e.target.checked)}
               style={{ width: 16, height: 16, accentColor: T.main }}
             />
-            Créer une note de crédit associée
+            {t("clients.create_credit_note_associated", "Créer une note de crédit associée")}
           </label>
         </div>
         {createCreditNote && (
           <div style={{ background: T.bg, borderRadius: 10, padding: 14, marginBottom: 14, border: `1px solid ${T.border}` }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               <div>
-                <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4, display: "block" }}>Montant ($)</label>
+                <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4, display: "block" }}>{t("clients.amount_dollars", "Montant ($)")}</label>
                 <input style={inputStyle} type="number" min="0" step="0.01" value={cnAmount} onChange={e => setCnAmount(e.target.value)} placeholder="0.00" />
               </div>
               <div>
-                <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4, display: "block" }}>Raison</label>
+                <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4, display: "block" }}>{t("clients.reason", "Raison")}</label>
                 <input style={inputStyle} value={cnReason} onChange={e => setCnReason(e.target.value)} />
               </div>
             </div>
           </div>
         )}
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-          <button onClick={onClose} style={{ padding: "10px 20px", borderRadius: 9, border: `1px solid ${T.border}`, background: T.bgCard, color: T.text, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Annuler</button>
+          <button onClick={onClose} style={{ padding: "10px 20px", borderRadius: 9, border: `1px solid ${T.border}`, background: T.bgCard, color: T.text, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>{t("cancel", "Annuler")}</button>
           <button
             onClick={handleSubmit}
             disabled={!resolution.trim() || (createCreditNote && !cnAmount)}
             style={{ padding: "10px 20px", borderRadius: 9, border: "none", background: resolution.trim() && (!createCreditNote || cnAmount) ? T.green : "#d1d5db", color: "#fff", fontSize: 13, fontWeight: 700, cursor: resolution.trim() && (!createCreditNote || cnAmount) ? "pointer" : "not-allowed", fontFamily: "inherit" }}
           >
-            {createCreditNote ? "Résoudre + Créer note de crédit" : "Résoudre"}
+            {createCreditNote ? t("clients.resolve_create_cn", "Résoudre + Créer note de crédit") : t("clients.resolve", "Résoudre")}
           </button>
         </div>
       </div>
@@ -609,6 +613,7 @@ function ResolveDisputeModal({ dispute, onClose, onResolve }: { dispute: any; on
 }
 
 function AdminDisputeMessagesModal({ dispute, onClose }: { dispute: any; onClose: () => void }) {
+  const { t } = useLanguage();
   const [messages, setMessages] = useState<any[]>([]);
   const [newMsg, setNewMsg] = useState("");
   const [sending, setSending] = useState(false);
@@ -664,7 +669,7 @@ function AdminDisputeMessagesModal({ dispute, onClose }: { dispute: any; onClose
         </div>
         <div ref={scrollRef} style={{ flex: 1, overflowY: "auto", padding: "16px 24px", minHeight: 180, maxHeight: 320 }}>
           {messages.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "30px 0", color: T.textLight, fontSize: 13 }}>Aucun message.</div>
+            <div style={{ textAlign: "center", padding: "30px 0", color: T.textLight, fontSize: 13 }}>{t("clients.no_messages", "Aucun message.")}</div>
           ) : messages.map((m: any) => (
             <div key={m.id} style={{ marginBottom: 12, display: "flex", flexDirection: "column", alignItems: m.is_admin ? "flex-end" : "flex-start" }}>
               <div style={{
@@ -689,7 +694,7 @@ function AdminDisputeMessagesModal({ dispute, onClose }: { dispute: any; onClose
               style={{ flex: 1, padding: "10px 12px", borderRadius: 8, border: `1.5px solid ${T.border}`, fontSize: 13, fontFamily: "inherit", outline: "none", color: T.text }}
               value={newMsg}
               onChange={e => setNewMsg(e.target.value)}
-              placeholder="Répondre en tant qu'admin..."
+              placeholder={t("clients.reply_as_admin", "Répondre en tant qu'admin...")}
               onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
             />
             <button
@@ -697,7 +702,7 @@ function AdminDisputeMessagesModal({ dispute, onClose }: { dispute: any; onClose
               disabled={!newMsg.trim() || sending}
               style={{ padding: "10px 18px", borderRadius: 8, border: "none", background: newMsg.trim() ? T.red : "#d1d5db", color: "#fff", fontSize: 13, fontWeight: 700, cursor: newMsg.trim() ? "pointer" : "not-allowed", fontFamily: "inherit" }}
             >
-              Envoyer
+              {t("clients.send", "Envoyer")}
             </button>
           </div>
         )}
@@ -707,6 +712,7 @@ function AdminDisputeMessagesModal({ dispute, onClose }: { dispute: any; onClose
 }
 
 function DisputesPanel({ disputes, onUpdate, onSelectClient }: { disputes: any[]; onUpdate: (id: string, fields: object) => void; onSelectClient: (id: string) => void }) {
+  const { t } = useLanguage();
   const [resolveDispute, setResolveDispute] = useState<any | null>(null);
   const [messageDispute, setMessageDispute] = useState<any | null>(null);
 
@@ -739,12 +745,12 @@ function DisputesPanel({ disputes, onUpdate, onSelectClient }: { disputes: any[]
   return (
     <div style={{ background: T.card, border: `1px solid ${T.border}`, borderTop: "none", borderRadius: "0 0 12px 12px", overflow: "hidden" }}>
       {disputes.length === 0 ? (
-        <div style={{ textAlign: "center", padding: 40, color: T.textLight }}>Aucune dispute.</div>
+        <div style={{ textAlign: "center", padding: 40, color: T.textLight }}>{t("clients.no_disputes", "Aucune dispute.")}</div>
       ) : (
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
           <thead>
             <tr style={{ background: T.bg }}>
-              {["Client", "Agent", "Sujet", "Priorité", "Statut", "Note crédit", "Date", "Actions"].map(h => (
+              {[t("clients.client_label", "Client"), t("clients.agent", "Agent"), t("clients.subject", "Sujet"), t("clients.priority", "Priorité"), t("clients.status", "Statut"), t("clients.credit_note", "Note crédit"), t("clients.date", "Date"), t("clients.actions", "Actions")].map(h => (
                 <th key={h} style={{ padding: "10px 14px", textAlign: "left", fontWeight: 700, fontSize: 10, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4 }}>{h}</th>
               ))}
             </tr>
@@ -765,7 +771,7 @@ function DisputesPanel({ disputes, onUpdate, onSelectClient }: { disputes: any[]
                 </td>
                 <td style={{ padding: "11px 14px" }}>
                   {d.credit_note_id ? (
-                    <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 10, background: "rgba(34,197,94,0.12)", color: T.green }}>NC liée</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 10, background: "rgba(34,197,94,0.12)", color: T.green }}>{t("clients.cn_linked", "NC liée")}</span>
                   ) : (
                     <span style={{ fontSize: 11, color: T.textLight }}>—</span>
                   )}
@@ -773,10 +779,10 @@ function DisputesPanel({ disputes, onUpdate, onSelectClient }: { disputes: any[]
                 <td style={{ padding: "11px 14px", fontSize: 12, color: T.textMid }}>{fmtDate(d.created_at)}</td>
                 <td style={{ padding: "11px 14px" }}>
                   <div style={{ display: "flex", gap: 5 }}>
-                    <button onClick={() => setMessageDispute(d)} style={{ padding: "4px 9px", borderRadius: 6, border: `1px solid ${T.border}`, background: T.bgCard, color: T.main, fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Messages</button>
-                    {d.status === "Ouverte" && <button onClick={() => onUpdate(d.id, { status: "En cours" })} style={{ padding: "4px 9px", borderRadius: 6, border: "none", background: T.orange, color: "#fff", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Prendre en charge</button>}
-                    {d.status === "En cours" && <button onClick={() => setResolveDispute(d)} style={{ padding: "4px 9px", borderRadius: 6, border: "none", background: T.green, color: "#fff", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Résoudre</button>}
-                    {d.status === "Résolue" && <button onClick={() => onUpdate(d.id, { status: "Fermée" })} style={{ padding: "4px 9px", borderRadius: 6, border: "none", background: T.textMid, color: "#fff", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Fermer</button>}
+                    <button onClick={() => setMessageDispute(d)} style={{ padding: "4px 9px", borderRadius: 6, border: `1px solid ${T.border}`, background: T.bgCard, color: T.main, fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>{t("clients.messages", "Messages")}</button>
+                    {d.status === "Ouverte" && <button onClick={() => onUpdate(d.id, { status: "En cours" })} style={{ padding: "4px 9px", borderRadius: 6, border: "none", background: T.orange, color: "#fff", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>{t("clients.take_charge", "Prendre en charge")}</button>}
+                    {d.status === "En cours" && <button onClick={() => setResolveDispute(d)} style={{ padding: "4px 9px", borderRadius: 6, border: "none", background: T.green, color: "#fff", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>{t("clients.resolve", "Résoudre")}</button>}
+                    {d.status === "Résolue" && <button onClick={() => onUpdate(d.id, { status: "Fermée" })} style={{ padding: "4px 9px", borderRadius: 6, border: "none", background: T.textMid, color: "#fff", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>{t("close", "Fermer")}</button>}
                   </div>
                 </td>
               </tr>
@@ -802,15 +808,16 @@ function DisputesPanel({ disputes, onUpdate, onSelectClient }: { disputes: any[]
 }
 
 function CreditNotesPanel({ creditNotes, onUpdate, onSelectClient }: { creditNotes: any[]; onUpdate: (id: string, status: string) => void; onSelectClient: (id: string) => void }) {
+  const { t } = useLanguage();
   return (
     <div style={{ background: T.card, border: `1px solid ${T.border}`, borderTop: "none", borderRadius: "0 0 12px 12px", overflow: "hidden" }}>
       {creditNotes.length === 0 ? (
-        <div style={{ textAlign: "center", padding: 40, color: T.textLight }}>Aucune note de crédit.</div>
+        <div style={{ textAlign: "center", padding: 40, color: T.textLight }}>{t("clients.no_credit_notes", "Aucune note de crédit.")}</div>
       ) : (
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
           <thead>
             <tr style={{ background: T.bg }}>
-              {["Client", "Agent", "Raison", "Montant", "Statut", "Date", "Actions"].map(h => (
+              {[t("clients.client_label", "Client"), t("clients.agent", "Agent"), t("clients.reason", "Raison"), t("clients.amount", "Montant"), t("clients.status", "Statut"), t("clients.date", "Date"), t("clients.actions", "Actions")].map(h => (
                 <th key={h} style={{ padding: "10px 14px", textAlign: "left", fontWeight: 700, fontSize: 10, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4 }}>{h}</th>
               ))}
             </tr>
@@ -832,11 +839,11 @@ function CreditNotesPanel({ creditNotes, onUpdate, onSelectClient }: { creditNot
                   <div style={{ display: "flex", gap: 5 }}>
                     {cn.status === "En attente" && (
                       <>
-                        <button onClick={() => onUpdate(cn.id, "Approuvée")} style={{ padding: "4px 9px", borderRadius: 6, border: "none", background: T.green, color: "#fff", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Approuver</button>
-                        <button onClick={() => onUpdate(cn.id, "Rejetée")} style={{ padding: "4px 9px", borderRadius: 6, border: "none", background: T.red, color: "#fff", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Rejeter</button>
+                        <button onClick={() => onUpdate(cn.id, "Approuvée")} style={{ padding: "4px 9px", borderRadius: 6, border: "none", background: T.green, color: "#fff", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>{t("clients.approve", "Approuver")}</button>
+                        <button onClick={() => onUpdate(cn.id, "Rejetée")} style={{ padding: "4px 9px", borderRadius: 6, border: "none", background: T.red, color: "#fff", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>{t("clients.reject", "Rejeter")}</button>
                       </>
                     )}
-                    {cn.status === "Approuvée" && <button onClick={() => onUpdate(cn.id, "Appliquée")} style={{ padding: "4px 9px", borderRadius: 6, border: "none", background: T.blue, color: "#fff", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Appliquer</button>}
+                    {cn.status === "Approuvée" && <button onClick={() => onUpdate(cn.id, "Appliquée")} style={{ padding: "4px 9px", borderRadius: 6, border: "none", background: T.blue, color: "#fff", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>{t("clients.apply", "Appliquer")}</button>}
                   </div>
                 </td>
               </tr>
@@ -849,24 +856,25 @@ function CreditNotesPanel({ creditNotes, onUpdate, onSelectClient }: { creditNot
 }
 
 function DeleteModal({ confirm, onChange, onConfirm }: { confirm: DeleteConfirm; onChange: (c: DeleteConfirm | null) => void; onConfirm: () => void }) {
+  const { t } = useLanguage();
   return (
     <>
       <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999 }} onClick={() => onChange(null)} />
       <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 420, background: T.bgCard, borderRadius: 16, padding: 28, zIndex: 10000, boxShadow: "0 24px 80px rgba(0,0,0,0.22)", fontFamily: "'Outfit', sans-serif" }}>
         <div style={{ fontSize: 18, fontWeight: 900, color: T.text, marginBottom: 10 }}>
-          {confirm.step === 1 ? "Supprimer ce client ?" : "Confirmation finale"}
+          {confirm.step === 1 ? t("clients.delete_client_q", "Supprimer ce client ?") : t("clients.final_confirmation", "Confirmation finale")}
         </div>
         <p style={{ fontSize: 14, color: T.textMid, marginBottom: 20, lineHeight: 1.5 }}>
           {confirm.step === 1
-            ? `Vous êtes sur le point de supprimer "${confirm.companyName}". Toutes les données (notes, disputes, notes de crédit) seront supprimées. Cette action est irréversible.`
-            : `Confirmez-vous la suppression définitive de "${confirm.companyName}" ? Cette action ne peut pas être annulée.`}
+            ? `${t("clients.delete_warning_1", "Vous êtes sur le point de supprimer")} "${confirm.companyName}". ${t("clients.delete_warning_2", "Toutes les données (notes, disputes, notes de crédit) seront supprimées. Cette action est irréversible.")}`
+            : `${t("clients.delete_confirm_final_1", "Confirmez-vous la suppression définitive de")} "${confirm.companyName}" ? ${t("clients.delete_confirm_final_2", "Cette action ne peut pas être annulée.")}`}
         </p>
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-          <button onClick={() => onChange(null)} style={{ padding: "10px 20px", borderRadius: 9, border: `1px solid ${T.border}`, background: T.bgCard, color: T.text, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Annuler</button>
+          <button onClick={() => onChange(null)} style={{ padding: "10px 20px", borderRadius: 9, border: `1px solid ${T.border}`, background: T.bgCard, color: T.text, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>{t("cancel", "Annuler")}</button>
           {confirm.step === 1 ? (
-            <button onClick={() => onChange({ ...confirm, step: 2 })} style={{ padding: "10px 20px", borderRadius: 9, border: "none", background: T.orange, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Continuer</button>
+            <button onClick={() => onChange({ ...confirm, step: 2 })} style={{ padding: "10px 20px", borderRadius: 9, border: "none", background: T.orange, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>{t("auth.continue", "Continuer")}</button>
           ) : (
-            <button onClick={onConfirm} style={{ padding: "10px 20px", borderRadius: 9, border: "none", background: T.red, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Supprimer définitivement</button>
+            <button onClick={onConfirm} style={{ padding: "10px 20px", borderRadius: 9, border: "none", background: T.red, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>{t("clients.delete_permanently", "Supprimer définitivement")}</button>
           )}
         </div>
       </div>
@@ -875,6 +883,7 @@ function DeleteModal({ confirm, onChange, onConfirm }: { confirm: DeleteConfirm;
 }
 
 function ReassignModalComp({ client, onReassign, onClose }: { client: Client; onReassign: (client: Client, agentId: string) => void; onClose: () => void }) {
+  const { t } = useLanguage();
   const ALL_AGENTS = useTeamAgents();
   const SALES_TEAMS = useTeams();
   const [selectedAgent, setSelectedAgent] = useState(client.agent_id);
@@ -885,10 +894,10 @@ function ReassignModalComp({ client, onReassign, onClose }: { client: Client; on
     <>
       <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999 }} onClick={onClose} />
       <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 420, background: T.bgCard, borderRadius: 16, padding: 28, zIndex: 10000, boxShadow: "0 24px 80px rgba(0,0,0,0.22)", fontFamily: "'Outfit', sans-serif" }}>
-        <div style={{ fontSize: 18, fontWeight: 900, color: T.text, marginBottom: 6 }}>Réassigner le client</div>
-        <p style={{ fontSize: 13, color: T.textMid, marginBottom: 18 }}>Client : <strong>{client.company_name}</strong></p>
+        <div style={{ fontSize: 18, fontWeight: 900, color: T.text, marginBottom: 6 }}>{t("clients.reassign_client", "Réassigner le client")}</div>
+        <p style={{ fontSize: 13, color: T.textMid, marginBottom: 18 }}>{t("clients.client_label", "Client")} : <strong>{client.company_name}</strong></p>
         <div style={{ marginBottom: 18 }}>
-          <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6, display: "block" }}>Nouvel agent assigné</label>
+          <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6, display: "block" }}>{t("clients.new_assigned_agent", "Nouvel agent assigné")}</label>
           <select
             value={selectedAgent}
             onChange={e => setSelectedAgent(e.target.value)}
@@ -896,12 +905,12 @@ function ReassignModalComp({ client, onReassign, onClose }: { client: Client; on
           >
             {ALL_AGENTS.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
           </select>
-          {team && <div style={{ marginTop: 8, fontSize: 12, color: T.textMid }}>Équipe : {team.name}</div>}
+          {team && <div style={{ marginTop: 8, fontSize: 12, color: T.textMid }}>{t("clients.team", "Équipe")} : {team.name}</div>}
         </div>
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-          <button onClick={onClose} style={{ padding: "10px 20px", borderRadius: 9, border: `1px solid ${T.border}`, background: T.bgCard, color: T.text, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Annuler</button>
+          <button onClick={onClose} style={{ padding: "10px 20px", borderRadius: 9, border: `1px solid ${T.border}`, background: T.bgCard, color: T.text, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>{t("cancel", "Annuler")}</button>
           <button onClick={() => onReassign(client, selectedAgent)} disabled={selectedAgent === client.agent_id} style={{ padding: "10px 20px", borderRadius: 9, border: "none", background: selectedAgent !== client.agent_id ? T.main : "#d1d5db", color: "#fff", fontSize: 13, fontWeight: 700, cursor: selectedAgent !== client.agent_id ? "pointer" : "not-allowed", fontFamily: "inherit" }}>
-            Confirmer la réassignation
+            {t("clients.confirm_reassign", "Confirmer la réassignation")}
           </button>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { T } from "./theme";
+import { useLanguage } from "./i18n/LanguageContext";
 import AddressAutocomplete from "./components/AddressAutocomplete";
 
 const fmt = (n: number) =>
@@ -464,9 +465,10 @@ const Ico = {
 // ── SHARED SMALL COMPONENTS ──
 
 const Badge = ({ s }: { s: ClientStatus }) => {
+  const { t } = useLanguage();
   const v = s === "active"
-    ? { bg: T.greenBg, c: T.green, l: "Actif" }
-    : { bg: "#f3f4f6", c: T.textMid, l: "Inactif" };
+    ? { bg: T.greenBg, c: T.green, l: t("active", "Actif") }
+    : { bg: "#f3f4f6", c: T.textMid, l: t("inactive", "Inactif") };
   return (
     <span style={{ background: v.bg, color: v.c, padding: "3px 10px", borderRadius: 4, fontSize: 11, fontWeight: 700, whiteSpace: "nowrap" }}>
       {v.l}
@@ -618,6 +620,7 @@ const MapMock = ({
   onSelect: (c: CRMClient | null) => void;
   selected: CRMClient | null;
 }) => {
+  const { t } = useLanguage();
   const [hovered, setHovered] = useState<string | null>(null);
   const [tooltip, setTooltip] = useState<{ x: number; y: number; client: CRMClient } | null>(null);
   const W = 800, H = 420;
@@ -741,7 +744,7 @@ const MapMock = ({
               {tooltip.client.tier}
             </span>
             <span style={{ fontSize: 10, fontWeight: 700, background: tooltip.client.status === "active" ? `${T.green}30` : "#ffffff10", color: tooltip.client.status === "active" ? T.green : T.textLight, padding: "2px 8px", borderRadius: 4 }}>
-              {tooltip.client.status === "active" ? "Actif" : "Inactif"}
+              {tooltip.client.status === "active" ? t("active", "Actif") : t("inactive", "Inactif")}
             </span>
           </div>
           <div style={{ marginTop: 6, fontSize: 12, color: "rgba(255,255,255,0.7)", fontWeight: 600 }}>{fmt(tooltip.client.spent)}</div>
@@ -751,11 +754,11 @@ const MapMock = ({
       {/* Legend */}
       <div style={{ position: "absolute", bottom: 12, left: 12, display: "flex", gap: 12, background: "rgba(0,0,0,0.5)", borderRadius: 6, padding: "6px 12px" }}>
         {[
-          { color: T.main, label: "Actif HIGH" },
-          { color: T.blue, label: "Actif MED" },
-          { color: T.silver, label: "Actif LOW" },
-          { color: T.red, label: "Inactif HIGH" },
-          { color: T.silverDark, label: "Inactif" },
+          { color: T.main, label: t("crm.active_high", "Actif HIGH") },
+          { color: T.blue, label: t("crm.active_med", "Actif MED") },
+          { color: T.silver, label: t("crm.active_low", "Actif LOW") },
+          { color: T.red, label: t("crm.inactive_high", "Inactif HIGH") },
+          { color: T.silverDark, label: t("inactive", "Inactif") },
         ].map(l => (
           <div key={l.label} style={{ display: "flex", alignItems: "center", gap: 5 }}>
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: l.color }} />
@@ -775,6 +778,7 @@ const ClientPanel = ({
   onClose: () => void;
   onEdit: (c: CRMClient) => void;
 }) => {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<"info" | "activity">("info");
 
   return (
@@ -799,7 +803,7 @@ const ClientPanel = ({
             </div>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <Btn v="outline" sz="sm" icon={<Ico.edit />} onClick={() => onEdit(client)}>Modifier</Btn>
+            <Btn v="outline" sz="sm" icon={<Ico.edit />} onClick={() => onEdit(client)}>{t("edit", "Modifier")}</Btn>
             <button onClick={onClose} style={{ background: "transparent", border: "none", cursor: "pointer", color: T.textLight, display: "flex", padding: 4 }}>
               <Ico.close />
             </button>
@@ -810,9 +814,9 @@ const ClientPanel = ({
       {/* Stats strip */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", borderBottom: `1px solid ${T.border}` }}>
         {[
-          { label: "Commandes", value: client.orders },
-          { label: "Total dépensé", value: fmt(client.spent) },
-          { label: "Dernière cmd.", value: client.lastOrder ? new Date(client.lastOrder).toLocaleDateString("fr-CA", { day: "numeric", month: "short" }) : "—" },
+          { label: t("crm.orders", "Commandes"), value: client.orders },
+          { label: t("crm.total_spent", "Total dépensé"), value: fmt(client.spent) },
+          { label: t("crm.last_order", "Dernière cmd."), value: client.lastOrder ? new Date(client.lastOrder).toLocaleDateString("fr-CA", { day: "numeric", month: "short" }) : "—" },
         ].map((s, i) => (
           <div key={i} style={{ padding: "14px 16px", textAlign: "center", borderRight: i < 2 ? `1px solid ${T.border}` : "none" }}>
             <div style={{ fontSize: 18, fontWeight: 800, color: T.text }}>{s.value}</div>
@@ -823,7 +827,7 @@ const ClientPanel = ({
 
       {/* Tabs */}
       <div style={{ display: "flex", borderBottom: `1px solid ${T.border}`, background: T.cardAlt }}>
-        {[["info", "Informations"], ["activity", "Activité"]].map(([k, l]) => (
+        {[["info", t("crm.information", "Informations")], ["activity", t("crm.activity", "Activité")]].map(([k, l]) => (
           <button key={k} onClick={() => setActiveTab(k as any)} style={{
             flex: 1, padding: "12px 16px", border: "none", background: "transparent",
             fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
@@ -842,7 +846,7 @@ const ClientPanel = ({
           <div>
             {/* Contact */}
             <div style={{ marginBottom: 20 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>Contact</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>{t("crm.contact", "Contact")}</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <div style={{ color: T.textLight, display: "flex", width: 18 }}><Ico.user /></div>
@@ -871,15 +875,15 @@ const ClientPanel = ({
 
             {/* Commercial info */}
             <div style={{ marginBottom: 20 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>Informations commerciales</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>{t("crm.commercial_info", "Informations commerciales")}</div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 {[
-                  { label: "Agent assigné", value: client.agentAssigned },
-                  { label: "Termes de paiement", value: client.paymentTerms },
-                  { label: "Niveau (tier)", value: client.tier },
-                  { label: "Type", value: client.type },
-                  { label: "Région", value: client.region },
-                  { label: "Statut", value: client.status === "active" ? "Actif" : "Inactif" },
+                  { label: t("crm.assigned_to", "Agent assigné"), value: client.agentAssigned },
+                  { label: t("crm.payment_terms", "Termes de paiement"), value: client.paymentTerms },
+                  { label: t("crm.tier_level", "Niveau (tier)"), value: client.tier },
+                  { label: t("type", "Type"), value: client.type },
+                  { label: t("crm.region", "Région"), value: client.region },
+                  { label: t("status", "Statut"), value: client.status === "active" ? t("active", "Actif") : t("inactive", "Inactif") },
                 ].map((f, i) => (
                   <div key={i} style={{ background: T.cardAlt, borderRadius: 8, padding: "10px 12px" }}>
                     <div style={{ fontSize: 10, color: T.textLight, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.3, marginBottom: 3 }}>{f.label}</div>
@@ -893,7 +897,7 @@ const ClientPanel = ({
               <>
                 <div style={{ height: 1, background: T.border, marginBottom: 20 }} />
                 <div>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>Notes</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>{t("notes", "Notes")}</div>
                   <div style={{ background: T.cardAlt, borderRadius: 8, padding: "12px 14px", fontSize: 13, color: T.text, lineHeight: 1.55 }}>
                     {client.notes}
                   </div>
@@ -904,7 +908,7 @@ const ClientPanel = ({
         ) : (
           <div>
             <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 14 }}>
-              Historique d'activité
+              {t("crm.activity_history", "Historique d'activité")}
             </div>
             <div style={{ position: "relative" }}>
               {client.activity.map((a, i) => (
@@ -937,6 +941,7 @@ const ClientFormModal = ({
   onSave: (data: Omit<CRMClient, "id" | "activity" | "lat" | "lng">) => void;
   onClose: () => void;
 }) => {
+  const { t } = useLanguage();
   const [form, setForm] = useState<Omit<CRMClient, "id" | "activity" | "lat" | "lng">>(
     initial
       ? { name: initial.name, contact: initial.contact, phone: initial.phone, email: initial.email, type: initial.type, region: initial.region, address: initial.address, city: initial.city, province: initial.province, postalCode: initial.postalCode, country: initial.country, tier: initial.tier, orders: initial.orders, spent: initial.spent, lastOrder: initial.lastOrder, status: initial.status, agentAssigned: initial.agentAssigned, paymentTerms: initial.paymentTerms, notes: initial.notes }
@@ -967,7 +972,7 @@ const ClientFormModal = ({
 
         <div style={{ padding: "20px 24px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ fontSize: 16, fontWeight: 800, color: T.text }}>
-            {initial ? "Modifier le client" : "Ajouter un client"}
+            {initial ? t("crm.edit_client", "Modifier le client") : t("crm.add_client", "Ajouter un client")}
           </div>
           <button onClick={onClose} style={{ background: "transparent", border: "none", cursor: "pointer", color: T.textLight, display: "flex" }}>
             <Ico.close />
@@ -975,34 +980,34 @@ const ClientFormModal = ({
         </div>
 
         <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: T.main, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 14 }}>Entreprise</div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: T.main, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 14 }}>{t("crm.company", "Entreprise")}</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
             <div style={{ gridColumn: "1 / -1" }}>
-              <Field label="Nom de l'entreprise" value={form.name} onChange={set("name")} required placeholder="Ex: Époxy Pro Montréal" />
+              <Field label={t("clients.company_name", "Nom de l'entreprise")} value={form.name} onChange={set("name")} required placeholder="Ex: Époxy Pro Montréal" />
             </div>
             <Field label="Type" value={form.type} onChange={set("type")} type="select" options={["Installateur", "Distributeur"]} />
             <Field label="Tier" value={form.tier} onChange={set("tier")} type="select" options={["HIGH", "MED", "LOW"]} />
           </div>
 
           <div style={{ height: 1, background: T.border, margin: "4px 0 18px" }} />
-          <div style={{ fontSize: 11, fontWeight: 700, color: T.main, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 14 }}>Contact principal</div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: T.main, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 14 }}>{t("crm.main_contact", "Contact principal")}</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
             <div style={{ gridColumn: "1 / -1" }}>
-              <Field label="Nom du contact" value={form.contact} onChange={set("contact")} required placeholder="Jean-Pierre Tremblay" />
+              <Field label={t("clients.contact_name", "Nom du contact")} value={form.contact} onChange={set("contact")} required placeholder="Jean-Pierre Tremblay" />
             </div>
-            <Field label="Téléphone" value={form.phone} onChange={set("phone")} type="tel" placeholder="514-555-0000" />
-            <Field label="Courriel" value={form.email} onChange={set("email")} type="email" placeholder="contact@entreprise.ca" />
+            <Field label={t("phone", "Téléphone")} value={form.phone} onChange={set("phone")} type="tel" placeholder="514-555-0000" />
+            <Field label={t("email", "Courriel")} value={form.email} onChange={set("email")} type="email" placeholder="contact@entreprise.ca" />
           </div>
 
           <div style={{ height: 1, background: T.border, margin: "4px 0 18px" }} />
           <div style={{ fontSize: 11, fontWeight: 700, color: T.main, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 14 }}>
-            Adresse
+            {t("address", "Adresse")}
             {/* TODO: Replace text fields with Mapbox Geocoding API autocomplete */}
             {/* API: https://api.mapbox.com/geocoding/v5/mapbox.places/{query}.json?access_token=VITE_MAPBOX_TOKEN */}
           </div>
           <div style={{ marginBottom: 14 }}>
             <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: T.textMid, marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.4 }}>
-              Adresse (rue)
+              {t("crm.street_address", "Adresse (rue)")}
             </label>
             <AddressAutocomplete
               style={{
@@ -1026,29 +1031,29 @@ const ClientFormModal = ({
             />
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: "0 12px" }}>
-            <Field label="Ville" value={form.city} onChange={set("city")} placeholder="Montréal" />
-            <Field label="Province" value={form.province} onChange={set("province")} type="select" options={PROVINCES} />
-            <Field label="Code postal" value={form.postalCode} onChange={set("postalCode")} placeholder="H1L 2P5" />
+            <Field label={t("city", "Ville")} value={form.city} onChange={set("city")} placeholder="Montréal" />
+            <Field label={t("province", "Province")} value={form.province} onChange={set("province")} type="select" options={PROVINCES} />
+            <Field label={t("crm.postal_code", "Code postal")} value={form.postalCode} onChange={set("postalCode")} placeholder="H1L 2P5" />
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
-            <Field label="Pays" value={form.country} onChange={set("country")} placeholder="Canada" />
-            <Field label="Région" value={form.region} onChange={set("region")} placeholder="Montréal" />
+            <Field label={t("country", "Pays")} value={form.country} onChange={set("country")} placeholder="Canada" />
+            <Field label={t("crm.region", "Région")} value={form.region} onChange={set("region")} placeholder="Montréal" />
           </div>
 
           <div style={{ height: 1, background: T.border, margin: "4px 0 18px" }} />
-          <div style={{ fontSize: 11, fontWeight: 700, color: T.main, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 14 }}>Commercial</div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: T.main, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 14 }}>{t("crm.commercial", "Commercial")}</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
-            <Field label="Agent assigné" value={form.agentAssigned} onChange={set("agentAssigned")} type="select" options={["", ...AGENTS]} />
-            <Field label="Termes de paiement" value={form.paymentTerms} onChange={set("paymentTerms")} type="select" options={TERMS} />
-            <Field label="Statut" value={form.status} onChange={set("status")} type="select" options={["active", "inactive"]} />
+            <Field label={t("crm.assigned_to", "Agent assigné")} value={form.agentAssigned} onChange={set("agentAssigned")} type="select" options={["", ...AGENTS]} />
+            <Field label={t("crm.payment_terms", "Termes de paiement")} value={form.paymentTerms} onChange={set("paymentTerms")} type="select" options={TERMS} />
+            <Field label={t("status", "Statut")} value={form.status} onChange={set("status")} type="select" options={["active", "inactive"]} />
           </div>
-          <Field label="Notes internes" value={form.notes} onChange={set("notes")} type="textarea" placeholder="Notes sur le client, préférences, informations importantes..." />
+          <Field label={t("crm.internal_notes", "Notes internes")} value={form.notes} onChange={set("notes")} type="textarea" placeholder={t("crm.notes_placeholder", "Notes sur le client, préférences, informations importantes...")} />
         </div>
 
         <div style={{ padding: "16px 24px", borderTop: `1px solid ${T.border}`, display: "flex", justifyContent: "flex-end", gap: 10 }}>
-          <Btn v="secondary" onClick={onClose}>Annuler</Btn>
+          <Btn v="secondary" onClick={onClose}>{t("cancel", "Annuler")}</Btn>
           <Btn disabled={!valid} onClick={() => valid && onSave(form)} icon={<Ico.check />}>
-            {initial ? "Sauvegarder" : "Ajouter le client"}
+            {initial ? t("save", "Sauvegarder") : t("crm.add_client", "Ajouter le client")}
           </Btn>
         </div>
       </div>
@@ -1060,6 +1065,7 @@ const ClientFormModal = ({
 // MAIN PAGE COMPONENT
 // ══════════════════════════════════════════════════════════════
 export const ClientsCRMPage = () => {
+  const { t } = useLanguage();
   const [clients, setClients] = useState<CRMClient[]>(CLIENTS_CRM);
   const [view, setView] = useState<"list" | "map">("list");
   const [search, setSearch] = useState("");
@@ -1108,7 +1114,7 @@ export const ClientsCRMPage = () => {
 
   const TABLE_COLS = [
     {
-      key: "name", label: "Entreprise",
+      key: "name", label: t("crm.company", "Entreprise"),
       render: (r: CRMClient) => (
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 34, height: 34, borderRadius: 8, background: `${T.main}14`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800, color: T.main, flexShrink: 0 }}>
@@ -1121,9 +1127,9 @@ export const ClientsCRMPage = () => {
         </div>
       ),
     },
-    { key: "type", label: "Type", render: (r: CRMClient) => <TypeBadge type={r.type} /> },
+    { key: "type", label: t("type", "Type"), render: (r: CRMClient) => <TypeBadge type={r.type} /> },
     {
-      key: "location", label: "Localisation",
+      key: "location", label: t("crm.location", "Localisation"),
       render: (r: CRMClient) => (
         <div>
           <div style={{ fontSize: 13, color: T.text }}>{r.city}</div>
@@ -1132,18 +1138,18 @@ export const ClientsCRMPage = () => {
       ),
     },
     { key: "tier", label: "Tier", render: (r: CRMClient) => <TierBadge tier={r.tier} /> },
-    { key: "orders", label: "Cmd.", align: "center" as const, render: (r: CRMClient) => <span style={{ fontWeight: 600 }}>{r.orders}</span> },
-    { key: "spent", label: "Total", align: "right" as const, render: (r: CRMClient) => <strong style={{ color: T.text }}>{fmt(r.spent)}</strong> },
+    { key: "orders", label: t("crm.orders_short", "Cmd."), align: "center" as const, render: (r: CRMClient) => <span style={{ fontWeight: 600 }}>{r.orders}</span> },
+    { key: "spent", label: t("total", "Total"), align: "right" as const, render: (r: CRMClient) => <strong style={{ color: T.text }}>{fmt(r.spent)}</strong> },
     {
-      key: "lastOrder", label: "Dernière cmd.", align: "center" as const,
+      key: "lastOrder", label: t("crm.last_order", "Dernière cmd."), align: "center" as const,
       render: (r: CRMClient) => (
         <span style={{ fontSize: 12, color: T.textMid }}>
           {r.lastOrder ? new Date(r.lastOrder).toLocaleDateString("fr-CA", { day: "numeric", month: "short", year: "numeric" }) : "—"}
         </span>
       ),
     },
-    { key: "agentAssigned", label: "Agent", render: (r: CRMClient) => <span style={{ fontSize: 12, color: T.textMid }}>{r.agentAssigned || "—"}</span> },
-    { key: "status", label: "Statut", render: (r: CRMClient) => <Badge s={r.status} /> },
+    { key: "agentAssigned", label: t("agent", "Agent"), render: (r: CRMClient) => <span style={{ fontSize: 12, color: T.textMid }}>{r.agentAssigned || "—"}</span> },
+    { key: "status", label: t("status", "Statut"), render: (r: CRMClient) => <Badge s={r.status} /> },
   ];
 
   return (
@@ -1153,7 +1159,7 @@ export const ClientsCRMPage = () => {
         <div>
           <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 800, color: T.text }}>CRM Clients</h2>
           <p style={{ margin: 0, color: T.textMid, fontSize: 14 }}>
-            {clients.length} clients · {activeCount} actifs
+            {clients.length} {t("crm.clients_label", "clients")} · {activeCount} {t("crm.actifs", "actifs")}
           </p>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -1173,16 +1179,16 @@ export const ClientsCRMPage = () => {
               </button>
             ))}
           </div>
-          <Btn icon={<Ico.plus />} onClick={() => setEditingClient("new")}>Ajouter un client</Btn>
+          <Btn icon={<Ico.plus />} onClick={() => setEditingClient("new")}>{t("crm.add_client", "Ajouter un client")}</Btn>
         </div>
       </div>
 
       {/* KPIs */}
       <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
-        <KpiCard icon={<Ico.users />} label="Total clients" value={clients.length} sub={`${activeCount} actifs, ${clients.length - activeCount} inactifs`} />
-        <KpiCard icon={<Ico.dollar />} label="Revenus cumulés (actifs)" value={fmt(totalRevenue)} />
-        <KpiCard icon={<Ico.fire />} label="Valeur moyenne / client" value={fmt(avgValue)} />
-        <KpiCard icon={<Ico.check />} label="Actifs ce mois-ci" value={newThisMonth} sub="Commandes en mars 2026" />
+        <KpiCard icon={<Ico.users />} label={t("crm.total_clients", "Total clients")} value={clients.length} sub={`${activeCount} ${t("crm.actifs", "actifs")}, ${clients.length - activeCount} ${t("crm.inactifs", "inactifs")}`} />
+        <KpiCard icon={<Ico.dollar />} label={t("crm.cumulative_revenue", "Revenus cumulés (actifs)")} value={fmt(totalRevenue)} />
+        <KpiCard icon={<Ico.fire />} label={t("crm.avg_value_client", "Valeur moyenne / client")} value={fmt(avgValue)} />
+        <KpiCard icon={<Ico.check />} label={t("crm.active_this_month", "Actifs ce mois-ci")} value={newThisMonth} sub={t("crm.orders_march", "Commandes en mars 2026")} />
       </div>
 
       {/* Filters */}
@@ -1194,7 +1200,7 @@ export const ClientsCRMPage = () => {
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Chercher un client..."
+            placeholder={t("crm.search_client", "Chercher un client...")}
             style={{
               width: "100%", padding: "8px 10px 8px 34px", borderRadius: 6,
               border: `1px solid ${T.border}`, fontSize: 13, fontFamily: "inherit",
@@ -1204,19 +1210,19 @@ export const ClientsCRMPage = () => {
         </div>
 
         <div style={{ display: "flex", gap: 4 }}>
-          {[["all", "Tous"], ["Installateur", "Installateurs"], ["Distributeur", "Distributeurs"]].map(([k, v]) => (
+          {[["all", t("all", "Tous")], ["Installateur", t("crm.installers", "Installateurs")], ["Distributeur", t("crm.distributors", "Distributeurs")]].map(([k, v]) => (
             <Btn key={k} v={filterType === k ? "primary" : "secondary"} sz="sm" onClick={() => setFilterType(k)}>{v}</Btn>
           ))}
         </div>
 
         <div style={{ display: "flex", gap: 4 }}>
-          {[["all", "Tier: Tous"], ["HIGH", "HIGH"], ["MED", "MED"], ["LOW", "LOW"]].map(([k, v]) => (
+          {[["all", `Tier: ${t("all", "Tous")}`], ["HIGH", "HIGH"], ["MED", "MED"], ["LOW", "LOW"]].map(([k, v]) => (
             <Btn key={k} v={filterTier === k ? "primary" : "secondary"} sz="sm" onClick={() => setFilterTier(k)}>{v}</Btn>
           ))}
         </div>
 
         <div style={{ display: "flex", gap: 4 }}>
-          {[["all", "Statut: Tous"], ["active", "Actifs"], ["inactive", "Inactifs"]].map(([k, v]) => (
+          {[["all", `${t("status", "Statut")}: ${t("all", "Tous")}`], ["active", t("crm.actifs", "Actifs")], ["inactive", t("crm.inactifs", "Inactifs")]].map(([k, v]) => (
             <Btn key={k} v={filterStatus === k ? "primary" : "secondary"} sz="sm" onClick={() => setFilterStatus(k)}>{v}</Btn>
           ))}
         </div>
@@ -1251,7 +1257,7 @@ export const ClientsCRMPage = () => {
                 {filtered.length === 0 ? (
                   <tr>
                     <td colSpan={TABLE_COLS.length + 1} style={{ textAlign: "center", padding: "40px 20px", color: T.textLight, fontSize: 14 }}>
-                      Aucun client trouvé
+                      {t("clients.no_clients", "Aucun client trouvé")}
                     </td>
                   </tr>
                 ) : filtered.map((row, ri) => (
@@ -1272,7 +1278,7 @@ export const ClientsCRMPage = () => {
                         onClick={e => { e.stopPropagation(); setEditingClient(row); }}
                         style={{ background: "transparent", border: `1px solid ${T.border}`, borderRadius: 5, padding: "4px 8px", cursor: "pointer", color: T.textMid, display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 600, fontFamily: "inherit" }}
                       >
-                        <Ico.edit /> Modifier
+                        <Ico.edit /> {t("edit", "Modifier")}
                       </button>
                     </td>
                   </tr>

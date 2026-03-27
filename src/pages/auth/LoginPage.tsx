@@ -4,6 +4,7 @@ import { L } from "../../theme";
 import TotpCodeInput from "../../components/auth/TotpCodeInput";
 import SphereBackground from "../../components/SphereBackground";
 import { COUNTRIES, PROVINCES } from "../../lib/vendeurCodeUtils";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
@@ -19,6 +20,7 @@ type Step = "vendeur_code" | "totp" | "enrollment_required";
 type Props = { onBack: () => void };
 
 export default function LoginPage({ onBack }: Props) {
+  const { t } = useLanguage();
   const [step, setStep] = useState<Step>("vendeur_code");
   const [vendeurCode, setVendeurCode] = useState("");
   const [totpValues, setTotpValues] = useState(["", "", "", "", "", ""]);
@@ -47,7 +49,7 @@ export default function LoginPage({ onBack }: Props) {
 
   const handleNext = () => {
     const code = vendeurCode.trim().toUpperCase();
-    if (!code) { setError("Entrez votre code utilisateur."); return; }
+    if (!code) { setError(t("auth.enter_code", "Entrez votre code utilisateur.")); return; }
     setError("");
     setVendeurCode(code);
     setStep("totp");
@@ -70,7 +72,7 @@ export default function LoginPage({ onBack }: Props) {
           setLoading(false);
           return;
         }
-        setError(data.error || "Erreur de connexion");
+        setError(data.error || t("login.error", "Erreur de connexion"));
         setTotpValues(["", "", "", "", "", ""]);
         setLoading(false);
         return;
@@ -81,17 +83,17 @@ export default function LoginPage({ onBack }: Props) {
         refresh_token: data.session.refresh_token,
       });
     } catch {
-      setError("Erreur réseau. Vérifiez votre connexion.");
+      setError(t("login.network_error", "Erreur réseau. Vérifiez votre connexion."));
       setTotpValues(["", "", "", "", "", ""]);
       setLoading(false);
     }
   };
 
   const handleSendFallbackOtp = async () => {
-    if (!fallbackEmail.trim()) { setError("Entrez votre courriel."); return; }
+    if (!fallbackEmail.trim()) { setError(t("login.enter_email", "Entrez votre courriel.")); return; }
     setLoading(true); setError("");
     const { error: e } = await supabase.auth.signInWithOtp({ email: fallbackEmail.trim() });
-    if (e) { setError("Erreur d'envoi. Vérifiez votre courriel."); }
+    if (e) { setError(t("login.send_error", "Erreur d'envoi. Vérifiez votre courriel.")); }
     else { setFallbackSent(true); }
     setLoading(false);
   };
@@ -99,15 +101,15 @@ export default function LoginPage({ onBack }: Props) {
   const handleFallbackOtpComplete = async (code: string) => {
     setLoading(true); setError("");
     const { error: e } = await supabase.auth.verifyOtp({ email: fallbackEmail.trim(), token: code, type: "email" });
-    if (e) { setError("Code incorrect ou expiré."); setFallbackOtp(["", "", "", "", "", ""]); }
+    if (e) { setError(t("login.code_expired", "Code incorrect ou expiré.")); setFallbackOtp(["", "", "", "", "", ""]); }
     setLoading(false);
   };
 
   const submitRequest = async () => {
-    if (!reqForm.full_name.trim() || !reqForm.email.trim()) { setReqError("Nom et courriel requis."); return; }
+    if (!reqForm.full_name.trim() || !reqForm.email.trim()) { setReqError(t("login.name_email_required", "Nom et courriel requis.")); return; }
     setReqLoading(true); setReqError("");
     const { error: e } = await supabase.from("account_requests").insert({ ...reqForm, status: "pending" });
-    if (e) setReqError("Erreur. Réessayez.");
+    if (e) setReqError(t("login.request_error", "Erreur. Réessayez."));
     else setReqSuccess(true);
     setReqLoading(false);
   };
@@ -179,7 +181,7 @@ export default function LoginPage({ onBack }: Props) {
           style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", cursor: "pointer", color: L.textMuted, fontSize: 13, fontWeight: 500, fontFamily: "inherit", transition: "color 0.2s" }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
-          Retour
+          {t("back", "Retour")}
         </button>
       </div>
 
@@ -195,20 +197,20 @@ export default function LoginPage({ onBack }: Props) {
             </div>
             {step === "vendeur_code" && (
               <>
-                <h1 style={{ fontSize: 32, fontWeight: 800, color: L.text, margin: "0 0 6px", letterSpacing: -1.5 }}>Connexion</h1>
-                <p style={{ fontSize: 14, color: L.textMid, margin: 0 }}>Entrez votre code utilisateur</p>
+                <h1 style={{ fontSize: 32, fontWeight: 800, color: L.text, margin: "0 0 6px", letterSpacing: -1.5 }}>{t("login", "Connexion")}</h1>
+                <p style={{ fontSize: 14, color: L.textMid, margin: 0 }}>{t("auth.enter_code", "Entrez votre code utilisateur")}</p>
               </>
             )}
             {step === "totp" && (
               <>
-                <h1 style={{ fontSize: 32, fontWeight: 800, color: L.text, margin: "0 0 6px", letterSpacing: -1.5 }}>Authentification</h1>
-                <p style={{ fontSize: 14, color: L.textMid, margin: 0 }}>Code Google Authenticator</p>
+                <h1 style={{ fontSize: 32, fontWeight: 800, color: L.text, margin: "0 0 6px", letterSpacing: -1.5 }}>{t("auth.title", "Authentification")}</h1>
+                <p style={{ fontSize: 14, color: L.textMid, margin: 0 }}>{t("auth.google_auth", "Code Google Authenticator")}</p>
               </>
             )}
             {step === "enrollment_required" && (
               <>
-                <h1 style={{ fontSize: 28, fontWeight: 800, color: L.text, margin: "0 0 6px", letterSpacing: -1 }}>Configuration requise</h1>
-                <p style={{ fontSize: 14, color: L.textMid, margin: 0 }}>Google Authenticator non configuré</p>
+                <h1 style={{ fontSize: 28, fontWeight: 800, color: L.text, margin: "0 0 6px", letterSpacing: -1 }}>{t("auth.config_required", "Configuration requise")}</h1>
+                <p style={{ fontSize: 14, color: L.textMid, margin: 0 }}>{t("auth.google_not_configured", "Google Authenticator non configuré")}</p>
               </>
             )}
           </div>
@@ -218,7 +220,7 @@ export default function LoginPage({ onBack }: Props) {
             <div style={{ animation: "stepSlide 0.3s ease-out both" }}>
               <div style={cardStyle}>
                 <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: L.textMuted, marginBottom: 8, letterSpacing: 0.8, textTransform: "uppercase" }}>
-                  Code utilisateur
+                  {t("auth.user_code", "Code utilisateur")}
                 </label>
                 <input
                   className="login-input"
@@ -239,13 +241,13 @@ export default function LoginPage({ onBack }: Props) {
                 )}
 
                 <button onClick={handleNext} style={{ ...btnPrimary, marginTop: 20 }}>
-                  Continuer
+                  {t("auth.continue", "Continuer")}
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginLeft: 6, verticalAlign: "middle" }}><polyline points="9 18 15 12 9 6" /></svg>
                 </button>
 
                 <div style={{ textAlign: "center", marginTop: 16 }}>
                   <button className="login-link" onClick={() => setShowRequest(true)} style={linkBtn}>
-                    Demander un accès
+                    {t("auth.request_access", "Demander un accès")}
                   </button>
                 </div>
               </div>
@@ -263,7 +265,7 @@ export default function LoginPage({ onBack }: Props) {
                 </div>
 
                 <p style={{ fontSize: 13, color: L.textMid, textAlign: "center", marginBottom: 20, lineHeight: 1.6 }}>
-                  Ouvrez <strong style={{ color: L.text }}>Google Authenticator</strong> et entrez le code à 6 chiffres
+                  {t("login.open_ga", "Ouvrez")} <strong style={{ color: L.text }}>Google Authenticator</strong> {t("login.enter_6_digits", "et entrez le code à 6 chiffres")}
                 </p>
 
                 <TotpCodeInput values={totpValues} onChange={setTotpValues} onComplete={handleTotpComplete} disabled={loading} autoFocus lightMode />
@@ -275,7 +277,7 @@ export default function LoginPage({ onBack }: Props) {
                 )}
 
                 {loading && (
-                  <p style={{ textAlign: "center", color: L.textMuted, fontSize: 13, marginTop: 16 }}>Vérification...</p>
+                  <p style={{ textAlign: "center", color: L.textMuted, fontSize: 13, marginTop: 16 }}>{t("auth.verify", "Vérification")}...</p>
                 )}
 
                 <button
@@ -283,7 +285,7 @@ export default function LoginPage({ onBack }: Props) {
                   onClick={() => { setStep("vendeur_code"); setTotpValues(["", "", "", "", "", ""]); setError(""); }}
                   style={{ ...linkBtn, display: "block", margin: "20px auto 0" }}
                 >
-                  ← Changer de code
+                  {t("login.change_code", "← Changer de code")}
                 </button>
               </div>
             </div>
@@ -298,16 +300,16 @@ export default function LoginPage({ onBack }: Props) {
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                   </div>
                   <p style={{ fontSize: 14, color: L.textMid, lineHeight: 1.6, margin: 0 }}>
-                    Configurez <strong style={{ color: L.text }}>Google Authenticator</strong> avant de continuer.
+                    {t("login.configure_ga", "Configurez")} <strong style={{ color: L.text }}>Google Authenticator</strong> {t("login.before_continuing", "avant de continuer.")}
                   </p>
                   <p style={{ fontSize: 12, color: L.textMuted, marginTop: 10, lineHeight: 1.5 }}>
-                    Connectez-vous par courriel pour configurer votre authentificateur.
+                    {t("login.connect_email_setup", "Connectez-vous par courriel pour configurer votre authentificateur.")}
                   </p>
                 </div>
 
                 {!fallbackSent ? (
                   <>
-                    <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: L.textMuted, marginBottom: 6, letterSpacing: 0.5, textTransform: "uppercase" }}>Votre courriel</label>
+                    <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: L.textMuted, marginBottom: 6, letterSpacing: 0.5, textTransform: "uppercase" }}>{t("auth.your_email", "Votre courriel")}</label>
                     <input
                       className="login-input"
                       type="email"
@@ -325,13 +327,13 @@ export default function LoginPage({ onBack }: Props) {
                       disabled={loading}
                       style={{ ...btnPrimary, marginTop: 14, background: "#d97706", opacity: loading ? 0.6 : 1, cursor: loading ? "not-allowed" : "pointer" }}
                     >
-                      {loading ? "Envoi..." : "Envoyer le code par courriel"}
+                      {loading ? t("login.sending", "Envoi...") : t("login.send_code_email", "Envoyer le code par courriel")}
                     </button>
                   </>
                 ) : (
                   <>
                     <p style={{ fontSize: 13, color: L.textMid, textAlign: "center", marginBottom: 16 }}>
-                      Code envoyé à <strong style={{ color: L.text }}>{fallbackEmail}</strong>
+                      {t("login.code_sent_to", "Code envoyé à")} <strong style={{ color: L.text }}>{fallbackEmail}</strong>
                     </p>
                     <TotpCodeInput values={fallbackOtp} onChange={setFallbackOtp} onComplete={handleFallbackOtpComplete} disabled={loading} autoFocus lightMode />
                     {error && (
@@ -345,7 +347,7 @@ export default function LoginPage({ onBack }: Props) {
                   onClick={() => { setStep("vendeur_code"); setError(""); setFallbackEmail(""); setFallbackSent(false); setFallbackOtp(["", "", "", "", "", ""]); }}
                   style={{ ...linkBtn, display: "block", margin: "16px auto 0" }}
                 >
-                  ← Retour
+                  {t("login.go_back", "← Retour")}
                 </button>
               </div>
             </div>
@@ -366,34 +368,34 @@ export default function LoginPage({ onBack }: Props) {
                 <div style={{ width: 52, height: 52, borderRadius: 14, background: "rgba(22,163,74,0.08)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
-                <h3 style={{ fontSize: 18, fontWeight: 700, color: L.text, marginBottom: 8 }}>Demande envoyée</h3>
-                <p style={{ fontSize: 13, color: L.textMid, marginBottom: 24 }}>Notre équipe examinera votre demande sous peu.</p>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: L.text, marginBottom: 8 }}>{t("auth.request_sent", "Demande envoyée")}</h3>
+                <p style={{ fontSize: 13, color: L.textMid, marginBottom: 24 }}>{t("login.team_review", "Notre équipe examinera votre demande sous peu.")}</p>
                 <button onClick={() => { setShowRequest(false); setReqSuccess(false); setReqForm({ full_name: "", email: "", phone: "", company: "", role_requested: "", message: "", store_code_requested: "", country: "CA", province: "QC", city: "" }); }}
                   style={{ padding: "10px 24px", borderRadius: 10, border: "none", background: L.accent, color: L.accentText, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
-                  Fermer
+                  {t("close", "Fermer")}
                 </button>
               </div>
             ) : (
               <>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-                  <h3 style={{ fontSize: 18, fontWeight: 700, color: L.text, margin: 0 }}>Demande d'accès</h3>
+                  <h3 style={{ fontSize: 18, fontWeight: 700, color: L.text, margin: 0 }}>{t("login.access_request", "Demande d'accès")}</h3>
                   <button onClick={() => setShowRequest(false)} style={{ border: "none", background: "none", cursor: "pointer", color: L.textMuted, padding: 4 }}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                   </button>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    <div><label style={{ fontSize: 11, fontWeight: 600, color: L.textMuted, display: "block", marginBottom: 4, letterSpacing: 0.3 }}>Nom complet *</label><input value={reqForm.full_name} onChange={e => setReqForm(f => ({ ...f, full_name: e.target.value }))} style={reqInputStyle} /></div>
-                    <div><label style={{ fontSize: 11, fontWeight: 600, color: L.textMuted, display: "block", marginBottom: 4, letterSpacing: 0.3 }}>Courriel *</label><input type="email" value={reqForm.email} onChange={e => setReqForm(f => ({ ...f, email: e.target.value }))} style={reqInputStyle} /></div>
+                    <div><label style={{ fontSize: 11, fontWeight: 600, color: L.textMuted, display: "block", marginBottom: 4, letterSpacing: 0.3 }}>{t("auth.full_name", "Nom complet *")}</label><input value={reqForm.full_name} onChange={e => setReqForm(f => ({ ...f, full_name: e.target.value }))} style={reqInputStyle} /></div>
+                    <div><label style={{ fontSize: 11, fontWeight: 600, color: L.textMuted, display: "block", marginBottom: 4, letterSpacing: 0.3 }}>{t("auth.email", "Courriel *")}</label><input type="email" value={reqForm.email} onChange={e => setReqForm(f => ({ ...f, email: e.target.value }))} style={reqInputStyle} /></div>
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    <div><label style={{ fontSize: 11, fontWeight: 600, color: L.textMuted, display: "block", marginBottom: 4 }}>Téléphone</label><input value={reqForm.phone} onChange={e => setReqForm(f => ({ ...f, phone: e.target.value }))} style={reqInputStyle} /></div>
-                    <div><label style={{ fontSize: 11, fontWeight: 600, color: L.textMuted, display: "block", marginBottom: 4 }}>Entreprise</label><input value={reqForm.company} onChange={e => setReqForm(f => ({ ...f, company: e.target.value }))} style={reqInputStyle} /></div>
+                    <div><label style={{ fontSize: 11, fontWeight: 600, color: L.textMuted, display: "block", marginBottom: 4 }}>{t("auth.phone", "Téléphone")}</label><input value={reqForm.phone} onChange={e => setReqForm(f => ({ ...f, phone: e.target.value }))} style={reqInputStyle} /></div>
+                    <div><label style={{ fontSize: 11, fontWeight: 600, color: L.textMuted, display: "block", marginBottom: 4 }}>{t("auth.company", "Entreprise")}</label><input value={reqForm.company} onChange={e => setReqForm(f => ({ ...f, company: e.target.value }))} style={reqInputStyle} /></div>
                   </div>
                   <div>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: L.textMuted, display: "block", marginBottom: 4 }}>Rôle demandé</label>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: L.textMuted, display: "block", marginBottom: 4 }}>{t("auth.requested_role", "Rôle demandé")}</label>
                     <select value={reqForm.role_requested} onChange={e => setReqForm(f => ({ ...f, role_requested: e.target.value, store_code_requested: "" }))} style={{ ...reqInputStyle, background: "#fff" }}>
-                      <option value="">-- Sélectionner --</option>
+                      <option value="">-- {t("select", "Sélectionner")} --</option>
                       <option value="vendeur_autonome">Vendeur Autonome</option>
                       <option value="vendeur_equipe">Vendeur Avec Équipe</option>
                       <option value="magasin">Magasin</option>
@@ -401,12 +403,12 @@ export default function LoginPage({ onBack }: Props) {
                   </div>
                   {reqForm.role_requested === "magasin" && (
                     <div>
-                      <label style={{ fontSize: 11, fontWeight: 600, color: L.textMuted, display: "block", marginBottom: 4 }}>Code magasin (optionnel)</label>
+                      <label style={{ fontSize: 11, fontWeight: 600, color: L.textMuted, display: "block", marginBottom: 4 }}>{t("login.store_code_optional", "Code magasin (optionnel)")}</label>
                       <input value={reqForm.store_code_requested} onChange={e => setReqForm(f => ({ ...f, store_code_requested: e.target.value.toUpperCase() }))} placeholder="ex: BSB, MTL01..." style={reqInputStyle} />
                     </div>
                   )}
                   <div>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: L.textMuted, display: "block", marginBottom: 4 }}>Zone</label>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: L.textMuted, display: "block", marginBottom: 4 }}>{t("auth.zone", "Zone")}</label>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
                       <select value={reqForm.country} onChange={e => setReqForm(f => ({ ...f, country: e.target.value, province: PROVINCES[e.target.value]?.[0]?.code || "" }))} style={{ ...reqInputStyle, background: "#fff" }}>
                         {COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.label}</option>)}
@@ -415,16 +417,16 @@ export default function LoginPage({ onBack }: Props) {
                         <option value="">— Province —</option>
                         {(PROVINCES[reqForm.country] || []).map((p) => <option key={p.code} value={p.code}>{p.label}</option>)}
                       </select>
-                      <input value={reqForm.city} onChange={e => setReqForm(f => ({ ...f, city: e.target.value }))} placeholder="Ville" style={reqInputStyle} />
+                      <input value={reqForm.city} onChange={e => setReqForm(f => ({ ...f, city: e.target.value }))} placeholder={t("city", "Ville")} style={reqInputStyle} />
                     </div>
                   </div>
-                  <div><label style={{ fontSize: 11, fontWeight: 600, color: L.textMuted, display: "block", marginBottom: 4 }}>Message</label><textarea value={reqForm.message} onChange={e => setReqForm(f => ({ ...f, message: e.target.value }))} rows={3} style={{ ...reqInputStyle, resize: "none" }} placeholder="Expliquez brièvement..." /></div>
+                  <div><label style={{ fontSize: 11, fontWeight: 600, color: L.textMuted, display: "block", marginBottom: 4 }}>{t("auth.message", "Message")}</label><textarea value={reqForm.message} onChange={e => setReqForm(f => ({ ...f, message: e.target.value }))} rows={3} style={{ ...reqInputStyle, resize: "none" }} placeholder={t("login.explain_briefly", "Expliquez brièvement...")} /></div>
                 </div>
                 {reqError && <p style={{ color: L.red, fontSize: 12, marginTop: 10 }}>{reqError}</p>}
                 <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 20 }}>
-                  <button onClick={() => setShowRequest(false)} style={{ padding: "10px 20px", borderRadius: 10, border: `1px solid ${L.border}`, background: L.card, color: L.text, fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}>Annuler</button>
+                  <button onClick={() => setShowRequest(false)} style={{ padding: "10px 20px", borderRadius: 10, border: `1px solid ${L.border}`, background: L.card, color: L.text, fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}>{t("cancel", "Annuler")}</button>
                   <button onClick={submitRequest} disabled={reqLoading} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: L.accent, color: L.accentText, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-                    {reqLoading ? "Envoi..." : "Envoyer"}
+                    {reqLoading ? t("login.sending", "Envoi...") : t("send", "Envoyer")}
                   </button>
                 </div>
               </>

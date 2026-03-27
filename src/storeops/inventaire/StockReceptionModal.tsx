@@ -5,6 +5,7 @@ import { CARRIERS } from "./inventaireTypes";
 import { useAuth } from "../../contexts/AuthContext";
 import { FORMATS } from "../storeOpsTypes";
 import { T } from "../../theme";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 const inputStyle: React.CSSProperties = {
   padding: "9px 12px", borderRadius: 8, border: `1px solid ${T.border}`,
@@ -42,6 +43,7 @@ interface Props {
 }
 
 export default function StockReceptionModal({ prefillProduct, onClose, onDone }: Props) {
+  const { t } = useLanguage();
   const { storeCode } = useAuth();
   const { products, reloadProducts } = useApp();
   const [receptionNumber, setReceptionNumber] = useState("");
@@ -138,7 +140,7 @@ export default function StockReceptionModal({ prefillProduct, onClose, onDone }:
         total_units_damaged: totalDamaged,
         confirmed_at: now.toISOString(),
       }).select().maybeSingle();
-      if (error || !reception) throw new Error("Erreur création réception");
+      if (error || !reception) throw new Error(t("inventory.error_create_reception", "Erreur création réception"));
 
       const itemRows = items.map((it, idx) => ({
         reception_id: reception.id,
@@ -209,12 +211,12 @@ export default function StockReceptionModal({ prefillProduct, onClose, onDone }:
       <div style={{ background: T.card, borderRadius: 16, padding: 32, width: "100%", maxWidth: 760, marginBottom: 20, boxShadow: "0 24px 60px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
           <div>
-            <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: T.text }}>Entrée de stock</h2>
-            <div style={{ fontSize: 13, color: T.textMid, marginTop: 3 }}>Réception de marchandise — Consignation SCI</div>
+            <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: T.text }}>{t("inventory.stock_entry", "Entrée de stock")}</h2>
+            <div style={{ fontSize: 13, color: T.textMid, marginTop: 3 }}>{t("inventory.reception", "Réception de marchandise — Consignation SCI")}</div>
           </div>
           <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
             <div style={{ background: T.cardAlt, borderRadius: 8, padding: "6px 12px", border: `1px solid ${T.border}` }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: T.textMid, letterSpacing: 0.7 }}># RÉCEPTION</div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: T.textMid, letterSpacing: 0.7 }}>{t("inventory.reception_number", "# RÉCEPTION")}</div>
               <div style={{ fontSize: 13, fontWeight: 800, color: T.main }}>{receptionNumber}</div>
             </div>
             <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 22, color: T.textMid }}>×</button>
@@ -222,83 +224,83 @@ export default function StockReceptionModal({ prefillProduct, onClose, onDone }:
         </div>
 
         <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>1 — Informations de réception</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>{t("inventory.section_info", "1 — Informations de réception")}</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
-            <Field label="Date de réception">
+            <Field label={t("inventory.date", "Date de réception")}>
               <input type="date" value={receivedAt} onChange={e => setReceivedAt(e.target.value)} style={inputStyle} />
             </Field>
-            <Field label="Fournisseur">
+            <Field label={t("inventory.supplier", "Fournisseur")}>
               <input value="SCI" disabled style={{ ...inputStyle, background: T.cardAlt, color: T.textMid }} />
             </Field>
-            <Field label="Numéro BL SCI">
+            <Field label={t("inventory.delivery_note", "Numéro BL SCI")}>
               <input value={deliveryNote} onChange={e => setDeliveryNote(e.target.value)} style={inputStyle} placeholder="BL-0000-XXX" />
             </Field>
-            <Field label="Transporteur">
+            <Field label={t("inventory.carrier", "Transporteur")}>
               <select value={carrier} onChange={e => setCarrier(e.target.value)} style={inputStyle}>
-                <option value="">Sélectionner…</option>
+                <option value="">{t("select_placeholder", "Sélectionner…")}</option>
                 {CARRIERS.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </Field>
-            <Field label="# Tracking (opt.)">
+            <Field label={t("inventory.tracking", "# Tracking (opt.)")}>
               <input value={tracking} onChange={e => setTracking(e.target.value)} style={inputStyle} placeholder="1Z…" />
             </Field>
-            <Field label="Reçu par">
-              <input value={receivedBy} onChange={e => setReceivedBy(e.target.value)} style={inputStyle} placeholder="Nom de l'employé" />
+            <Field label={t("inventory.received_by", "Reçu par")}>
+              <input value={receivedBy} onChange={e => setReceivedBy(e.target.value)} style={inputStyle} placeholder={t("inventory.employee_name", "Nom de l'employé")} />
             </Field>
           </div>
           <div style={{ marginTop: 12 }}>
-            <Field label="Notes">
-              <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} style={{ ...inputStyle, resize: "vertical" }} placeholder="Ex: 2 palettes, colis endommagé…" />
+            <Field label={t("notes", "Notes")}>
+              <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} style={{ ...inputStyle, resize: "vertical" }} placeholder={t("inventory.notes_placeholder", "Ex: 2 palettes, colis endommagé…")} />
             </Field>
           </div>
         </div>
 
         <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>2 — Produits reçus</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>{t("inventory.section_products", "2 — Produits reçus")}</div>
           <div style={{ background: T.cardAlt, borderRadius: 10, padding: 16, marginBottom: 16 }}>
             <div style={{ display: "grid", gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1fr auto", gap: 10, alignItems: "end" }}>
-              <Field label="Produit">
+              <Field label={t("inventory.product", "Produit")}>
                 <select value={itemForm.product_id} onChange={e => {
                   const p = products.find(x => x.id === e.target.value);
                   setItemForm(f => ({ ...f, product_id: e.target.value, product_name: p?.name ?? "" }));
                 }} style={inputStyle}>
-                  <option value="">Sélectionner…</option>
+                  <option value="">{t("select_placeholder", "Sélectionner…")}</option>
                   {products.filter(p => p.is_active).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                 </select>
               </Field>
-              <Field label="Format">
+              <Field label={t("inventory.format", "Format")}>
                 <select value={itemForm.format} onChange={e => updateItem('format', e.target.value)} style={inputStyle}>
-                  <option value="">Format…</option>
+                  <option value="">{t("inventory.format", "Format")}…</option>
                   {FORMATS.map(f => <option key={f} value={f}>{f}</option>)}
                 </select>
               </Field>
-              <Field label="Quantité">
+              <Field label={t("inventory.qty", "Quantité")}>
                 <input type="number" min={1} value={itemForm.quantity_received || ""} onChange={e => updateItem('quantity_received', Number(e.target.value))} style={inputStyle} />
               </Field>
-              <Field label="Lot (opt.)">
+              <Field label={t("inventory.batch", "Lot (opt.)")}>
                 <input value={itemForm.batch_number} onChange={e => updateItem('batch_number', e.target.value)} style={inputStyle} placeholder="LOT-XXX" />
               </Field>
-              <Field label="État">
+              <Field label={t("inventory.condition", "État")}>
                 <select value={itemForm.condition} onChange={e => updateItem('condition', e.target.value)} style={inputStyle}>
-                  <option value="good">Bon état</option>
-                  <option value="damaged_partial">Endommagé (partiel)</option>
-                  <option value="damaged_total">Endommagé (total)</option>
+                  <option value="good">{t("inventory.good", "Bon état")}</option>
+                  <option value="damaged_partial">{t("inventory.damaged_partial", "Endommagé (partiel)")}</option>
+                  <option value="damaged_total">{t("inventory.damaged_total", "Endommagé (total)")}</option>
                 </select>
               </Field>
               <div style={{ paddingBottom: 0 }}>
                 <button onClick={addItem} disabled={!canAdd}
                   style={{ padding: "9px 14px", borderRadius: 8, border: "none", background: canAdd ? T.main : "#e5e7eb", color: canAdd ? "#fff" : "#9ca3af", fontSize: 12, fontWeight: 700, cursor: canAdd ? "pointer" : "default", fontFamily: "inherit", whiteSpace: "nowrap", height: 37 }}>
-                  Ajouter
+                  {t("inventory.add", "Ajouter")}
                 </button>
               </div>
             </div>
             {itemForm.condition !== 'good' && (
               <div style={{ display: "grid", gridTemplateColumns: "1fr 3fr", gap: 10, marginTop: 10 }}>
-                <Field label="Qté endommagée">
+                <Field label={t("inventory.qty_damaged", "Qté endommagée")}>
                   <input type="number" min={0} max={itemForm.quantity_received} value={itemForm.quantity_damaged || ""} onChange={e => updateItem('quantity_damaged', Number(e.target.value))} style={inputStyle} />
                 </Field>
-                <Field label="Description des dommages">
-                  <input value={itemForm.damage_description} onChange={e => updateItem('damage_description', e.target.value)} style={inputStyle} placeholder="Ex: boîtes écrasées, fuites…" />
+                <Field label={t("inventory.damage_desc", "Description des dommages")}>
+                  <input value={itemForm.damage_description} onChange={e => updateItem('damage_description', e.target.value)} style={inputStyle} placeholder={t("inventory.damage_placeholder", "Ex: boîtes écrasées, fuites…")} />
                 </Field>
               </div>
             )}
@@ -308,7 +310,7 @@ export default function StockReceptionModal({ prefillProduct, onClose, onDone }:
             <table style={{ width: "100%", borderCollapse: "collapse", border: `1px solid ${T.border}`, borderRadius: 8, overflow: "hidden" }}>
               <thead>
                 <tr style={{ background: T.cardAlt }}>
-                  {["#", "Produit", "Qté", "Format", "Lot", "État", "Endommagé", "OK", ""].map(h => (
+                  {["#", t("inventory.product", "Produit"), t("inventory.qty", "Qté"), t("inventory.format", "Format"), t("inventory.batch", "Lot"), t("inventory.condition", "État"), t("inventory.units_damaged", "Endommagé"), "OK", ""].map(h => (
                     <th key={h} style={{ padding: "8px 10px", textAlign: "left", fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.7, borderBottom: `1px solid ${T.border}` }}>{h}</th>
                   ))}
                 </tr>
@@ -323,13 +325,13 @@ export default function StockReceptionModal({ prefillProduct, onClose, onDone }:
                     <td style={{ padding: "9px 10px", fontSize: 12, color: T.textMid }}>{it.batch_number || "—"}</td>
                     <td style={{ padding: "9px 10px" }}>
                       <span style={{ padding: "2px 7px", borderRadius: 20, fontSize: 10, fontWeight: 700, background: it.condition === 'good' ? "#d1f5db" : "#ffe5e3", color: it.condition === 'good' ? T.green : T.red }}>
-                        {it.condition === 'good' ? 'Bon' : it.condition === 'damaged_partial' ? 'Endommagé partiellement' : 'Endommagé totalement'}
+                        {it.condition === 'good' ? t("inventory.good_short", "Bon") : it.condition === 'damaged_partial' ? t("inventory.damaged_partial_label", "Endommagé partiellement") : t("inventory.damaged_total_label", "Endommagé totalement")}
                       </span>
                     </td>
                     <td style={{ padding: "9px 10px", fontSize: 13, color: it.quantity_damaged > 0 ? T.red : T.textLight }}>{it.quantity_damaged}</td>
                     <td style={{ padding: "9px 10px", fontSize: 13, fontWeight: 700, color: T.green }}>{it.quantity_ok}</td>
                     <td style={{ padding: "9px 10px" }}>
-                      <button onClick={() => removeItem(it.tempId)} style={{ background: "#ffe5e3", color: T.red, border: "none", borderRadius: 6, padding: "3px 8px", cursor: "pointer", fontSize: 11, fontWeight: 700, fontFamily: "inherit" }}>Retirer</button>
+                      <button onClick={() => removeItem(it.tempId)} style={{ background: "#ffe5e3", color: T.red, border: "none", borderRadius: 6, padding: "3px 8px", cursor: "pointer", fontSize: 11, fontWeight: 700, fontFamily: "inherit" }}>{t("inventory.remove", "Retirer")}</button>
                     </td>
                   </tr>
                 ))}
@@ -337,30 +339,30 @@ export default function StockReceptionModal({ prefillProduct, onClose, onDone }:
             </table>
           ) : (
             <div style={{ textAlign: "center", padding: "20px 0", color: T.textLight, fontSize: 13, border: `1px dashed ${T.border}`, borderRadius: 8 }}>
-              Aucun produit ajouté.
+              {t("inventory.no_products", "Aucun produit ajouté.")}
             </div>
           )}
         </div>
 
         {items.length > 0 && (
           <div style={{ background: T.cardAlt, borderRadius: 10, padding: "14px 18px", marginBottom: 20 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 }}>Résumé de la réception</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 }}>{t("inventory.summary", "Résumé de la réception")}</div>
             <div style={{ display: "flex", gap: 24 }}>
-              <div><div style={{ fontSize: 11, color: T.textMid }}>Produits</div><div style={{ fontSize: 18, fontWeight: 800 }}>{items.length}</div></div>
-              <div><div style={{ fontSize: 11, color: T.textMid }}>Unités totales</div><div style={{ fontSize: 18, fontWeight: 800 }}>{totalUnits}</div></div>
-              <div><div style={{ fontSize: 11, color: T.textMid }}>En bon état</div><div style={{ fontSize: 18, fontWeight: 800, color: T.green }}>{totalOk}</div></div>
-              {totalDamaged > 0 && <div><div style={{ fontSize: 11, color: T.textMid }}>Endommagées</div><div style={{ fontSize: 18, fontWeight: 800, color: T.red }}>{totalDamaged}</div></div>}
+              <div><div style={{ fontSize: 11, color: T.textMid }}>{t("products", "Produits")}</div><div style={{ fontSize: 18, fontWeight: 800 }}>{items.length}</div></div>
+              <div><div style={{ fontSize: 11, color: T.textMid }}>{t("inventory.total_units", "Unités totales")}</div><div style={{ fontSize: 18, fontWeight: 800 }}>{totalUnits}</div></div>
+              <div><div style={{ fontSize: 11, color: T.textMid }}>{t("inventory.units_ok", "En bon état")}</div><div style={{ fontSize: 18, fontWeight: 800, color: T.green }}>{totalOk}</div></div>
+              {totalDamaged > 0 && <div><div style={{ fontSize: 11, color: T.textMid }}>{t("inventory.units_damaged", "Endommagées")}</div><div style={{ fontSize: 18, fontWeight: 800, color: T.red }}>{totalDamaged}</div></div>}
             </div>
           </div>
         )}
 
         <div style={{ display: "flex", gap: 10 }}>
           <button onClick={onClose} style={{ flex: 1, padding: "12px 0", borderRadius: 10, border: `1px solid ${T.border}`, background: "transparent", color: T.textMid, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-            Annuler
+            {t("cancel", "Annuler")}
           </button>
           <button onClick={handleConfirm} disabled={!canSave}
             style={{ flex: 2, padding: "12px 0", borderRadius: 10, border: "none", background: canSave ? T.green : "#e5e7eb", color: canSave ? "#fff" : "#9ca3af", fontSize: 14, fontWeight: 700, cursor: canSave ? "pointer" : "default", fontFamily: "inherit" }}>
-            {saving ? "Enregistrement…" : "Confirmer la réception"}
+            {saving ? t("inventory.saving", "Enregistrement…") : t("inventory.confirm_reception", "Confirmer la réception")}
           </button>
         </div>
       </div>

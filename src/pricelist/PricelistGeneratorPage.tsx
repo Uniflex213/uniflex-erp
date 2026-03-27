@@ -7,6 +7,7 @@ import { useApp } from "../AppContext";
 import SendEmailModal from "../components/email/SendEmailModal";
 import { tplPricelistClient } from "../lib/emailTemplates";
 import { useAuth } from "../contexts/AuthContext";
+import { useLanguage } from "../i18n/LanguageContext";
 import { supabase } from "../supabaseClient";
 
 type View = "history" | "create";
@@ -14,14 +15,15 @@ type View = "history" | "create";
 export default function PricelistGeneratorPage() {
   const { prefillData, clearPrefill } = useApp();
   const { profile } = useAuth();
+  const { t } = useLanguage();
   const [view, setView] = useState<View>("history");
   const [pricelists, setPricelists] = useState<Pricelist[]>([]);
   const [prefill, setPrefill] = useState<Pricelist | null>(null);
   const [emailModal, setEmailModal] = useState<{ pl: Pricelist; subject: string; html: string; text: string } | null>(null);
 
   const sellerInfo: PdfSellerInfo | undefined = profile ? {
-    fullName: profile.full_name || "Équipe Uniflex",
-    title: profile.role === "god_admin" ? "Directeur" : profile.role === "admin" ? "Gestionnaire" : "Représentant",
+    fullName: profile.full_name || t("pricelist.team_uniflex", "Équipe Uniflex"),
+    title: profile.role === "god_admin" ? t("pricelist.director", "Directeur") : profile.role === "admin" ? t("pricelist.manager", "Gestionnaire") : t("pricelist.representative", "Représentant"),
     email: profile.email || "",
     phone: profile.phone || "",
     agentCode: profile.agent_code || "",
@@ -140,7 +142,7 @@ export default function PricelistGeneratorPage() {
     const saved = { ...pl, id: row?.id ?? pl.id, createdAt: row?.created_at ?? pl.createdAt };
     setPricelists(prev => [saved, ...prev]);
     setView("history");
-    const tpl = tplPricelistClient(saved as unknown as Record<string, unknown>, profile?.full_name ?? "Équipe Uniflex");
+    const tpl = tplPricelistClient(saved as unknown as Record<string, unknown>, profile?.full_name ?? t("pricelist.team_uniflex", "Équipe Uniflex"));
     setEmailModal({ pl: saved, subject: tpl.subject, html: tpl.html, text: tpl.text });
   };
 

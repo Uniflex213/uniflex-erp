@@ -3,6 +3,7 @@ import { supabase } from "../../supabaseClient";
 import { InventaireProduct } from "./inventaireTypes";
 import { useAuth } from "../../contexts/AuthContext";
 import { T } from "../../theme";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 const fmt2 = (n: number) => new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD" }).format(n);
 const inputStyle: React.CSSProperties = {
@@ -26,6 +27,7 @@ interface Props {
 }
 
 export default function PhysicalInventoryModal({ products, onClose, onDone }: Props) {
+  const { t } = useLanguage();
   const { storeCode } = useAuth();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [startedBy, setStartedBy] = useState("");
@@ -92,7 +94,7 @@ export default function PhysicalInventoryModal({ products, onClose, onDone }: Pr
         products_with_discrepancy: discrepancyItems.length,
         total_discrepancy_value: totalDiscrepancyValue,
       }).select().maybeSingle();
-      if (error || !inv) throw new Error("Erreur création inventaire");
+      if (error || !inv) throw new Error(t("inventory.error_create_inventory", "Erreur création inventaire"));
 
       const itemRows = items.map((it, idx) => ({
         inventory_id: inv.id,
@@ -142,8 +144,8 @@ export default function PhysicalInventoryModal({ products, onClose, onDone }: Pr
       <div style={{ background: T.card, borderRadius: 16, padding: 32, width: "100%", maxWidth: 800, marginBottom: 20, boxShadow: "0 24px 60px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
           <div>
-            <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: T.text }}>Inventaire Physique</h2>
-            <div style={{ fontSize: 13, color: T.textMid, marginTop: 3 }}>Comptage physique de la consignation SCI</div>
+            <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: T.text }}>{t("inventory.physical", "Inventaire Physique")}</h2>
+            <div style={{ fontSize: 13, color: T.textMid, marginTop: 3 }}>{t("inventory.physical_desc", "Comptage physique de la consignation SCI")}</div>
           </div>
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
             {[1, 2, 3].map(n => (
@@ -159,20 +161,20 @@ export default function PhysicalInventoryModal({ products, onClose, onDone }: Pr
         {step === 1 && (
           <div>
             <div style={{ background: T.cardAlt, borderRadius: 10, padding: 20, marginBottom: 20 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>Étape 1 — Démarrer le comptage</div>
+              <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>{t("inventory.step1_title", "Étape 1 — Démarrer le comptage")}</div>
               <p style={{ fontSize: 13, color: T.textMid, margin: "0 0 16px" }}>
-                Le système va générer une feuille de comptage avec tous les <strong>{activeProducts.length}</strong> produits actifs et leur stock théorique actuel. Vous pourrez l'imprimer ou saisir les quantités directement.
+                {t("inventory.step1_desc_before", "Le système va générer une feuille de comptage avec tous les")} <strong>{activeProducts.length}</strong> {t("inventory.step1_desc_after", "produits actifs et leur stock théorique actuel. Vous pourrez l'imprimer ou saisir les quantités directement.")}
               </p>
               <div>
-                <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 5 }}>Effectué par *</label>
-                <input value={startedBy} onChange={e => setStartedBy(e.target.value)} style={{ ...inputStyle, maxWidth: 300 }} placeholder="Nom de l'employé" />
+                <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 5 }}>{t("inventory.performed_by", "Effectué par")} *</label>
+                <input value={startedBy} onChange={e => setStartedBy(e.target.value)} style={{ ...inputStyle, maxWidth: 300 }} placeholder={t("inventory.employee_name", "Nom de l'employé")} />
               </div>
             </div>
             <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={onClose} style={{ flex: 1, padding: "11px 0", borderRadius: 10, border: `1px solid ${T.border}`, background: "transparent", color: T.textMid, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>Annuler</button>
+              <button onClick={onClose} style={{ flex: 1, padding: "11px 0", borderRadius: 10, border: `1px solid ${T.border}`, background: "transparent", color: T.textMid, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>{t("cancel", "Annuler")}</button>
               <button onClick={handleStart} disabled={!startedBy.trim()}
                 style={{ flex: 2, padding: "11px 0", borderRadius: 10, border: "none", background: startedBy.trim() ? T.main : "#e5e7eb", color: startedBy.trim() ? "#fff" : "#9ca3af", fontSize: 13, fontWeight: 700, cursor: startedBy.trim() ? "pointer" : "default", fontFamily: "inherit" }}>
-                Démarrer l'inventaire
+                {t("inventory.start_inventory", "Démarrer l'inventaire")}
               </button>
             </div>
           </div>
@@ -181,10 +183,10 @@ export default function PhysicalInventoryModal({ products, onClose, onDone }: Pr
         {step === 2 && (
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <div style={{ fontSize: 13, color: T.textMid }}>Saisissez les quantités réellement comptées pour chaque produit.</div>
+              <div style={{ fontSize: 13, color: T.textMid }}>{t("inventory.enter_counted_qty", "Saisissez les quantités réellement comptées pour chaque produit.")}</div>
               <div style={{ display: "flex", gap: 8 }}>
                 <button onClick={printSheet} style={{ padding: "7px 14px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.cardAlt, color: T.textMid, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-                  Imprimer la feuille
+                  {t("inventory.print_sheet", "Imprimer la feuille")}
                 </button>
               </div>
             </div>
@@ -192,7 +194,7 @@ export default function PhysicalInventoryModal({ products, onClose, onDone }: Pr
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead style={{ position: "sticky", top: 0, background: T.cardAlt, zIndex: 1 }}>
                   <tr>
-                    {["Produit", "Stock système", "Stock compté", "Écart", "Notes"].map(h => (
+                    {[t("inventory.product", "Produit"), t("inventory.system_stock", "Stock système"), t("inventory.counted_stock", "Stock compté"), t("inventory.discrepancy", "Écart"), t("notes", "Notes")].map(h => (
                       <th key={h} style={{ padding: "10px 12px", textAlign: "left", fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.7, borderBottom: `1px solid ${T.border}` }}>{h}</th>
                     ))}
                   </tr>
@@ -212,7 +214,7 @@ export default function PhysicalInventoryModal({ products, onClose, onDone }: Pr
                           {diff === null ? "—" : diff === 0 ? "✓ 0" : (diff > 0 ? "+" : "") + diff}
                         </td>
                         <td style={{ padding: "10px 12px" }}>
-                          <input value={it.notes} onChange={e => updateNotes(it.product_id, e.target.value)} style={{ ...inputStyle, fontSize: 12 }} placeholder="Notes (opt.)" />
+                          <input value={it.notes} onChange={e => updateNotes(it.product_id, e.target.value)} style={{ ...inputStyle, fontSize: 12 }} placeholder={t("inventory.notes_opt", "Notes (opt.)")} />
                         </td>
                       </tr>
                     );
@@ -221,10 +223,10 @@ export default function PhysicalInventoryModal({ products, onClose, onDone }: Pr
               </table>
             </div>
             <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-              <button onClick={() => setStep(1)} style={{ flex: 1, padding: "11px 0", borderRadius: 10, border: `1px solid ${T.border}`, background: "transparent", color: T.textMid, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>Retour</button>
+              <button onClick={() => setStep(1)} style={{ flex: 1, padding: "11px 0", borderRadius: 10, border: `1px solid ${T.border}`, background: "transparent", color: T.textMid, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>{t("back", "Retour")}</button>
               <button onClick={() => setStep(3)} disabled={filledItems.length === 0}
                 style={{ flex: 2, padding: "11px 0", borderRadius: 10, border: "none", background: filledItems.length > 0 ? T.main : "#e5e7eb", color: filledItems.length > 0 ? "#fff" : "#9ca3af", fontSize: 13, fontWeight: 700, cursor: filledItems.length > 0 ? "pointer" : "default", fontFamily: "inherit" }}>
-                Voir le résumé ({filledItems.length}/{items.length} comptés)
+                {t("inventory.view_summary", "Voir le résumé")} ({filledItems.length}/{items.length} {t("inventory.counted", "comptés")})
               </button>
             </div>
           </div>
@@ -233,18 +235,18 @@ export default function PhysicalInventoryModal({ products, onClose, onDone }: Pr
         {step === 3 && (
           <div>
             <div style={{ background: T.cardAlt, borderRadius: 10, padding: 18, marginBottom: 20 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 12 }}>Résumé des écarts</div>
+              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 12 }}>{t("inventory.discrepancy_summary", "Résumé des écarts")}</div>
               <div style={{ display: "flex", gap: 20, marginBottom: 16 }}>
-                <div><div style={{ fontSize: 11, color: T.textMid }}>Produits comptés</div><div style={{ fontSize: 20, fontWeight: 800 }}>{filledItems.length} / {items.length}</div></div>
-                <div><div style={{ fontSize: 11, color: T.textMid }}>Avec écart</div><div style={{ fontSize: 20, fontWeight: 800, color: discrepancyItems.length > 0 ? T.red : T.green }}>{discrepancyItems.length}</div></div>
-                <div><div style={{ fontSize: 11, color: T.textMid }}>Valeur des écarts</div><div style={{ fontSize: 20, fontWeight: 800, color: totalDiscrepancyValue < 0 ? T.red : totalDiscrepancyValue > 0 ? T.blue : T.green }}>{fmt2(totalDiscrepancyValue)}</div></div>
+                <div><div style={{ fontSize: 11, color: T.textMid }}>{t("inventory.products_counted", "Produits comptés")}</div><div style={{ fontSize: 20, fontWeight: 800 }}>{filledItems.length} / {items.length}</div></div>
+                <div><div style={{ fontSize: 11, color: T.textMid }}>{t("inventory.with_discrepancy", "Avec écart")}</div><div style={{ fontSize: 20, fontWeight: 800, color: discrepancyItems.length > 0 ? T.red : T.green }}>{discrepancyItems.length}</div></div>
+                <div><div style={{ fontSize: 11, color: T.textMid }}>{t("inventory.discrepancy_value", "Valeur des écarts")}</div><div style={{ fontSize: 20, fontWeight: 800, color: totalDiscrepancyValue < 0 ? T.red : totalDiscrepancyValue > 0 ? T.blue : T.green }}>{fmt2(totalDiscrepancyValue)}</div></div>
               </div>
               {discrepancyItems.length > 0 && (
                 <div style={{ maxHeight: 260, overflowY: "auto" }}>
                   <table style={{ width: "100%", borderCollapse: "collapse" }}>
                     <thead>
                       <tr>
-                        {["Produit", "Système", "Compté", "Écart", "Valeur écart"].map(h => (
+                        {[t("inventory.product", "Produit"), t("inventory.system_label", "Système"), t("inventory.counted_label", "Compté"), t("inventory.discrepancy", "Écart"), t("inventory.discrepancy_value_col", "Valeur écart")].map(h => (
                           <th key={h} style={{ padding: "7px 10px", textAlign: "left", fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", borderBottom: `1px solid ${T.border}` }}>{h}</th>
                         ))}
                       </tr>
@@ -268,14 +270,14 @@ export default function PhysicalInventoryModal({ products, onClose, onDone }: Pr
                 </div>
               )}
               {discrepancyItems.length === 0 && (
-                <div style={{ textAlign: "center", padding: "12px 0", color: T.green, fontWeight: 700 }}>Aucun écart — stock système conforme au comptage physique.</div>
+                <div style={{ textAlign: "center", padding: "12px 0", color: T.green, fontWeight: 700 }}>{t("inventory.no_discrepancy", "Aucun écart — stock système conforme au comptage physique.")}</div>
               )}
             </div>
             <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={() => setStep(2)} style={{ flex: 1, padding: "11px 0", borderRadius: 10, border: `1px solid ${T.border}`, background: "transparent", color: T.textMid, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>Modifier</button>
+              <button onClick={() => setStep(2)} style={{ flex: 1, padding: "11px 0", borderRadius: 10, border: `1px solid ${T.border}`, background: "transparent", color: T.textMid, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>{t("edit", "Modifier")}</button>
               <button onClick={handleApply} disabled={saving}
                 style={{ flex: 2, padding: "11px 0", borderRadius: 10, border: "none", background: T.main, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
-                {saving ? "Application…" : discrepancyItems.length > 0 ? `Appliquer ${discrepancyItems.length} ajustement(s)` : "Valider l'inventaire"}
+                {saving ? t("inventory.applying", "Application…") : discrepancyItems.length > 0 ? `${t("inventory.apply", "Appliquer")} ${discrepancyItems.length} ${t("inventory.adjustments", "ajustement(s)")}` : t("inventory.validate_inventory", "Valider l'inventaire")}
               </button>
             </div>
           </div>

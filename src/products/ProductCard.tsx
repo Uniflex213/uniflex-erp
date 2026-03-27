@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { SaleProduct } from "../sales/productTypes";
 import { T } from "../theme";
+import { useLanguage } from "../i18n/LanguageContext";
 import { DownloadIcon, EditIcon, ImageIcon } from "./productIcons";
 import { PARTIE_LABELS } from "./productFormTypes";
 import ProductCarousel from "./ProductCarousel";
 
 export default function ProductCard({ product, onEdit, canEdit }: { product: SaleProduct; onEdit: (p: SaleProduct) => void; canEdit?: boolean }) {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("description");
 
   const mainImage = product.images?.find(img => img.image_type === "main");
@@ -16,16 +18,16 @@ export default function ProductCard({ product, onEdit, canEdit }: { product: Sal
   const getSdsFile = (letter: string) => product.files?.find(f => f.file_type === `SDS-${letter}`);
 
   const tabs = [
-    { key: "description", label: "Description" },
-    { key: "formats", label: "Formats" },
-    { key: "composants", label: "Composants" },
+    { key: "description", label: t("description", "Description") },
+    { key: "formats", label: t("products.format", "Formats") },
+    { key: "composants", label: t("products.components", "Composants") },
   ];
 
   const renderTabContent = () => {
     if (activeTab === "description") {
       return (
         <p style={{ margin: 0, fontSize: 11.5, lineHeight: 1.55, color: T.textMid, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical" } as React.CSSProperties}>
-          {product.description || <span style={{ color: T.silverDark, fontStyle: "italic" }}>Aucune description.</span>}
+          {product.description || <span style={{ color: T.silverDark, fontStyle: "italic" }}>{t("products.no_description", "Aucune description.")}</span>}
         </p>
       );
     }
@@ -40,11 +42,11 @@ export default function ProductCard({ product, onEdit, canEdit }: { product: Sal
               ))}
             </div>
           ) : (
-            <span style={{ fontSize: 11, color: T.silverDark, fontStyle: "italic" }}>Aucun format défini.</span>
+            <span style={{ fontSize: 11, color: T.silverDark, fontStyle: "italic" }}>{t("products.no_formats", "Aucun format défini.")}</span>
           )}
           {product.units_per_pallet != null && (
             <div style={{ fontSize: 11, color: T.textMid, marginTop: allFormats.length > 0 ? 4 : 0 }}>
-              <span style={{ fontWeight: 600, color: T.text }}>Palette complète :</span> {product.units_per_pallet} unités
+              <span style={{ fontWeight: 600, color: T.text }}>{t("products.full_pallet", "Palette complète")} :</span> {product.units_per_pallet} {t("products.units", "unités")}
             </div>
           )}
         </div>
@@ -58,7 +60,7 @@ export default function ProductCard({ product, onEdit, canEdit }: { product: Sal
             return (
               <div key={letter} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
                 <div style={{ background: "rgba(99,102,241,0.08)", border: `1px solid rgba(99,102,241,0.2)`, borderRadius: 6, padding: "3px 12px", fontSize: 11, fontWeight: 700, color: T.main, flexShrink: 0 }}>
-                  Partie {letter}
+                  {t("products.partie", "Partie")} {letter}
                 </div>
                 {sdsFile ? (
                   <a href={sdsFile.file_url} download={sdsFile.file_name} style={{ textDecoration: "none" }}>
@@ -72,7 +74,7 @@ export default function ProductCard({ product, onEdit, canEdit }: { product: Sal
                     </button>
                   </a>
                 ) : (
-                  <span style={{ fontSize: 10, color: T.textLight, fontStyle: "italic" }}>Pas de SDS</span>
+                  <span style={{ fontSize: 10, color: T.textLight, fontStyle: "italic" }}>{t("products.no_sds", "Pas de SDS")}</span>
                 )}
               </div>
             );
@@ -124,7 +126,7 @@ export default function ProductCard({ product, onEdit, canEdit }: { product: Sal
               background: product.is_active ? T.greenBg : "#f3f4f6",
               color: product.is_active ? T.green : T.textMid,
             }}>
-              {product.is_active ? "Actif" : "Inactif"}
+              {product.is_active ? t("active", "Actif") : t("inactive", "Inactif")}
             </span>
           </div>
         </div>
@@ -151,7 +153,7 @@ export default function ProductCard({ product, onEdit, canEdit }: { product: Sal
                 fontFamily: "inherit",
               }}
             >
-              <EditIcon /> Modifier
+              <EditIcon /> {t("edit", "Modifier")}
             </button>
           )}
         </div>

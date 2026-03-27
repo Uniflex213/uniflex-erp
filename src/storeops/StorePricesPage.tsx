@@ -6,6 +6,7 @@ import {
   Pencil, Plus, X,
 } from "lucide-react";
 import { T } from "../theme";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD", minimumFractionDigits: 2 }).format(n);
@@ -47,21 +48,22 @@ const inputStyle: React.CSSProperties = {
 
 
 export default function StorePricesPage() {
+  const { t } = useLanguage();
   const [tab, setTab] = useState<"catalogue" | "coutants">("catalogue");
 
   return (
     <div>
       <div style={{ marginBottom: 20 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 800, color: T.text, margin: "0 0 4px" }}>Store Prices</h1>
+        <h1 style={{ fontSize: 24, fontWeight: 800, color: T.text, margin: "0 0 4px" }}>{t("nav.store_prices", "Store Prices")}</h1>
         <p style={{ margin: 0, fontSize: 14, color: T.textMid }}>
-          Gerez le catalogue de produits du magasin et les prix coutants
+          {t("storeprices.subtitle", "Gerez le catalogue de produits du magasin et les prix coutants")}
         </p>
       </div>
 
       <div style={{ display: "flex", gap: 4, marginBottom: 24, borderBottom: `2px solid ${T.border}`, paddingBottom: 0 }}>
         {([
-          { key: "catalogue", label: "Catalogue Magasin" },
-          { key: "coutants", label: "Prix Coutants" },
+          { key: "catalogue", label: t("storeprices.catalogue_tab", "Catalogue Magasin") },
+          { key: "coutants", label: t("storeprices.cost_prices_tab", "Prix Coutants") },
         ] as { key: "catalogue" | "coutants"; label: string }[]).map(t => (
           <button
             key={t.key}
@@ -91,6 +93,7 @@ export default function StorePricesPage() {
 }
 
 function CatalogueTab() {
+  const { t } = useLanguage();
   const [items, setItems] = useState<CatalogueProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -144,10 +147,10 @@ function CatalogueTab() {
     <div>
       <div style={{ display: "flex", gap: 16, marginBottom: 24, flexWrap: "wrap" }}>
         {[
-          { icon: <Package size={20} />, count: items.length, label: "Produits total", color: T.main, bg: `${T.main}10` },
-          { icon: <Check size={20} />, count: activeCount, label: "Actifs", color: T.green, bg: T.greenBg },
-          { icon: <DollarSign size={20} />, count: withPrice, label: "Avec prix magasin", color: T.main, bg: `${T.main}10` },
-          { icon: <AlertCircle size={20} />, count: withoutPrice, label: "Sans prix magasin", color: withoutPrice > 0 ? T.orange : T.green, bg: withoutPrice > 0 ? T.orangeBg : T.greenBg },
+          { icon: <Package size={20} />, count: items.length, label: t("storeprices.total_products", "Produits total"), color: T.main, bg: `${T.main}10` },
+          { icon: <Check size={20} />, count: activeCount, label: t("storeprices.active", "Actifs"), color: T.green, bg: T.greenBg },
+          { icon: <DollarSign size={20} />, count: withPrice, label: t("storeprices.with_store_price", "Avec prix magasin"), color: T.main, bg: `${T.main}10` },
+          { icon: <AlertCircle size={20} />, count: withoutPrice, label: t("storeprices.without_store_price", "Sans prix magasin"), color: withoutPrice > 0 ? T.orange : T.green, bg: withoutPrice > 0 ? T.orangeBg : T.greenBg },
         ].map(s => (
           <div key={s.label} style={{ flex: "1 1 160px", background: T.card, borderRadius: 12, padding: "18px 20px", border: `1px solid ${T.border}` }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -164,7 +167,7 @@ function CatalogueTab() {
       <div style={{ padding: "12px 18px", background: `${T.main}08`, borderRadius: 10, marginBottom: 16, display: "flex", alignItems: "center", gap: 10 }}>
         <Package size={16} color={T.main} />
         <span style={{ fontSize: 12, color: T.textMid }}>
-          Les produits proviennent du <strong>menu Produits</strong>. Vous pouvez définir un prix de vente magasin ici.
+          {t("storeprices.info_banner", "Les produits proviennent du menu Produits. Vous pouvez définir un prix de vente magasin ici.")}
         </span>
       </div>
 
@@ -174,24 +177,24 @@ function CatalogueTab() {
             <Search size={16} color={T.textLight} />
             <input
               type="text" value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="Rechercher par nom ou SKU..."
+              placeholder={t("storeprices.search_placeholder", "Rechercher par nom ou SKU...")}
               style={{ border: "none", background: "transparent", outline: "none", fontSize: 13, width: "100%", fontFamily: "inherit" }}
             />
           </div>
         </div>
 
         {loading ? (
-          <div style={{ padding: 40, textAlign: "center", color: T.textMid }}>Chargement...</div>
+          <div style={{ padding: 40, textAlign: "center", color: T.textMid }}>{t("loading_dots", "Chargement...")}</div>
         ) : filtered.length === 0 ? (
           <div style={{ padding: 40, textAlign: "center", color: T.textMid }}>
-            {items.length === 0 ? "Aucun produit. Ajoutez des produits dans le menu Produits." : "Aucun produit correspondant"}
+            {items.length === 0 ? t("storeprices.no_products_add", "Aucun produit. Ajoutez des produits dans le menu Produits.") : t("storeprices.no_matching", "Aucun produit correspondant")}
           </div>
         ) : (
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ background: T.cardAlt }}>
-                  {["Produit", "SKU", "Catégorie", "Formats", "Prix magasin", "Unité", "Statut", ""].map(h => (
+                  {[t("product", "Produit"), "SKU", t("category", "Catégorie"), "Formats", t("storeprices.store_price", "Prix magasin"), t("storeprices.unit", "Unité"), t("status", "Statut"), ""].map(h => (
                     <th key={h} style={{ textAlign: "left", padding: "11px 16px", fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5 }}>{h}</th>
                   ))}
                 </tr>
@@ -223,7 +226,7 @@ function CatalogueTab() {
                     </td>
                     <td style={{ padding: "13px 16px" }}>
                       <span style={{ fontSize: 14, fontWeight: 700, color: (item.store_unit_price || 0) > 0 ? T.text : T.orange }}>
-                        {(item.store_unit_price || 0) > 0 ? fmt(item.store_unit_price) : "Non défini"}
+                        {(item.store_unit_price || 0) > 0 ? fmt(item.store_unit_price) : t("storeprices.not_defined", "Non défini")}
                       </span>
                       {savedId === item.id && <Check size={14} color={T.green} style={{ marginLeft: 6 }} />}
                     </td>
@@ -232,13 +235,13 @@ function CatalogueTab() {
                     </td>
                     <td style={{ padding: "13px 16px" }}>
                       <span style={{ background: item.is_active ? T.greenBg : T.cardAlt, color: item.is_active ? T.green : T.textMid, padding: "3px 9px", borderRadius: 6, fontSize: 11, fontWeight: 600 }}>
-                        {item.is_active ? "Actif" : "Inactif"}
+                        {item.is_active ? t("active", "Actif") : t("inactive", "Inactif")}
                       </span>
                     </td>
                     <td style={{ padding: "13px 16px" }}>
                       <button onClick={() => openEdit(item)}
                         style={{ display: "flex", alignItems: "center", gap: 4, background: (item.store_unit_price || 0) > 0 ? T.cardAlt : T.main, color: (item.store_unit_price || 0) > 0 ? T.textMid : "#fff", border: "none", borderRadius: 6, padding: "5px 10px", cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "inherit" }}>
-                        <Pencil size={12} /> {(item.store_unit_price || 0) > 0 ? "Modifier" : "Définir prix"}
+                        <Pencil size={12} /> {(item.store_unit_price || 0) > 0 ? t("edit", "Modifier") : t("storeprices.set_price", "Définir prix")}
                       </button>
                     </td>
                   </tr>
@@ -253,7 +256,7 @@ function CatalogueTab() {
         <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
           <div style={{ background: T.card, borderRadius: 16, width: "100%", maxWidth: 420, boxShadow: "0 20px 60px rgba(0,0,0,0.2)", fontFamily: "inherit" }}>
             <div style={{ padding: "18px 24px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h2 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: T.text }}>Prix magasin</h2>
+              <h2 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: T.text }}>{t("storeprices.store_price", "Prix magasin")}</h2>
               <button onClick={() => setEditItem(null)} style={{ background: "none", border: "none", cursor: "pointer", color: T.textMid, padding: 4 }}>
                 <X size={20} />
               </button>
@@ -265,11 +268,11 @@ function CatalogueTab() {
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>Prix de vente ($)</label>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>{t("storeprices.sale_price", "Prix de vente ($)")}</label>
                   <input type="number" step="0.01" min="0" style={inputStyle} value={editPrice} onChange={e => setEditPrice(e.target.value)} autoFocus placeholder="0.00" />
                 </div>
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>Unité</label>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>{t("storeprices.unit", "Unité")}</label>
                   <select style={inputStyle} value={editUnit} onChange={e => setEditUnit(e.target.value)}>
                     {PRICE_UNITS.map(u => <option key={u} value={u}>{u}</option>)}
                   </select>
@@ -279,12 +282,12 @@ function CatalogueTab() {
             <div style={{ padding: "14px 24px", borderTop: `1px solid ${T.border}`, display: "flex", justifyContent: "flex-end", gap: 10 }}>
               <button onClick={() => setEditItem(null)}
                 style={{ background: T.cardAlt, color: T.textMid, border: "none", borderRadius: 8, padding: "9px 20px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
-                Annuler
+                {t("cancel", "Annuler")}
               </button>
               <button onClick={handleSavePrice} disabled={saving}
                 style={{ background: T.main, color: "#fff", border: "none", borderRadius: 8, padding: "9px 22px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 7 }}>
                 <Save size={14} />
-                {saving ? "Sauvegarde..." : "Sauvegarder"}
+                {saving ? t("storeprices.saving", "Sauvegarde...") : t("save", "Sauvegarder")}
               </button>
             </div>
           </div>
@@ -295,6 +298,7 @@ function CatalogueTab() {
 }
 
 function CoutantsTab() {
+  const { t } = useLanguage();
   const [products, setProducts] = useState<SaleProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -349,9 +353,9 @@ function CoutantsTab() {
     <div>
       <div style={{ display: "flex", gap: 16, marginBottom: 24, flexWrap: "wrap" }}>
         {[
-          { icon: <Package size={20} />, value: products.length, label: "Produits total", color: T.main, bg: `${T.main}10` },
-          { icon: <DollarSign size={20} />, value: withCost, label: "Avec prix coutant", color: T.green, bg: T.greenBg },
-          { icon: <AlertCircle size={20} />, value: withoutCost, label: "Sans prix coutant", color: withoutCost > 0 ? T.orange : T.green, bg: withoutCost > 0 ? T.orangeBg : T.greenBg },
+          { icon: <Package size={20} />, value: products.length, label: t("storeprices.total_products", "Produits total"), color: T.main, bg: `${T.main}10` },
+          { icon: <DollarSign size={20} />, value: withCost, label: t("storeprices.with_cost_price", "Avec prix coutant"), color: T.green, bg: T.greenBg },
+          { icon: <AlertCircle size={20} />, value: withoutCost, label: t("storeprices.without_cost_price", "Sans prix coutant"), color: withoutCost > 0 ? T.orange : T.green, bg: withoutCost > 0 ? T.orangeBg : T.greenBg },
         ].map(s => (
           <div key={s.label} style={{ flex: "1 1 180px", background: T.card, borderRadius: 12, padding: "18px 20px", border: `1px solid ${T.border}` }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -370,7 +374,7 @@ function CoutantsTab() {
           <div style={{ display: "flex", alignItems: "center", gap: 8, background: T.cardAlt, borderRadius: 8, padding: "8px 14px", flex: 1, maxWidth: 400 }}>
             <Search size={16} color={T.textLight} />
             <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="Rechercher par nom ou SKU..."
+              placeholder={t("storeprices.search_placeholder", "Rechercher par nom ou SKU...")}
               style={{ border: "none", background: "transparent", outline: "none", fontSize: 13, width: "100%", fontFamily: "inherit" }} />
           </div>
           {withoutCost > 0 && (
@@ -379,26 +383,26 @@ function CoutantsTab() {
               style={{ display: "flex", alignItems: "center", gap: 7, background: T.main, color: "#fff", border: "none", borderRadius: 8, padding: "9px 18px", cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: "inherit", whiteSpace: "nowrap" }}
             >
               <Plus size={15} />
-              Ajouter un prix ({withoutCost})
+              {t("storeprices.add_price", "Ajouter un prix")} ({withoutCost})
             </button>
           )}
         </div>
 
         {loading ? (
-          <div style={{ padding: 40, textAlign: "center", color: T.textMid }}>Chargement des produits...</div>
+          <div style={{ padding: 40, textAlign: "center", color: T.textMid }}>{t("storeprices.loading_products", "Chargement des produits...")}</div>
         ) : filtered.length === 0 ? (
-          <div style={{ padding: 40, textAlign: "center", color: T.textMid }}>Aucun produit trouvé</div>
+          <div style={{ padding: 40, textAlign: "center", color: T.textMid }}>{t("products.no_products", "Aucun produit trouvé")}</div>
         ) : (
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ background: T.cardAlt }}>
                   {[
-                    { label: "Produit", align: "left" as const, w: undefined },
+                    { label: t("product", "Produit"), align: "left" as const, w: undefined },
                     { label: "SKU", align: "left" as const, w: undefined },
                     { label: "Formats", align: "left" as const, w: undefined },
-                    { label: "Statut", align: "left" as const, w: undefined },
-                    { label: "Prix coutant", align: "right" as const, w: 200 },
+                    { label: t("status", "Statut"), align: "left" as const, w: undefined },
+                    { label: t("storeprices.cost_price", "Prix coutant"), align: "right" as const, w: 200 },
                   ].map(h => (
                     <th key={h.label} style={{ textAlign: h.align, padding: "12px 16px", fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, minWidth: h.w }}>
                       {h.label}
@@ -429,7 +433,7 @@ function CoutantsTab() {
                     </td>
                     <td style={{ padding: "13px 16px" }}>
                       <span style={{ background: p.is_active ? T.greenBg : T.cardAlt, color: p.is_active ? T.green : T.textMid, padding: "3px 9px", borderRadius: 6, fontSize: 11, fontWeight: 600 }}>
-                        {p.is_active ? "Actif" : "Inactif"}
+                        {p.is_active ? t("active", "Actif") : t("inactive", "Inactif")}
                       </span>
                     </td>
                     <td style={{ padding: "13px 16px", textAlign: "right" }}>
@@ -450,13 +454,13 @@ function CoutantsTab() {
                       ) : (
                         <div style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "flex-end" }}>
                           <span style={{ fontSize: 15, fontWeight: 700, color: p.cost_price > 0 ? T.text : T.orange }}>
-                            {p.cost_price > 0 ? fmt(p.cost_price) : "Non défini"}
+                            {p.cost_price > 0 ? fmt(p.cost_price) : t("storeprices.not_defined", "Non défini")}
                           </span>
                           {savedId === p.id && <Check size={16} color={T.green} />}
                           <button onClick={() => handleEdit(p)}
                             style={{ display: "flex", alignItems: "center", gap: 5, padding: "6px 12px", background: p.cost_price > 0 ? T.cardAlt : T.main, color: p.cost_price > 0 ? T.textMid : "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontSize: 12, fontWeight: 600, transition: "all 0.15s" }}>
                             <Pencil size={12} />
-                            {p.cost_price > 0 ? "Modifier" : "Ajouter"}
+                            {p.cost_price > 0 ? t("edit", "Modifier") : t("add", "Ajouter")}
                           </button>
                         </div>
                       )}
@@ -472,7 +476,7 @@ function CoutantsTab() {
       <div style={{ marginTop: 20, padding: "14px 18px", background: T.orangeBg, borderRadius: 10, display: "flex", alignItems: "flex-start", gap: 12 }}>
         <AlertCircle size={18} color={T.orange} style={{ flexShrink: 0, marginTop: 2 }} />
         <div style={{ fontSize: 12, color: T.textMid, lineHeight: 1.5 }}>
-          Les prix coutants définis ici sont utilisés pour calculer le bénéfice dans le menu <strong>Bénéfice Magasin</strong>. Le prix magasin (onglet Catalogue) est le prix de vente client.
+          {t("storeprices.cost_price_info", "Les prix coutants définis ici sont utilisés pour calculer le bénéfice dans le menu Bénéfice Magasin. Le prix magasin (onglet Catalogue) est le prix de vente client.")}
         </div>
       </div>
     </div>

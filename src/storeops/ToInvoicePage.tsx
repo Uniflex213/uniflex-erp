@@ -11,17 +11,19 @@ import TabHistory from "./toinvoice/TabHistory";
 import TabAnalytics from "./toinvoice/TabAnalytics";
 import EmailToolModal from "./toinvoice/EmailToolModal";
 import PaymentRecordModal from "./toinvoice/PaymentRecordModal";
+import { useLanguage } from "../i18n/LanguageContext";
 
 type Tab = "to_send" | "sent" | "billed" | "paid" | "history" | "analytics";
 
-const TABS: { key: Tab; label: string }[] = [
-  { key: "to_send", label: "A envoyer" },
-  { key: "sent", label: "Envoye — en attente" },
-  { key: "billed", label: "Facture" },
-  { key: "paid", label: "Paye & Ferme" },
-  { key: "history", label: "Historique des envois" },
-  { key: "analytics", label: "Analytics" },
-];
+const TAB_KEYS: Tab[] = ["to_send", "sent", "billed", "paid", "history", "analytics"];
+const TAB_LABEL_KEYS: Record<Tab, [string, string]> = {
+  to_send: ["toinvoice.tab_to_send", "À envoyer"],
+  sent: ["toinvoice.tab_sent", "Envoyé — en attente"],
+  billed: ["toinvoice.tab_billed", "Facturé"],
+  paid: ["toinvoice.tab_paid", "Payé & Fermé"],
+  history: ["toinvoice.tab_history", "Historique des envois"],
+  analytics: ["toinvoice.tab_analytics", "Analytics"],
+};
 
 function mapPickup(row: Record<string, unknown>): InvoiceDoc {
   return {
@@ -70,6 +72,7 @@ function mapOrder(row: Record<string, unknown>): InvoiceDoc {
 }
 
 function DocDetailModal({ doc, onClose }: { doc: InvoiceDoc; onClose: () => void }) {
+  const { t } = useLanguage();
   const raw = doc.raw || {};
   const isPickup = doc.document_type === "pickup";
   const labelStyle: React.CSSProperties = { fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 3 };
@@ -93,7 +96,7 @@ function DocDetailModal({ doc, onClose }: { doc: InvoiceDoc; onClose: () => void
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
               <span style={{ background: isPickup ? T.blueBg : T.greenBg, color: isPickup ? T.blue : T.green, padding: "2px 8px", borderRadius: 5, fontSize: 10, fontWeight: 700 }}>
-                {isPickup ? "Pickup" : "Commande"}
+                {isPickup ? "Pickup" : t("order", "Commande")}
               </span>
               <span style={{ background: payColors.bg, color: payColors.color, padding: "2px 8px", borderRadius: 5, fontSize: 10, fontWeight: 700 }}>
                 {PAYMENT_LABEL[doc.payment_status]}
@@ -106,27 +109,27 @@ function DocDetailModal({ doc, onClose }: { doc: InvoiceDoc; onClose: () => void
         </div>
 
         <div style={{ padding: "18px 22px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-          <Field label="Client" value={doc.client_name} />
-          <Field label="Valeur totale" value={fmt(doc.value)} />
-          <Field label="Date document" value={new Date(doc.issued_at).toLocaleDateString("fr-CA", { year: "numeric", month: "long", day: "numeric" })} />
-          <Field label="Statut facturation" value={BILLING_LABEL[doc.billing_status]} />
-          {doc.sent_to_sci_at && <Field label="Envoye a SCI le" value={new Date(doc.sent_to_sci_at).toLocaleDateString("fr-CA", { year: "numeric", month: "long", day: "numeric" })} />}
-          {doc.sci_invoice_number && <Field label="# Facture SCI" value={doc.sci_invoice_number} />}
-          {doc.sci_billed_amount > 0 && <Field label="Montant facture SCI" value={fmt(doc.sci_billed_amount)} />}
-          {doc.sci_billed_at && <Field label="Date facturation SCI" value={new Date(doc.sci_billed_at).toLocaleDateString("fr-CA", { year: "numeric", month: "long", day: "numeric" })} />}
-          <Field label="Montant paye" value={fmt(doc.paid_amount)} />
-          <Field label="Statut paiement" value={PAYMENT_LABEL[doc.payment_status]} />
-          {doc.paid_at && <Field label="Paye le" value={new Date(doc.paid_at).toLocaleDateString("fr-CA", { year: "numeric", month: "long", day: "numeric" })} />}
-          {doc.closed_at && <Field label="Ferme le" value={new Date(doc.closed_at).toLocaleDateString("fr-CA", { year: "numeric", month: "long", day: "numeric" })} />}
-          {isPickup && <Field label="Methode de paiement" value={raw.payment_method as string} />}
-          {isPickup && <Field label="Province" value={raw.province as string} />}
-          {!isPickup && <Field label="Destination" value={raw.destination as string} />}
-          {!isPickup && <Field label="Type de livraison" value={raw.delivery_type as string} />}
+          <Field label={t("client", "Client")} value={doc.client_name} />
+          <Field label={t("toinvoice.total_value", "Valeur totale")} value={fmt(doc.value)} />
+          <Field label={t("toinvoice.document_date", "Date document")} value={new Date(doc.issued_at).toLocaleDateString("fr-CA", { year: "numeric", month: "long", day: "numeric" })} />
+          <Field label={t("toinvoice.billing_status", "Statut facturation")} value={BILLING_LABEL[doc.billing_status]} />
+          {doc.sent_to_sci_at && <Field label={t("toinvoice.sent_to_sci_on", "Envoyé à SCI le")} value={new Date(doc.sent_to_sci_at).toLocaleDateString("fr-CA", { year: "numeric", month: "long", day: "numeric" })} />}
+          {doc.sci_invoice_number && <Field label={t("toinvoice.sci_invoice_number", "# Facture SCI")} value={doc.sci_invoice_number} />}
+          {doc.sci_billed_amount > 0 && <Field label={t("toinvoice.sci_billed_amount", "Montant facture SCI")} value={fmt(doc.sci_billed_amount)} />}
+          {doc.sci_billed_at && <Field label={t("toinvoice.sci_billed_date", "Date facturation SCI")} value={new Date(doc.sci_billed_at).toLocaleDateString("fr-CA", { year: "numeric", month: "long", day: "numeric" })} />}
+          <Field label={t("toinvoice.paid_amount", "Montant payé")} value={fmt(doc.paid_amount)} />
+          <Field label={t("billing.payment_status", "Statut paiement")} value={PAYMENT_LABEL[doc.payment_status]} />
+          {doc.paid_at && <Field label={t("toinvoice.paid_on", "Payé le")} value={new Date(doc.paid_at).toLocaleDateString("fr-CA", { year: "numeric", month: "long", day: "numeric" })} />}
+          {doc.closed_at && <Field label={t("toinvoice.closed_on", "Fermé le")} value={new Date(doc.closed_at).toLocaleDateString("fr-CA", { year: "numeric", month: "long", day: "numeric" })} />}
+          {isPickup && <Field label={t("toinvoice.payment_method", "Méthode de paiement")} value={raw.payment_method as string} />}
+          {isPickup && <Field label={t("province", "Province")} value={raw.province as string} />}
+          {!isPickup && <Field label={t("orders.destination", "Destination")} value={raw.destination as string} />}
+          {!isPickup && <Field label={t("orders.delivery_type", "Type de livraison")} value={raw.delivery_type as string} />}
         </div>
 
         <div style={{ padding: "14px 22px", borderTop: `1px solid ${T.border}`, display: "flex", justifyContent: "flex-end" }}>
           <button onClick={onClose} style={{ background: T.cardAlt, color: T.text, border: `1px solid ${T.border}`, borderRadius: 8, padding: "9px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-            Fermer
+            {t("close", "Fermer")}
           </button>
         </div>
       </div>
@@ -135,6 +138,7 @@ function DocDetailModal({ doc, onClose }: { doc: InvoiceDoc; onClose: () => void
 }
 
 export default function ToInvoicePage() {
+  const { t } = useLanguage();
   const { profile, storeCode } = useAuth();
   const [tab, setTab] = useState<Tab>("to_send");
   const [docs, setDocs] = useState<InvoiceDoc[]>([]);
@@ -222,8 +226,8 @@ export default function ToInvoicePage() {
     <div style={{ padding: "28px 32px", background: T.cardAlt, minHeight: "100%", fontFamily: "'Outfit', sans-serif" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: T.text, margin: 0 }}>To Invoice — Suivi de facturation</h1>
-          <div style={{ fontSize: 13, color: T.textMid, marginTop: 4 }}>Documents a envoyer au manufacturier SCI pour facturation</div>
+          <h1 style={{ fontSize: 24, fontWeight: 800, color: T.text, margin: 0 }}>{t("toinvoice.title", "To Invoice — Suivi de facturation")}</h1>
+          <div style={{ fontSize: 13, color: T.textMid, marginTop: 4 }}>{t("toinvoice.subtitle", "Documents à envoyer au manufacturier SCI pour facturation")}</div>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
           {toSendDocs.length > 0 && (
@@ -232,7 +236,7 @@ export default function ToInvoicePage() {
               style={{ background: T.main, color: "#fff", border: "none", borderRadius: 9, padding: "11px 20px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 7 }}
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-              Envoyer tout a SCI
+              {t("toinvoice.send_all_to_sci", "Envoyer tout à SCI")}
               <span style={{ background: "rgba(255,255,255,0.25)", borderRadius: 4, padding: "1px 6px", fontSize: 11 }}>{toSendDocs.length}</span>
             </button>
           )}
@@ -243,17 +247,18 @@ export default function ToInvoicePage() {
 
       <div style={{ background: T.card, borderRadius: 14, border: `1px solid ${T.border}` }}>
         <div style={{ display: "flex", borderBottom: `1px solid ${T.border}`, overflowX: "auto" }}>
-          {TABS.map(t => {
-            const isActive = tab === t.key;
-            const count = t.key === "to_send" ? toSendDocs.length
-              : t.key === "sent" ? sentDocs.length
-              : t.key === "billed" ? unpaidBilledDocs.length
-              : t.key === "paid" ? paidDocs.length
-              : t.key === "history" ? logs.length : 0;
+          {TAB_KEYS.map(tabKey => {
+            const isActive = tab === tabKey;
+            const count = tabKey === "to_send" ? toSendDocs.length
+              : tabKey === "sent" ? sentDocs.length
+              : tabKey === "billed" ? unpaidBilledDocs.length
+              : tabKey === "paid" ? paidDocs.length
+              : tabKey === "history" ? logs.length : 0;
+            const [labelKey, labelFallback] = TAB_LABEL_KEYS[tabKey];
             return (
               <button
-                key={t.key}
-                onClick={() => setTab(t.key)}
+                key={tabKey}
+                onClick={() => setTab(tabKey)}
                 style={{
                   background: "none", border: "none", padding: "14px 20px", cursor: "pointer",
                   fontFamily: "inherit", fontSize: 13, fontWeight: isActive ? 700 : 500,
@@ -263,8 +268,8 @@ export default function ToInvoicePage() {
                   display: "flex", alignItems: "center",
                 }}
               >
-                {t.label}
-                <TabBadge count={count} warn={t.key === "to_send" && count > 0} accent={t.key === "paid"} />
+                {t(labelKey, labelFallback)}
+                <TabBadge count={count} warn={tabKey === "to_send" && count > 0} accent={tabKey === "paid"} />
               </button>
             );
           })}
@@ -272,7 +277,7 @@ export default function ToInvoicePage() {
 
         <div style={{ padding: "20px" }}>
           {loading ? (
-            <div style={{ textAlign: "center", padding: 40, color: T.textMid, fontSize: 13 }}>Chargement...</div>
+            <div style={{ textAlign: "center", padding: 40, color: T.textMid, fontSize: 13 }}>{t("loading_dots", "Chargement...")}</div>
           ) : (
             <>
               {tab === "to_send" && <TabToSend docs={toSendDocs} onRefresh={load} onDocClick={setDetailDoc} />}

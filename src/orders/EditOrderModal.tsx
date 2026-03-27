@@ -3,6 +3,7 @@ import { Order, OrderProduct, OrderMotif, OrderDestination, OrderLabel, Delivery
 import { logChanges } from "../shared/changeLogUtils";
 import { useCurrentAgent } from "../hooks/useCurrentAgent";
 import { T } from "../theme";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const inputStyle: React.CSSProperties = {
   width: "100%", padding: "9px 12px", borderRadius: 8,
@@ -35,6 +36,7 @@ interface ProductRow extends OrderProduct {
 }
 
 export default function EditOrderModal({ order, onSave, onCancel }: Props) {
+  const { t } = useLanguage();
   const agent = useCurrentAgent();
   const [client, setClient] = useState(order.client);
   const [vendeurCode, setVendeurCode] = useState(order.vendeurCode);
@@ -147,7 +149,7 @@ export default function EditOrderModal({ order, onSave, onCancel }: Props) {
       }}>
         <div style={{ padding: "20px 24px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
-            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: T.text }}>Modifier la commande</h2>
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: T.text }}>{t("orders.edit_order", "Modifier la commande")}</h2>
             <p style={{ margin: "2px 0 0", fontSize: 12, color: T.textMid, fontFamily: "monospace" }}>{order.id}</p>
           </div>
           <button onClick={onCancel} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: T.textMid }}>
@@ -158,39 +160,39 @@ export default function EditOrderModal({ order, onSave, onCancel }: Props) {
         <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 20 }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
             <div>
-              <label style={labelStyle}>Client</label>
-              <input value={client} onChange={e => setClient(e.target.value)} style={inputStyle} placeholder="Nom du client" />
+              <label style={labelStyle}>{t("client")}</label>
+              <input value={client} onChange={e => setClient(e.target.value)} style={inputStyle} placeholder={t("orders.client_name_placeholder", "Nom du client")} />
             </div>
             <div>
-              <label style={labelStyle}>Code vendeur</label>
+              <label style={labelStyle}>{t("orders.vendor_code")}</label>
               <input value={vendeurCode} onChange={e => setVendeurCode(e.target.value)} style={inputStyle} placeholder="Ex: KM-001" />
             </div>
             <div>
-              <label style={labelStyle}>Motif</label>
+              <label style={labelStyle}>{t("orders.motif")}</label>
               <select value={motif} onChange={e => setMotif(e.target.value as OrderMotif)} style={inputStyle}>
                 {MOTIFS.map(m => <option key={m} value={m}>{m}</option>)}
               </select>
             </div>
             {motif === "Autre" && (
               <div>
-                <label style={labelStyle}>Préciser le motif</label>
+                <label style={labelStyle}>{t("orders.specify_motif", "Préciser le motif")}</label>
                 <input value={motifAutre} onChange={e => setMotifAutre(e.target.value)} style={inputStyle} />
               </div>
             )}
             <div>
-              <label style={labelStyle}>Destination</label>
+              <label style={labelStyle}>{t("orders.destination")}</label>
               <select value={destination} onChange={e => setDestination(e.target.value as OrderDestination)} style={inputStyle}>
                 {DESTINATIONS.map(d => <option key={d} value={d}>{d}</option>)}
               </select>
             </div>
             <div>
-              <label style={labelStyle}>Label</label>
+              <label style={labelStyle}>{t("orders.label")}</label>
               <select value={label} onChange={e => setLabel(e.target.value as OrderLabel)} style={inputStyle}>
                 {LABELS.map(l => <option key={l} value={l}>{l}</option>)}
               </select>
             </div>
             <div>
-              <label style={labelStyle}>Type de livraison</label>
+              <label style={labelStyle}>{t("orders.delivery_type")}</label>
               <select value={deliveryType} onChange={e => setDeliveryType(e.target.value as DeliveryType)} style={inputStyle}>
                 {DELIVERY_TYPES.map(d => <option key={d} value={d}>{d}</option>)}
               </select>
@@ -198,20 +200,20 @@ export default function EditOrderModal({ order, onSave, onCancel }: Props) {
           </div>
 
           <div>
-            <label style={labelStyle}>Adresse de livraison</label>
+            <label style={labelStyle}>{t("orders.delivery_address")}</label>
             <textarea value={deliveryAddress} onChange={e => setDeliveryAddress(e.target.value)} rows={2}
-              style={{ ...inputStyle, resize: "vertical" }} placeholder="Adresse complète..." />
+              style={{ ...inputStyle, resize: "vertical" }} placeholder={t("orders.full_address_placeholder", "Adresse complète...")} />
           </div>
 
           <div style={{ borderRadius: 12, border: `1px solid ${T.border}`, overflow: "hidden" }}>
             <div style={{ padding: "12px 16px", background: T.bg, fontWeight: 800, fontSize: 13, color: T.text, borderBottom: `1px solid ${T.border}` }}>
-              Produits
+              {t("products")}
             </div>
             <div style={{ padding: 16 }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, marginBottom: 14 }}>
                 <thead>
                   <tr style={{ background: T.bg }}>
-                    {["Produit", "Format", "Qté", "Prix unitaire", "Unité", "Sous-total", ""].map(h => (
+                    {[t("product"), t("orders.format"), t("orders.qty"), t("unit_price"), t("orders.unit"), t("subtotal"), ""].map(h => (
                       <th key={h} style={{ padding: "8px 10px", textAlign: "left", fontWeight: 700, fontSize: 11, color: T.textMid, textTransform: "uppercase" }}>{h}</th>
                     ))}
                   </tr>
@@ -257,15 +259,15 @@ export default function EditOrderModal({ order, onSave, onCancel }: Props) {
               </table>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 130px 100px 110px 90px auto auto", gap: 8, alignItems: "end" }}>
-                <input placeholder="Nouveau produit" value={newProduct.product} onChange={e => setNewProduct(p => ({ ...p, product: e.target.value }))}
+                <input placeholder={t("orders.new_product", "Nouveau produit")} value={newProduct.product} onChange={e => setNewProduct(p => ({ ...p, product: e.target.value }))}
                   style={{ ...inputStyle, padding: "8px 10px" }} />
                 <select value={newProduct.format} onChange={e => setNewProduct(p => ({ ...p, format: e.target.value }))}
                   style={{ ...inputStyle, padding: "8px 10px" }}>
                   {FORMATS.map(f => <option key={f} value={f}>{f}</option>)}
                 </select>
-                <input type="number" placeholder="Qté" value={newProduct.qty || ""} onChange={e => setNewProduct(p => ({ ...p, qty: Number(e.target.value) }))}
+                <input type="number" placeholder={t("orders.qty")} value={newProduct.qty || ""} onChange={e => setNewProduct(p => ({ ...p, qty: Number(e.target.value) }))}
                   style={{ ...inputStyle, padding: "8px 10px" }} min="1" />
-                <input type="number" placeholder="Prix" value={newProduct.price || ""} onChange={e => setNewProduct(p => ({ ...p, price: Number(e.target.value) }))}
+                <input type="number" placeholder={t("price")} value={newProduct.price || ""} onChange={e => setNewProduct(p => ({ ...p, price: Number(e.target.value) }))}
                   style={{ ...inputStyle, padding: "8px 10px" }} min="0" step="0.01" />
                 <select value={newProduct.unit} onChange={e => setNewProduct(p => ({ ...p, unit: e.target.value as "/KIT" | "/GAL" }))}
                   style={{ ...inputStyle, padding: "8px 10px" }}>
@@ -274,7 +276,7 @@ export default function EditOrderModal({ order, onSave, onCancel }: Props) {
                 </select>
                 <button onClick={addProduct}
                   style={{ background: T.main, color: "#fff", border: "none", borderRadius: 8, padding: "9px 16px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}>
-                  + Ajouter
+                  + {t("add")}
                 </button>
               </div>
             </div>
@@ -282,7 +284,7 @@ export default function EditOrderModal({ order, onSave, onCancel }: Props) {
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
             <div>
-              <label style={labelStyle}>Rabais</label>
+              <label style={labelStyle}>{t("discount")}</label>
               <div style={{ display: "flex", gap: 8 }}>
                 <select value={discountType} onChange={e => setDiscountType(e.target.value as "%" | "$")}
                   style={{ ...inputStyle, width: 70 }}>
@@ -294,26 +296,26 @@ export default function EditOrderModal({ order, onSave, onCancel }: Props) {
               </div>
             </div>
             <div>
-              <label style={labelStyle}>Note admin</label>
-              <input value={adminNote} onChange={e => setAdminNote(e.target.value)} style={inputStyle} placeholder="Note interne..." />
+              <label style={labelStyle}>{t("orders.admin_note")}</label>
+              <input value={adminNote} onChange={e => setAdminNote(e.target.value)} style={inputStyle} placeholder={t("orders.internal_note_placeholder", "Note interne...")} />
             </div>
           </div>
 
           <div style={{ background: T.bg, borderRadius: 10, padding: "14px 18px", display: "flex", justifyContent: "flex-end", gap: 24, alignItems: "center" }}>
-            <div style={{ fontSize: 13, color: T.textMid }}>Sous-total: <strong style={{ color: T.text }}>{fmt(subtotal)}</strong></div>
-            {discountAmt > 0 && <div style={{ fontSize: 13, color: T.red }}>Rabais: <strong>−{fmt(discountAmt)}</strong></div>}
-            <div style={{ fontSize: 16, fontWeight: 800, color: T.main }}>Total: {fmt(total)}</div>
+            <div style={{ fontSize: 13, color: T.textMid }}>{t("subtotal")}: <strong style={{ color: T.text }}>{fmt(subtotal)}</strong></div>
+            {discountAmt > 0 && <div style={{ fontSize: 13, color: T.red }}>{t("discount")}: <strong>−{fmt(discountAmt)}</strong></div>}
+            <div style={{ fontSize: 16, fontWeight: 800, color: T.main }}>{t("total")}: {fmt(total)}</div>
           </div>
         </div>
 
         <div style={{ padding: "16px 24px", borderTop: `1px solid ${T.border}`, display: "flex", justifyContent: "flex-end", gap: 10 }}>
           <button onClick={onCancel}
             style={{ background: T.bg, color: T.textMid, border: `1px solid ${T.border}`, borderRadius: 8, padding: "10px 20px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
-            Annuler
+            {t("cancel")}
           </button>
           <button onClick={handleSave} disabled={saving || products.length === 0}
             style={{ background: T.main, color: "#fff", border: "none", borderRadius: 8, padding: "10px 24px", fontSize: 13, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer", fontFamily: "inherit", opacity: saving ? 0.7 : 1 }}>
-            {saving ? "Sauvegarde..." : "Sauvegarder les modifications"}
+            {saving ? t("orders.saving", "Sauvegarde...") : t("orders.save_changes", "Sauvegarder les modifications")}
           </button>
         </div>
       </div>

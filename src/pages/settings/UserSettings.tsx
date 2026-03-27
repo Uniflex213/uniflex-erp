@@ -6,6 +6,7 @@ import { logActivity } from "../../lib/activityLogger";
 import { useAuth } from "../../contexts/AuthContext";
 import { T } from "../../theme";
 import TotpCodeInput from "../../components/auth/TotpCodeInput";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
@@ -25,6 +26,7 @@ function pwStrength(pw: string): { score: number; label: string; color: string }
 }
 
 export default function UserSettings() {
+  const { t } = useLanguage();
   const { profile, user, reloadProfile } = useAuth();
   const [tab, setTab] = useState<"profile" | "security" | "activity" | "email">("profile");
   const [fullName, setFullName] = useState(profile?.full_name ?? "");
@@ -166,7 +168,7 @@ export default function UserSettings() {
     await supabase.from("profiles").update({ full_name: fullName, phone, job_title: jobTitle }).eq("id", user.id);
     await logActivity(supabase, user.id, "profile_updated", "settings");
     await reloadProfile();
-    setProfileMsg("Profil mis à jour");
+    setProfileMsg(t("settings.profile_updated", "Profil mis à jour"));
     setSaving(false);
     setTimeout(() => setProfileMsg(""), 2500);
   };
@@ -301,8 +303,8 @@ export default function UserSettings() {
   return (
     <div style={{ fontFamily: "'Outfit', sans-serif", maxWidth: 720, margin: "0 auto" }}>
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 800, color: "#fff", margin: 0 }}>Paramètres</h1>
-        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", marginTop: 4 }}>Gérez votre profil et la sécurité de votre compte</p>
+        <h1 style={{ fontSize: 28, fontWeight: 800, color: "#fff", margin: 0 }}>{t("settings.title", "Paramètres")}</h1>
+        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", marginTop: 4 }}>{t("settings.subtitle", "Gérez votre profil et la sécurité de votre compte")}</p>
       </div>
 
       <div style={{ background: T.bgCard, borderRadius: 16, overflow: "hidden", border: `1px solid ${T.border}` }}>
@@ -334,29 +336,29 @@ export default function UserSettings() {
                     {profile?.role && <span style={{ background: T.mainGlow, color: T.mainLight, padding: "1px 8px", borderRadius: 4, fontWeight: 600 }}>{profile.role}</span>}
                     {profile?.seller_code && <span style={{ marginLeft: 8 }}>Code: {profile.seller_code}</span>}
                   </div>
-                  {uploading && <div style={{ fontSize: 12, color: T.textMid, marginTop: 4 }}>Téléversement...</div>}
+                  {uploading && <div style={{ fontSize: 12, color: T.textMid, marginTop: 4 }}>{t("settings.uploading", "Téléversement...")}</div>}
                 </div>
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                <div><label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 4 }}>Nom complet</label><input value={fullName} onChange={(e) => setFullName(e.target.value)} style={iStyle} /></div>
-                <div><label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 4 }}>Téléphone</label><input value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" style={iStyle} /></div>
-                <div><label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 4 }}>Titre / poste</label><input value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} style={iStyle} /></div>
+                <div><label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 4 }}>{t("settings.full_name", "Nom complet")}</label><input value={fullName} onChange={(e) => setFullName(e.target.value)} style={iStyle} /></div>
+                <div><label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 4 }}>{t("settings.phone", "Téléphone")}</label><input value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" style={iStyle} /></div>
+                <div><label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 4 }}>{t("settings.job_title", "Titre / poste")}</label><input value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} style={iStyle} /></div>
               </div>
 
               <div style={{ background: "rgba(0,0,0,0.03)", borderRadius: 10, padding: 14, border: `1px solid ${T.border}` }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: T.textMid, marginBottom: 8 }}>Lecture seule</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: T.textMid, marginBottom: 8 }}>{t("settings.read_only", "Lecture seule")}</div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                  <div><div style={{ fontSize: 11, color: T.textLight, marginBottom: 2 }}>Courriel</div><div style={{ fontSize: 13, fontWeight: 500, color: T.text }}>{profile?.email ?? "—"}</div></div>
-                  <div><div style={{ fontSize: 11, color: T.textLight, marginBottom: 2 }}>Rôle</div><div style={{ fontSize: 13, fontWeight: 500, color: T.text }}>{profile?.role ?? "—"}</div></div>
-                  {profile?.seller_code && <div><div style={{ fontSize: 11, color: T.textLight, marginBottom: 2 }}>Code vendeur</div><div style={{ fontSize: 13, fontWeight: 500, color: T.text }}>{profile.seller_code}</div></div>}
-                  {profile?.username && <div><div style={{ fontSize: 11, color: T.textLight, marginBottom: 2 }}>Nom d'utilisateur</div><div style={{ fontSize: 13, fontWeight: 500, color: T.text }}>{profile.username}</div></div>}
+                  <div><div style={{ fontSize: 11, color: T.textLight, marginBottom: 2 }}>{t("settings.email_label", "Courriel")}</div><div style={{ fontSize: 13, fontWeight: 500, color: T.text }}>{profile?.email ?? "—"}</div></div>
+                  <div><div style={{ fontSize: 11, color: T.textLight, marginBottom: 2 }}>{t("settings.role", "Rôle")}</div><div style={{ fontSize: 13, fontWeight: 500, color: T.text }}>{profile?.role ?? "—"}</div></div>
+                  {profile?.seller_code && <div><div style={{ fontSize: 11, color: T.textLight, marginBottom: 2 }}>{t("settings.seller_code", "Code vendeur")}</div><div style={{ fontSize: 13, fontWeight: 500, color: T.text }}>{profile.seller_code}</div></div>}
+                  {profile?.username && <div><div style={{ fontSize: 11, color: T.textLight, marginBottom: 2 }}>{t("settings.username", "Nom d'utilisateur")}</div><div style={{ fontSize: 13, fontWeight: 500, color: T.text }}>{profile.username}</div></div>}
                 </div>
               </div>
 
               {profileMsg && <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: T.green }}><Check size={14} />{profileMsg}</div>}
               <button onClick={saveProfile} disabled={saving} style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: 8, border: "none", background: saving ? "#9ca3af" : T.main, color: "#fff", fontSize: 14, fontWeight: 600, cursor: saving ? "not-allowed" : "pointer" }}>
-                {saving ? "Sauvegarde..." : "Sauvegarder"}
+                {saving ? t("common.saving", "Sauvegarde...") : t("common.save", "Sauvegarder")}
               </button>
             </div>
           )}
@@ -364,12 +366,12 @@ export default function UserSettings() {
           {tab === "security" && (
             <div style={{ maxWidth: 460, display: "flex", flexDirection: "column", gap: 20 }}>
               <div>
-                <h3 style={{ fontSize: 16, fontWeight: 700, color: T.text, margin: "0 0 4px" }}>Authentification à deux facteurs</h3>
-                <p style={{ fontSize: 13, color: T.textMid, margin: 0 }}>Sécurisez votre connexion avec Google Authenticator.</p>
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: T.text, margin: "0 0 4px" }}>{t("settings.2fa_title", "Authentification à deux facteurs")}</h3>
+                <p style={{ fontSize: 13, color: T.textMid, margin: 0 }}>{t("settings.2fa_subtitle", "Sécurisez votre connexion avec Google Authenticator.")}</p>
               </div>
 
               {totpEnrolled === null && (
-                <p style={{ fontSize: 13, color: T.textMid }}>Chargement...</p>
+                <p style={{ fontSize: 13, color: T.textMid }}>{t("common.loading", "Chargement...")}</p>
               )}
 
               {/* ENROLLED — show status + reconfigure option */}
@@ -380,15 +382,15 @@ export default function UserSettings() {
                       <Shield size={18} color="#16a34a" />
                     </div>
                     <div>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: T.text }}>Google Authenticator activé</div>
-                      <div style={{ fontSize: 12, color: T.textMid }}>Votre compte est protégé par 2FA</div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: T.text }}>{t("settings.totp_enabled", "Google Authenticator activé")}</div>
+                      <div style={{ fontSize: 12, color: T.textMid }}>{t("settings.2fa_protected", "Votre compte est protégé par 2FA")}</div>
                     </div>
                   </div>
                   <button
                     onClick={() => { setEnrollStep("idle"); setTotpEnrolled(false); setEnrollMsg(""); setEnrollError(""); }}
                     style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(220,38,38,0.3)", background: "rgba(220,38,38,0.06)", color: "#dc2626", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
                   >
-                    <RefreshCw size={13} /> Reconfigurer
+                    <RefreshCw size={13} /> {t("settings.reconfigure", "Reconfigurer")}
                   </button>
                   {enrollMsg && <p style={{ color: T.green, fontSize: 12, marginTop: 10 }}>{enrollMsg}</p>}
                 </div>
@@ -407,7 +409,7 @@ export default function UserSettings() {
                     style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", borderRadius: 9, border: "none", background: T.main, color: "#fff", fontSize: 14, fontWeight: 600, cursor: enrollLoading ? "not-allowed" : "pointer", fontFamily: "inherit", opacity: enrollLoading ? 0.7 : 1 }}
                   >
                     <Shield size={15} />
-                    {enrollLoading ? "Génération..." : "Configurer Google Authenticator"}
+                    {enrollLoading ? t("settings.generating", "Génération...") : t("settings.configure_totp", "Configurer Google Authenticator")}
                   </button>
                 </div>
               )}
@@ -415,7 +417,7 @@ export default function UserSettings() {
               {/* QR CODE step */}
               {enrollStep === "qr" && otpauthUri && (
                 <div style={{ background: T.bgCard, borderRadius: 12, border: `1px solid ${T.border}`, padding: 24 }}>
-                  <h4 style={{ fontSize: 14, fontWeight: 700, color: T.text, margin: "0 0 4px" }}>Scannez ce QR code</h4>
+                  <h4 style={{ fontSize: 14, fontWeight: 700, color: T.text, margin: "0 0 4px" }}>{t("settings.scan_qr", "Scannez ce QR code")}</h4>
                   <p style={{ fontSize: 12, color: T.textMid, margin: "0 0 20px", lineHeight: 1.5 }}>Ouvrez Google Authenticator → + → Scanner un QR code</p>
 
                   <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
@@ -440,7 +442,7 @@ export default function UserSettings() {
                     autoFocus
                   />
                   {enrollError && <p style={{ color: T.red, fontSize: 12, marginTop: 12, textAlign: "center" }}>{enrollError}</p>}
-                  {enrollLoading && <p style={{ color: T.textMid, fontSize: 12, marginTop: 12, textAlign: "center" }}>Vérification...</p>}
+                  {enrollLoading && <p style={{ color: T.textMid, fontSize: 12, marginTop: 12, textAlign: "center" }}>{t("settings.verifying", "Vérification...")}</p>}
                 </div>
               )}
 
@@ -450,7 +452,7 @@ export default function UserSettings() {
                   <div style={{ width: 48, height: 48, borderRadius: "50%", background: "rgba(22,163,74,0.12)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
                     <Check size={22} color="#16a34a" />
                   </div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: T.text, marginBottom: 6 }}>Google Authenticator configuré !</div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: T.text, marginBottom: 6 }}>{t("settings.totp_configured", "Google Authenticator configuré !")}</div>
                   <div style={{ fontSize: 13, color: T.textMid }}>À partir de maintenant, connectez-vous avec votre code vendeur + le code de l'app.</div>
                 </div>
               )}
@@ -460,8 +462,8 @@ export default function UserSettings() {
           {tab === "email" && (
             <div style={{ maxWidth: 520, display: "flex", flexDirection: "column", gap: 20 }}>
               <div>
-                <h3 style={{ fontSize: 16, fontWeight: 700, color: T.text, margin: "0 0 4px" }}>Boite email personnelle</h3>
-                <p style={{ fontSize: 13, color: T.textMid, margin: 0 }}>Configurez votre adresse Hostinger pour envoyer et recevoir des emails.</p>
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: T.text, margin: "0 0 4px" }}>{t("settings.personal_email", "Boite email personnelle")}</h3>
+                <p style={{ fontSize: 13, color: T.textMid, margin: 0 }}>{t("settings.email_config_desc", "Configurez votre adresse Hostinger pour envoyer et recevoir des emails.")}</p>
               </div>
 
               {emailIsVerified && (
@@ -471,15 +473,15 @@ export default function UserSettings() {
               )}
 
               <div>
-                <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 4 }}>Adresse email *</label>
+                <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 4 }}>{t("settings.email_address", "Adresse email")} *</label>
                 <input value={emailFromEmail} onChange={e => setEmailFromEmail(e.target.value)} placeholder="vous@votredomaine.com" type="email" style={iStyle} />
               </div>
               <div>
-                <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 4 }}>Nom affiche</label>
+                <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 4 }}>{t("settings.display_name", "Nom affiché")}</label>
                 <input value={emailFromName} onChange={e => setEmailFromName(e.target.value)} placeholder="Votre Nom — Uniflex" style={iStyle} />
               </div>
               <div>
-                <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 4 }}>Mot de passe</label>
+                <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 4 }}>{t("settings.password", "Mot de passe")}</label>
                 <div style={{ position: "relative" }}>
                   <input type={showSmtpPw ? "text" : "password"} value={emailSmtpPassword} onChange={e => setEmailSmtpPassword(e.target.value)} placeholder="Entrer pour modifier" style={{ ...iStyle, paddingRight: 36 }} />
                   <button type="button" onClick={() => setShowSmtpPw(!showSmtpPw)} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: T.textMid }}>
@@ -489,7 +491,7 @@ export default function UserSettings() {
               </div>
 
               <button onClick={saveEmailConfig} disabled={emailSaving || !emailFromEmail} style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: 8, border: "none", background: emailSaving || !emailFromEmail ? "#9ca3af" : T.main, color: "#fff", fontSize: 14, fontWeight: 600, cursor: emailSaving || !emailFromEmail ? "not-allowed" : "pointer" }}>
-                {emailSaving ? "Sauvegarde..." : "Sauvegarder"}
+                {emailSaving ? t("common.saving", "Sauvegarde...") : t("common.save", "Sauvegarder")}
               </button>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 8 }}>
@@ -503,7 +505,7 @@ export default function UserSettings() {
                     <div>Port 465 · SSL</div>
                   </div>
                   <button onClick={testSmtp} disabled={emailTesting || !emailFromEmail || !emailSmtpPassword} style={{ width: "100%", padding: "8px 14px", borderRadius: 8, border: `1px solid ${T.main}`, background: "transparent", color: T.mainLight, fontSize: 12, fontWeight: 600, cursor: emailTesting || !emailFromEmail || !emailSmtpPassword ? "not-allowed" : "pointer", opacity: !emailFromEmail || !emailSmtpPassword ? 0.5 : 1 }}>
-                    {emailTesting ? "Test..." : "Tester SMTP"}
+                    {emailTesting ? "Test..." : t("settings.test_smtp", "Tester SMTP")}
                   </button>
                   {emailError && <p style={{ color: T.red, fontSize: 11, margin: "8px 0 0", whiteSpace: "pre-wrap" }}>{emailError}</p>}
                   {emailMsg && <div style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: T.green, marginTop: 8 }}><Check size={12} />{emailMsg}</div>}
@@ -519,7 +521,7 @@ export default function UserSettings() {
                     <div>Port 993 · SSL</div>
                   </div>
                   <button onClick={testImap} disabled={imapTesting || !emailFromEmail || !emailSmtpPassword} style={{ width: "100%", padding: "8px 14px", borderRadius: 8, border: "1px solid #10b981", background: "transparent", color: "#10b981", fontSize: 12, fontWeight: 600, cursor: imapTesting || !emailFromEmail || !emailSmtpPassword ? "not-allowed" : "pointer", opacity: !emailFromEmail || !emailSmtpPassword ? 0.5 : 1 }}>
-                    {imapTesting ? "Test..." : "Tester IMAP"}
+                    {imapTesting ? "Test..." : t("settings.test_imap", "Tester IMAP")}
                   </button>
                   {imapError && <p style={{ color: T.red, fontSize: 11, margin: "8px 0 0", whiteSpace: "pre-wrap" }}>{imapError}</p>}
                   {imapMsg && <div style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: T.green, marginTop: 8 }}><Check size={12} />{imapMsg}</div>}
@@ -536,8 +538,8 @@ export default function UserSettings() {
 
           {tab === "activity" && (
             <div>
-              <h3 style={{ fontSize: 16, fontWeight: 700, color: T.text, margin: "0 0 16px" }}>Journaux d'activité</h3>
-              {logs.length === 0 ? <div style={{ padding: 32, textAlign: "center", color: T.textMid }}>Aucune activité.</div> : (
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: T.text, margin: "0 0 16px" }}>{t("settings.activity_logs", "Journaux d'activité")}</h3>
+              {logs.length === 0 ? <div style={{ padding: 32, textAlign: "center", color: T.textMid }}>{t("settings.no_activity", "Aucune activité.")}</div> : (
                 <>
                   <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                     {logs.map((log) => (
@@ -558,8 +560,8 @@ export default function UserSettings() {
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16 }}>
                     <span style={{ fontSize: 12, color: T.textMid }}>{logsTotal} entrées</span>
                     <div style={{ display: "flex", gap: 8 }}>
-                      <button disabled={logsPage === 0} onClick={() => setLogsPage((p) => p - 1)} style={{ padding: "6px 14px", borderRadius: 8, border: `1px solid ${T.border}`, background: "rgba(0,0,0,0.04)", color: T.text, fontSize: 12, cursor: logsPage === 0 ? "not-allowed" : "pointer", opacity: logsPage === 0 ? 0.5 : 1 }}>Précédent</button>
-                      <button disabled={(logsPage + 1) * PER_PAGE >= logsTotal} onClick={() => setLogsPage((p) => p + 1)} style={{ padding: "6px 14px", borderRadius: 8, border: `1px solid ${T.border}`, background: "rgba(0,0,0,0.04)", color: T.text, fontSize: 12, cursor: "pointer" }}>Suivant</button>
+                      <button disabled={logsPage === 0} onClick={() => setLogsPage((p) => p - 1)} style={{ padding: "6px 14px", borderRadius: 8, border: `1px solid ${T.border}`, background: "rgba(0,0,0,0.04)", color: T.text, fontSize: 12, cursor: logsPage === 0 ? "not-allowed" : "pointer", opacity: logsPage === 0 ? 0.5 : 1 }}>{t("common.previous", "Précédent")}</button>
+                      <button disabled={(logsPage + 1) * PER_PAGE >= logsTotal} onClick={() => setLogsPage((p) => p + 1)} style={{ padding: "6px 14px", borderRadius: 8, border: `1px solid ${T.border}`, background: "rgba(0,0,0,0.04)", color: T.text, fontSize: 12, cursor: "pointer" }}>{t("common.next", "Suivant")}</button>
                     </div>
                   </div>
                 </>

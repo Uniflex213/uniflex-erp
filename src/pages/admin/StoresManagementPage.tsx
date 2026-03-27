@@ -3,6 +3,7 @@ import { supabase } from "../../supabaseClient";
 import { useAuth } from "../../contexts/AuthContext";
 import { T } from "../../theme";
 import AddressAutocomplete from "../../components/AddressAutocomplete";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Store {
   id: string;
@@ -32,6 +33,7 @@ const inputStyle: React.CSSProperties = {
 };
 
 export default function StoresManagementPage() {
+  const { t } = useLanguage();
   const { can } = useAuth();
   const [stores, setStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(true);
@@ -173,10 +175,10 @@ export default function StoresManagementPage() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <div>
           <h1 style={{ color: T.text, fontSize: 20, fontWeight: 800, margin: 0, letterSpacing: "0.05em" }}>
-            Gestion des Magasins
+            {t("stores.title", "Gestion des Magasins")}
           </h1>
           <p style={{ color: T.textMid, fontSize: 12, marginTop: 4 }}>
-            {stores.length} magasin{stores.length !== 1 ? "s" : ""} enregistré{stores.length !== 1 ? "s" : ""}
+            {stores.length} {t("stores.store", "magasin")}{stores.length !== 1 ? "s" : ""} {t("stores.registered", "enregistré")}{stores.length !== 1 ? "s" : ""}
           </p>
         </div>
         {can("admin.stores.create") && (
@@ -195,13 +197,13 @@ export default function StoresManagementPage() {
               cursor: "pointer",
             }}
           >
-            + Nouveau magasin
+            + {t("stores.new_store", "Nouveau magasin")}
           </button>
         )}
       </div>
 
       {loading ? (
-        <div style={{ textAlign: "center", color: T.textLight, padding: 60, fontSize: 13 }}>Chargement...</div>
+        <div style={{ textAlign: "center", color: T.textLight, padding: 60, fontSize: 13 }}>{t("common.loading", "Chargement...")}</div>
       ) : (
         <div style={{ display: "grid", gap: 12 }}>
           {stores.map((store) => (
@@ -243,7 +245,7 @@ export default function StoresManagementPage() {
                   color: store.is_active ? "#16a34a" : "#dc2626",
                   letterSpacing: "0.06em",
                 }}>
-                  {store.is_active ? "ACTIF" : "INACTIF"}
+                  {store.is_active ? t("stores.active", "ACTIF") : t("stores.inactive", "INACTIF")}
                 </span>
                 {can("admin.stores.edit") && (
                   <button
@@ -254,7 +256,7 @@ export default function StoresManagementPage() {
                       fontWeight: 600, fontFamily: "inherit", cursor: "pointer",
                     }}
                   >
-                    Modifier
+                    {t("common.edit", "Modifier")}
                   </button>
                 )}
                 {can("admin.stores.deactivate") && (
@@ -268,7 +270,7 @@ export default function StoresManagementPage() {
                       fontWeight: 600, fontFamily: "inherit", cursor: "pointer",
                     }}
                   >
-                    {store.is_active ? "Désactiver" : "Réactiver"}
+                    {store.is_active ? t("stores.deactivate", "Désactiver") : t("stores.reactivate", "Réactiver")}
                   </button>
                 )}
               </div>
@@ -288,14 +290,14 @@ export default function StoresManagementPage() {
             padding: 32, width: 440, maxWidth: "90vw", maxHeight: "80vh", overflowY: "auto",
           }}>
             <h3 style={{ color: T.text, fontSize: 16, fontWeight: 800, marginBottom: 20, letterSpacing: "0.04em" }}>
-              {editStore ? "Modifier le magasin" : "Nouveau magasin"}
+              {editStore ? t("stores.edit_store", "Modifier le magasin") : t("stores.new_store", "Nouveau magasin")}
             </h3>
 
             <div style={{ display: "grid", gap: 14 }}>
               {!editStore && (
                 <div>
                   <label style={{ color: T.textMid, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>
-                    Code magasin *
+                    {t("stores.store_code", "Code magasin")} *
                   </label>
                   <input
                     value={newCode}
@@ -307,22 +309,22 @@ export default function StoresManagementPage() {
               )}
               <div>
                 <label style={{ color: T.textMid, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>
-                  Nom *
+                  {t("stores.name", "Nom")} *
                 </label>
                 <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="ex: Montréal Centre" style={inputStyle} />
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <div>
-                  <label style={{ color: T.textMid, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>Ville</label>
+                  <label style={{ color: T.textMid, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{t("city", "Ville")}</label>
                   <input value={newCity} onChange={(e) => setNewCity(e.target.value)} placeholder="Montréal" style={inputStyle} />
                 </div>
                 <div>
-                  <label style={{ color: T.textMid, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>Province</label>
+                  <label style={{ color: T.textMid, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{t("stores.province", "Province")}</label>
                   <input value={newProvince} onChange={(e) => setNewProvince(e.target.value)} placeholder="QC" style={inputStyle} />
                 </div>
               </div>
               <div>
-                <label style={{ color: T.textMid, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>Adresse</label>
+                <label style={{ color: T.textMid, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{t("stores.address", "Adresse")}</label>
                 <AddressAutocomplete
                   style={inputStyle}
                   value={newAddress}
@@ -337,11 +339,11 @@ export default function StoresManagementPage() {
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <div>
-                  <label style={{ color: T.textMid, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>Téléphone</label>
+                  <label style={{ color: T.textMid, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{t("stores.phone", "Téléphone")}</label>
                   <input value={newPhone} onChange={(e) => setNewPhone(e.target.value)} placeholder="450-123-4567" style={inputStyle} />
                 </div>
                 <div>
-                  <label style={{ color: T.textMid, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>Email</label>
+                  <label style={{ color: T.textMid, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{t("stores.email", "Email")}</label>
                   <input value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="store@uniflex.ca" style={inputStyle} />
                 </div>
               </div>
@@ -360,7 +362,7 @@ export default function StoresManagementPage() {
                   fontWeight: 600, fontFamily: "inherit", cursor: "pointer",
                 }}
               >
-                Annuler
+                {t("cancel", "Annuler")}
               </button>
               <button
                 onClick={editStore ? handleUpdate : handleCreate}
@@ -372,7 +374,7 @@ export default function StoresManagementPage() {
                   opacity: saving ? 0.6 : 1,
                 }}
               >
-                {saving ? "Enregistrement..." : editStore ? "Enregistrer" : "Créer le magasin"}
+                {saving ? t("common.saving", "Enregistrement...") : editStore ? t("common.save", "Enregistrer") : t("stores.create_store", "Créer le magasin")}
               </button>
             </div>
           </div>

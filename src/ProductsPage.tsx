@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { useApp } from "./AppContext";
 import { useAuth } from "./contexts/AuthContext";
+import { useLanguage } from "./i18n/LanguageContext";
 import { SaleProduct, PRODUCT_CATEGORIES } from "./sales/productTypes";
 import { T } from "./theme";
 import { PlusIcon, SearchIcon } from "./products/productIcons";
@@ -13,6 +14,7 @@ const CATEGORY_ORDER: string[] = [...PRODUCT_CATEGORIES];
 export default function ProductsPage() {
   const { products, addProduct, updateProduct, deleteProduct } = useApp();
   const { profile, can } = useAuth();
+  const { t } = useLanguage();
   const canCreate = profile?.role === "god_admin";
   const canEditProducts = can("ventes.products.edit");
   const [search, setSearch] = useState("");
@@ -78,11 +80,11 @@ export default function ProductsPage() {
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
         <div>
           <div style={{ fontSize: 11, fontWeight: 700, color: "#6577a8", letterSpacing: 2, textTransform: "uppercase", marginBottom: 4 }}>
-            Ventes / Outils de vente
+            {t("nav.sales_tools", "Ventes / Outils de vente")}
           </div>
-          <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: T.text, letterSpacing: -0.5 }}>Produits</h1>
+          <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: T.text, letterSpacing: -0.5 }}>{t("products", "Produits")}</h1>
           <p style={{ margin: "4px 0 0", fontSize: 13, color: T.textMid }}>
-            {products.length === 0 ? "Aucun produit dans le catalogue" : `${totalFiltered} produit${totalFiltered !== 1 ? "s" : ""} dans le catalogue`}
+            {products.length === 0 ? t("products.no_products_catalog", "Aucun produit dans le catalogue") : `${totalFiltered} ${t("product", "produit")}${totalFiltered !== 1 ? "s" : ""} ${t("products.in_catalog", "dans le catalogue")}`}
           </p>
         </div>
         {canCreate && (
@@ -96,7 +98,7 @@ export default function ProductsPage() {
               animation: "btnGlow 2.5s ease-in-out infinite",
             }}
           >
-            <PlusIcon /> Ajouter un produit
+            <PlusIcon /> {t("products.add", "Ajouter un produit")}
           </button>
         )}
       </div>
@@ -111,7 +113,7 @@ export default function ProductsPage() {
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Rechercher un produit..."
+              placeholder={t("products.search_placeholder", "Rechercher un produit...")}
               style={{
                 width: "100%", padding: "9px 12px 9px 33px",
                 border: `1.5px solid ${T.silverLight}`, borderRadius: 8,
@@ -135,7 +137,7 @@ export default function ProductsPage() {
                 transition: "all 0.15s",
               }}
             >
-              Tout ({filtered.length})
+              {t("all", "Tous")} ({filtered.length})
             </button>
             {categories.map(cat => {
               const count = grouped[cat]?.length || 0;
@@ -174,10 +176,10 @@ export default function ProductsPage() {
             </svg>
           </div>
           <div style={{ fontSize: 16, fontWeight: 700, color: T.text, marginBottom: 8 }}>
-            {search ? `Aucun résultat pour "${search}"` : "Aucun produit"}
+            {search ? `${t("no_results", "Aucun résultat")} "${search}"` : t("products.no_products", "Aucun produit")}
           </div>
           <div style={{ fontSize: 13, color: T.textMid, marginBottom: 24, textAlign: "center" }}>
-            {search ? "Essayez un autre terme de recherche." : canCreate ? "Cliquez sur Ajouter un produit pour commencer." : "Aucun produit disponible."}
+            {search ? t("products.try_other_search", "Essayez un autre terme de recherche.") : canCreate ? t("products.click_add", "Cliquez sur Ajouter un produit pour commencer.") : t("products.no_available", "Aucun produit disponible.")}
           </div>
           {!search && canCreate && (
             <button
@@ -189,7 +191,7 @@ export default function ProductsPage() {
                 cursor: "pointer", fontFamily: "inherit",
               }}
             >
-              <PlusIcon /> Ajouter un produit
+              <PlusIcon /> {t("products.add", "Ajouter un produit")}
             </button>
           )}
         </div>

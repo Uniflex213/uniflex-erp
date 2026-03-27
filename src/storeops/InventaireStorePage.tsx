@@ -10,11 +10,13 @@ import StockReceptionModal from "./inventaire/StockReceptionModal";
 import StockAdjustmentModal from "./inventaire/StockAdjustmentModal";
 import PhysicalInventoryModal from "./inventaire/PhysicalInventoryModal";
 import { T } from "../theme";
+import { useLanguage } from "../i18n/LanguageContext";
 
 type Tab = "inventaire" | "mouvements";
 type Modal = "reception" | "adjustment" | "physical" | "history" | null;
 
 export default function InventaireStorePage() {
+  const { t } = useLanguage();
   const { reloadProducts } = useApp();
   const { storeCode } = useAuth();
   const [tab, setTab] = useState<Tab>("inventaire");
@@ -135,31 +137,31 @@ export default function InventaireStorePage() {
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
         <div>
-          <h1 style={{ fontSize: 26, fontWeight: 900, color: T.text, margin: 0 }}>Inventaire — Gestion des stocks</h1>
-          <div style={{ fontSize: 13, color: T.textMid, marginTop: 4 }}>Produits en consignation SCI — {storeCode ?? "BSB"}</div>
+          <h1 style={{ fontSize: 26, fontWeight: 900, color: T.text, margin: 0 }}>{t("inventory.title", "Inventaire")} — {t("inventory.stock_management", "Gestion des stocks")}</h1>
+          <div style={{ fontSize: 13, color: T.textMid, marginTop: 4 }}>{t("inventory.consignment_products", "Produits en consignation SCI")} — {storeCode ?? "BSB"}</div>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
           <button onClick={() => setModal("physical")} style={{ padding: "9px 16px", borderRadius: 10, border: `1.5px solid ${T.border}`, background: "transparent", color: T.textMid, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s" }}>
-            Inventaire physique
+            {t("inventory.physical", "Inventaire physique")}
           </button>
           <button onClick={() => openAdjustment(products[0])} disabled={products.length === 0} style={{ padding: "9px 16px", borderRadius: 10, border: `1.5px solid ${T.border}`, background: T.card, color: T.text, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s" }}>
-            Ajustement
+            {t("inventory.adjustment", "Ajustement")}
           </button>
           <button onClick={() => openReception()} className="breathe-inv" style={{ padding: "9px 18px", borderRadius: 10, border: "none", background: T.main, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s" }}>
-            + Entrée de stock
+            + {t("inventory.stock_entry", "Entrée de stock")}
           </button>
         </div>
       </div>
 
       {loading ? (
-        <div style={{ textAlign: "center", padding: "60px 0", color: T.textMid, fontSize: 14 }}>Chargement…</div>
+        <div style={{ textAlign: "center", padding: "60px 0", color: T.textMid, fontSize: 14 }}>{t("loading_dots", "Chargement…")}</div>
       ) : (
         <>
           <InventaireKpiBar products={products} movements={movements} />
 
           <div style={{ display: "flex", gap: 4, background: T.card, borderRadius: 10, padding: 4, border: `1px solid ${T.border}`, marginBottom: 16, width: "fit-content" }}>
-            <TabBtn id="inventaire" label={`Inventaire (${products.length})`} />
-            <TabBtn id="mouvements" label={`Mouvements (${movements.length})`} />
+            <TabBtn id="inventaire" label={`${t("inventory.title", "Inventaire")} (${products.length})`} />
+            <TabBtn id="mouvements" label={`${t("inventory.movements", "Mouvements")} (${movements.length})`} />
           </div>
 
           {tab === "inventaire" && (
@@ -224,21 +226,22 @@ export default function InventaireStorePage() {
 }
 
 function AdjustmentProductPicker({ products, onSelect, onClose }: { products: InventaireProduct[]; onSelect: (p: InventaireProduct) => void; onClose: () => void }) {
+  const { t } = useLanguage();
   const [search, setSearch] = useState("");
   const filtered = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || p.sku.toLowerCase().includes(search.toLowerCase()));
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1500, padding: 20 }} onClick={onClose}>
       <div style={{ background: T.card, borderRadius: 16, padding: 28, width: "100%", maxWidth: 440, boxShadow: "0 24px 60px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>Choisir un produit</h3>
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>{t("inventory.choose_product", "Choisir un produit")}</h3>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 18, color: T.textMid }}>×</button>
         </div>
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher…" style={{ padding: "9px 12px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, fontFamily: "inherit", outline: "none", width: "100%", boxSizing: "border-box", marginBottom: 12 }} />
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t("search_placeholder", "Rechercher…")} style={{ padding: "9px 12px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, fontFamily: "inherit", outline: "none", width: "100%", boxSizing: "border-box", marginBottom: 12 }} />
         <div style={{ maxHeight: 360, overflowY: "auto", display: "flex", flexDirection: "column", gap: 4 }}>
           {filtered.map(p => (
             <button key={p.id} onClick={() => onSelect(p)} style={{ padding: "10px 14px", borderRadius: 8, border: `1px solid ${T.border}`, background: "transparent", textAlign: "left", cursor: "pointer", fontFamily: "inherit", fontSize: 13, fontWeight: 600, color: T.text, transition: "background 0.1s" }}
               onMouseEnter={e => (e.currentTarget.style.background = "#f0f3ff")} onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
-              {p.name} <span style={{ fontSize: 11, color: T.textLight, fontWeight: 400 }}>— {p.stock_qty} unités</span>
+              {p.name} <span style={{ fontSize: 11, color: T.textLight, fontWeight: 400 }}>— {p.stock_qty} {t("inventory.units_label", "unités")}</span>
             </button>
           ))}
         </div>

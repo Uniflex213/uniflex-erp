@@ -9,6 +9,7 @@ import { useAuth } from "../contexts/AuthContext";
 import SendEmailModal from "../components/email/SendEmailModal";
 import { tplOrderConfirmationClient } from "../lib/emailTemplates";
 import { generateOrderPDFBase64 } from "./orderPDF";
+import { useLanguage } from "../i18n/LanguageContext";
 
 type View = "list" | "new";
 
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export default function OrdersController({ isAdmin = false }: Props) {
+  const { t } = useLanguage();
   const { orders, addOrder, updateOrder, removeOrder, getNextCounter } = useOrders();
   const { prefillData, clearPrefill } = useApp();
   const { profile } = useAuth();
@@ -41,7 +43,7 @@ export default function OrdersController({ isAdmin = false }: Props) {
       ...data,
       id: buildOrderId(data.motif, data.destination, data.label, counter),
       date: new Date().toISOString().split("T")[0],
-      createdBy: profile?.full_name ?? "Inconnu",
+      createdBy: profile?.full_name ?? t("orders.unknown_creator", "Inconnu"),
     };
     await addOrder(newOrder);
     setView("list");
@@ -83,7 +85,7 @@ export default function OrdersController({ isAdmin = false }: Props) {
           templateKey="order_confirmation_client"
           referenceType="order"
           referenceId={emailModal.order.id}
-          attachmentLabel={`Commande_${emailModal.order.id}.pdf`}
+          attachmentLabel={`${t("order", "Commande")}_${emailModal.order.id}.pdf`}
           onGetAttachment={() => generateOrderPDFBase64(emailModal.order)}
         />
       )}

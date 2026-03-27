@@ -7,6 +7,7 @@ import { useApp } from "../AppContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useCurrentAgent } from "../hooks/useCurrentAgent";
 import { MOCK_PRICELISTS } from "../pricelist/pricelistTypes";
+import { useLanguage } from "../i18n/LanguageContext";
 import { T } from "../theme";
 
 
@@ -28,6 +29,7 @@ type SortKey = "company_name" | "tier" | "region" | "created_at" | "client_type"
 export default function MyClientsPage() {
   const { navigate, leads, samples } = useApp();
   const { profile, realProfile } = useAuth();
+  const { t } = useLanguage();
   const agent = useCurrentAgent();
   const ownerId = realProfile?.id ?? profile?.id ?? null;
   const [clients, setClients] = useState<Client[]>([]);
@@ -148,9 +150,9 @@ export default function MyClientsPage() {
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
         <div>
-          <h2 style={{ margin: "0 0 6px", fontSize: 24, fontWeight: 900, color: T.text }}>Mes Clients</h2>
+          <h2 style={{ margin: "0 0 6px", fontSize: 24, fontWeight: 900, color: T.text }}>{t("clients.title", "Mes Clients")}</h2>
           <p style={{ margin: 0, color: T.textMid, fontSize: 14 }}>
-            <span style={{ fontWeight: 700, color: T.main }}>{kpis.active}</span> clients actifs
+            <span style={{ fontWeight: 700, color: T.main }}>{kpis.active}</span> {t("clients.active_clients", "clients actifs")}
           </p>
         </div>
         <button
@@ -162,47 +164,47 @@ export default function MyClientsPage() {
             cursor: "pointer", fontFamily: "inherit",
           }}
         >
-          + NOUVEAU CLIENT
+          + {t("clients.new", "Nouveau client").toUpperCase()}
         </button>
       </div>
 
       <div style={{ display: "flex", gap: 14, marginBottom: 20, flexWrap: "wrap" }}>
-        <KpiCard label="Clients actifs" value={kpis.active} accent={T.main} />
-        <KpiCard label="Clients inactifs" value={kpis.inactive} sub="+60 jours sans commande" accent={T.orange} />
-        <KpiCard label="Total clients" value={kpis.total} accent={T.text} />
-        <KpiCard label="Types" value={new Set(clients.map(c => c.client_type)).size} sub="types différents" />
-        <KpiCard label="Régions" value={new Set(clients.map(c => c.region).filter(Boolean)).size} sub="régions couvertes" />
+        <KpiCard label={t("clients.active_clients", "Clients actifs")} value={kpis.active} accent={T.main} />
+        <KpiCard label={t("clients.inactive_clients", "Clients inactifs")} value={kpis.inactive} sub={t("clients.60_days_no_order", "+60 jours sans commande")} accent={T.orange} />
+        <KpiCard label={t("clients.total_clients", "Total clients")} value={kpis.total} accent={T.text} />
+        <KpiCard label={t("clients.types", "Types")} value={new Set(clients.map(c => c.client_type)).size} sub={t("clients.different_types", "types différents")} />
+        <KpiCard label={t("clients.regions", "Régions")} value={new Set(clients.map(c => c.region).filter(Boolean)).size} sub={t("clients.covered_regions", "régions couvertes")} />
         <KpiCard label="Tiers HIGH" value={clients.filter(c => c.tier === "HIGH").length} accent="#d4a017" />
       </div>
 
       <div style={{ display: "flex", gap: 10, marginBottom: 18, flexWrap: "wrap", alignItems: "center" }}>
         <input
           style={{ ...selectStyle, flex: 1, minWidth: 200 }}
-          placeholder="Rechercher par compagnie, contact, email, téléphone..."
+          placeholder={t("clients.search_placeholder", "Rechercher par compagnie, contact, email, téléphone...")}
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
         <select style={selectStyle} value={filterType} onChange={e => setFilterType(e.target.value)}>
-          <option value="">Tous les types</option>
+          <option value="">{t("clients.all_types", "Tous les types")}</option>
           {["Installateur", "Distributeur", "Large Scale", "Contracteur", "Autre"].map(t => <option key={t}>{t}</option>)}
         </select>
         <select style={selectStyle} value={filterTier} onChange={e => setFilterTier(e.target.value)}>
-          <option value="">Tous les tiers</option>
+          <option value="">{t("clients.all_tiers", "Tous les tiers")}</option>
           {["HIGH", "MED", "LOW"].map(t => <option key={t}>{t}</option>)}
         </select>
         <select style={selectStyle} value={filterRegion} onChange={e => setFilterRegion(e.target.value)}>
-          <option value="">Toutes les régions</option>
+          <option value="">{t("clients.all_regions", "Toutes les régions")}</option>
           {regions.map(r => <option key={r}>{r}</option>)}
         </select>
         <select style={selectStyle} value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-          <option value="">Tous les statuts</option>
-          <option>Actif</option>
-          <option>Inactif</option>
+          <option value="">{t("clients.all_statuses", "Tous les statuts")}</option>
+          <option value="Actif">{t("active", "Actif")}</option>
+          <option value="Inactif">{t("inactive", "Inactif")}</option>
         </select>
         {(search || filterType || filterTier || filterRegion || filterStatus) && (
           <button onClick={() => { setSearch(""); setFilterType(""); setFilterTier(""); setFilterRegion(""); setFilterStatus(""); }}
             style={{ padding: "9px 14px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, color: T.textMid, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
-            Réinitialiser
+            {t("reset", "Réinitialiser")}
           </button>
         )}
       </div>
@@ -212,13 +214,13 @@ export default function MyClientsPage() {
           <thead>
             <tr style={{ background: T.bg }}>
               {[
-                { key: "company_name" as SortKey, label: "Compagnie" },
-                { key: null, label: "Contact" },
-                { key: "client_type" as SortKey, label: "Type" },
-                { key: "region" as SortKey, label: "Région" },
+                { key: "company_name" as SortKey, label: t("clients.company", "Compagnie") },
+                { key: null, label: t("crm.contact", "Contact") },
+                { key: "client_type" as SortKey, label: t("type", "Type") },
+                { key: "region" as SortKey, label: t("crm.region", "Région") },
                 { key: "tier" as SortKey, label: "Tier" },
-                { key: null, label: "Dernière commande" },
-                { key: null, label: "Statut" },
+                { key: null, label: t("clients.last_order", "Dernière commande") },
+                { key: null, label: t("status", "Statut") },
               ].map(({ key, label }) => (
                 <th
                   key={label}
@@ -239,10 +241,10 @@ export default function MyClientsPage() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={7} style={{ textAlign: "center", padding: 40, color: T.textLight }}>Chargement...</td></tr>
+              <tr><td colSpan={7} style={{ textAlign: "center", padding: 40, color: T.textLight }}>{t("loading_dots", "Chargement...")}</td></tr>
             ) : filtered.length === 0 ? (
               <tr><td colSpan={7} style={{ textAlign: "center", padding: 40, color: T.textLight }}>
-                {clients.length === 0 ? "Aucun client pour l'instant. Créez votre premier client !" : "Aucun résultat pour ces filtres."}
+                {clients.length === 0 ? t("clients.no_clients_yet", "Aucun client pour l'instant. Créez votre premier client !") : t("clients.no_results_filters", "Aucun résultat pour ces filtres.")}
               </td></tr>
             ) : filtered.map(c => {
               const inactive = isInactive(c);
@@ -293,7 +295,7 @@ export default function MyClientsPage() {
       </div>
 
       <div style={{ marginTop: 10, fontSize: 12, color: T.textLight, textAlign: "right" }}>
-        {filtered.length} client{filtered.length !== 1 ? "s" : ""} affiché{filtered.length !== 1 ? "s" : ""}
+        {filtered.length} {t("client", "client")}{filtered.length !== 1 ? "s" : ""} {t("clients.displayed", "affiché")}{filtered.length !== 1 ? "s" : ""}
       </div>
 
       {showForm && (
