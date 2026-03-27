@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { SciEmailLog, T, fmt, fmtDate } from "./toInvoiceTypes";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   logs: SciEmailLog[];
 }
 
 export default function TabHistory({ logs }: Props) {
+  const { t } = useLanguage();
   const [expanded, setExpanded] = useState<string | null>(null);
 
   const exportCSV = () => {
@@ -31,8 +33,8 @@ export default function TabHistory({ logs }: Props) {
   if (logs.length === 0) {
     return (
       <div style={{ background: T.card, borderRadius: 12, border: `1px solid ${T.border}`, padding: 40, textAlign: "center" }}>
-        <div style={{ fontSize: 15, fontWeight: 700, color: T.textMid, marginBottom: 4 }}>Aucun historique</div>
-        <div style={{ fontSize: 13, color: T.textLight }}>Les emails envoyés à SCI apparaîtront ici.</div>
+        <div style={{ fontSize: 15, fontWeight: 700, color: T.textMid, marginBottom: 4 }}>{t("history.no_history")}</div>
+        <div style={{ fontSize: 13, color: T.textLight }}>{t("history.emails_here")}</div>
       </div>
     );
   }
@@ -41,7 +43,7 @@ export default function TabHistory({ logs }: Props) {
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
         <button onClick={exportCSV} style={{ background: T.cardAlt, color: T.text, border: `1px solid ${T.border}`, borderRadius: 7, padding: "7px 14px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-          Export CSV
+          {t("history.export_csv")}
         </button>
       </div>
 
@@ -62,7 +64,7 @@ export default function TabHistory({ logs }: Props) {
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: T.text, marginBottom: 2 }}>
-                  {log.log_type === "send" ? "Envoi initial" : "Relance"} — {log.num_documents} document{log.num_documents !== 1 ? "s" : ""} — <span style={{ color: T.main }}>{fmt(log.total_value)}</span>
+                  {log.log_type === "send" ? t("history.initial_send") : t("history.followup")} — {log.num_documents} {t("history.document_count")} — <span style={{ color: T.main }}>{fmt(log.total_value)}</span>
                 </div>
                 <div style={{ fontSize: 11, color: T.textMid }}>
                   {new Date(log.sent_at).toLocaleString("fr-CA", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })} — À : {log.recipients.join(", ")} — Envoyé par : {log.sent_by}
@@ -77,21 +79,21 @@ export default function TabHistory({ logs }: Props) {
               <div style={{ borderTop: `1px solid ${T.border}`, padding: "16px 18px", background: T.cardAlt }}>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
                   <div>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 4 }}>Destinataires</div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 4 }}>{t("history.recipients")}</div>
                     <div style={{ fontSize: 13, color: T.text }}>{log.recipients.join(", ")}</div>
                     {log.cc_recipients.length > 0 && (
                       <div style={{ fontSize: 12, color: T.textMid, marginTop: 2 }}>CC : {log.cc_recipients.join(", ")}</div>
                     )}
                   </div>
                   <div>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 4 }}>Objet</div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 4 }}>{t("history.subject")}</div>
                     <div style={{ fontSize: 13, color: T.text }}>{log.subject}</div>
                   </div>
                 </div>
 
                 {log.items && log.items.length > 0 && (
                   <div style={{ marginBottom: 16 }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 8 }}>Documents inclus</div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 8 }}>{t("history.docs_included")}</div>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                       {log.items.map(item => (
                         <div key={item.id} style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 600, color: T.text }}>
@@ -103,7 +105,7 @@ export default function TabHistory({ logs }: Props) {
                 )}
 
                 <div>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 8 }}>Corps de l'email</div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 8 }}>{t("history.email_body")}</div>
                   <div style={{ background: T.bgCard, borderRadius: 8, border: `1px solid ${T.border}`, padding: "12px 14px", fontSize: 12, color: T.text, whiteSpace: "pre-wrap", lineHeight: 1.7, maxHeight: 240, overflowY: "auto" }}>
                     {log.body}
                   </div>

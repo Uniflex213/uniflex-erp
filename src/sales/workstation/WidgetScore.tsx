@@ -3,12 +3,14 @@ import { CRMLead } from "../crmTypes";
 import { T } from "./workstationTypes";
 import { useCurrentAgent } from "../../hooks/useCurrentAgent";
 import { useTeamAgents } from "../../hooks/useAgents";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   leads: CRMLead[];
 }
 
 export default function WidgetScore({ leads }: Props) {
+  const { t } = useLanguage();
   const currentAgent = useCurrentAgent();
   const agents = useTeamAgents();
   const now = new Date();
@@ -44,7 +46,7 @@ export default function WidgetScore({ leads }: Props) {
   const scoreColor = composite >= 80 ? T.green : composite >= 60 ? T.main : composite >= 40 ? T.orange : T.red;
 
   const badgeBg = composite >= 80 ? "rgba(34,197,94,0.1)" : composite >= 60 ? `${T.main}12` : composite >= 40 ? "rgba(245,158,11,0.1)" : "rgba(239,68,68,0.1)";
-  const badgeLabel = composite >= 80 ? "Excellent" : composite >= 60 ? "Bon" : composite >= 40 ? "Moyen" : "À améliorer";
+  const badgeLabel = composite >= 80 ? t("ws.score.excellent", "Excellent") : composite >= 60 ? t("ws.score.good", "Bon") : composite >= 40 ? t("ws.score.average", "Moyen") : t("ws.score.improve", "À améliorer");
 
   const circumference = 2 * Math.PI * 36;
   const dashOffset = circumference * (1 - composite / 100);
@@ -55,7 +57,7 @@ export default function WidgetScore({ leads }: Props) {
       padding: "16px 20px", boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
       paddingTop: 24,
     }}>
-      <div style={{ fontSize: 12, fontWeight: 700, color: T.main, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 14 }}>🏆 Mon Score & Classement</div>
+      <div style={{ fontSize: 12, fontWeight: 700, color: T.main, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 14 }}>🏆 {t("ws.score.title", "Mon Score & Classement")}</div>
 
       <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 16 }}>
         <svg width="90" height="90" viewBox="0 0 90 90" style={{ flexShrink: 0 }}>
@@ -71,7 +73,7 @@ export default function WidgetScore({ leads }: Props) {
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
             <span style={{ fontSize: 24, fontWeight: 900, color: scoreColor }}>#{myRank}</span>
-            <span style={{ fontSize: 13, color: T.textMid }}>sur {leaderboard.length}</span>
+            <span style={{ fontSize: 13, color: T.textMid }}>{t("ws.score.of", "sur")} {leaderboard.length}</span>
           </div>
           <span style={{ background: badgeBg, color: scoreColor, borderRadius: 8, padding: "3px 10px", fontSize: 12, fontWeight: 700 }}>{badgeLabel}</span>
         </div>

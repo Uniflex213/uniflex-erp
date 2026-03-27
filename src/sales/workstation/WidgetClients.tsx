@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { CRMLead } from "../crmTypes";
 import { T, fmt, daysSince } from "./workstationTypes";
 import { useCurrentAgent } from "../../hooks/useCurrentAgent";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   leads: CRMLead[];
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export default function WidgetClients({ leads, onOpenLead }: Props) {
+  const { t } = useLanguage();
   const agent = useCurrentAgent();
   const myLeads = useMemo(() => leads.filter(l => l.assigned_agent_id === agent.id), [leads, agent.id]);
 
@@ -25,8 +27,8 @@ export default function WidgetClients({ leads, onOpenLead }: Props) {
     const avgFreqDays = 30;
     const lastOrderDays = daysSince(lead.last_activity_at);
     const daysUntilRestock = avgFreqDays - lastOrderDays;
-    if (daysUntilRestock < 0) return { label: "En retard — contacter", color: T.red, bg: "#fee2e2" };
-    if (daysUntilRestock <= 7) return { label: "Bientôt", color: T.greenDark, bg: "#dcfce7" };
+    if (daysUntilRestock < 0) return { label: t("ws.clients.to_contact", "à contacter"), color: T.red, bg: "#fee2e2" };
+    if (daysUntilRestock <= 7) return { label: t("ws.clients.soon", "bientôt"), color: T.greenDark, bg: "#dcfce7" };
     return { label: `Dans ~${daysUntilRestock}j`, color: T.textMid, bg: T.cardAlt };
   };
 
@@ -36,9 +38,9 @@ export default function WidgetClients({ leads, onOpenLead }: Props) {
   if (activeClients.length === 0) {
     return (
       <div style={{ background: T.card, borderRadius: 16, border: `1px solid ${T.border}`, padding: 24, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
-        <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 6 }}>Mes clients actifs</div>
+        <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 6 }}>{t("ws.clients.title", "Mes clients actifs")}</div>
         <div style={{ color: T.textLight, fontSize: 13, fontStyle: "italic", padding: "16px 0" }}>
-          Aucun client actif (deals fermés gagnés)
+          {t("ws.clients.none", "Aucun client actif (deals fermés gagnés)")}
         </div>
       </div>
     );
@@ -50,20 +52,20 @@ export default function WidgetClients({ leads, onOpenLead }: Props) {
     <div style={{ background: T.card, borderRadius: 16, border: `1px solid ${T.border}`, padding: 24, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
         <div>
-          <div style={{ fontWeight: 800, fontSize: 15 }}>Mes clients actifs</div>
+          <div style={{ fontWeight: 800, fontSize: 15 }}>{t("ws.clients.title", "Mes clients actifs")}</div>
           <div style={{ fontSize: 12, color: T.textMid, marginTop: 2 }}>
-            {activeClients.length} client{activeClients.length !== 1 ? "s" : ""} · {fmt(totalYtd)} total YTD
+            {activeClients.length} client{activeClients.length !== 1 ? "s" : ""} · {fmt(totalYtd)} {t("ws.clients.total_ytd", "total YTD")}
           </div>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
-          {activeClients.filter(l => getRestockStatus(l).label === "En retard — contacter").length > 0 && (
+          {activeClients.filter(l => getRestockStatus(l).color === T.red).length > 0 && (
             <span style={{ background: "#fee2e2", color: T.red, padding: "3px 8px", borderRadius: 6, fontSize: 11, fontWeight: 700 }}>
-              {activeClients.filter(l => getRestockStatus(l).label === "En retard — contacter").length} à contacter
+              {activeClients.filter(l => getRestockStatus(l).color === T.red).length} {t("ws.clients.to_contact", "à contacter")}
             </span>
           )}
-          {activeClients.filter(l => getRestockStatus(l).label === "Bientôt").length > 0 && (
+          {activeClients.filter(l => getRestockStatus(l).color === T.greenDark).length > 0 && (
             <span style={{ background: "#dcfce7", color: T.greenDark, padding: "3px 8px", borderRadius: 6, fontSize: 11, fontWeight: 700 }}>
-              {activeClients.filter(l => getRestockStatus(l).label === "Bientôt").length} bientôt
+              {activeClients.filter(l => getRestockStatus(l).color === T.greenDark).length} {t("ws.clients.soon", "bientôt")}
             </span>
           )}
         </div>
@@ -73,7 +75,7 @@ export default function WidgetClients({ leads, onOpenLead }: Props) {
         <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 740 }}>
           <thead>
             <tr style={{ background: T.cardAlt }}>
-              {["Client", "Dernière activité", "Total (YTD)", "Vol. mensuel objectif", "Fréq. moy.", "Prochain restock", "Statut"].map(h => (
+              {[t("ws.clients.client", "Client"), t("ws.clients.last_activity", "Dernière activité"), t("ws.clients.total_ytd_h", "Total (YTD)"), t("ws.clients.monthly_vol", "Vol. mensuel objectif"), t("ws.clients.avg_freq", "Fréq. moy."), t("ws.clients.next_restock", "Prochain restock"), t("ws.clients.status", "Statut")].map(h => (
                 <th key={h} style={thColor}>{h}</th>
               ))}
             </tr>
@@ -92,15 +94,15 @@ export default function WidgetClients({ leads, onOpenLead }: Props) {
                   onClick={() => onOpenLead(lead.id)}
                   style={{
                     cursor: "pointer",
-                    background: restock.label === "En retard — contacter" ? "#fff5f5" : "transparent",
+                    background: restock.color === T.red ? "#fff5f5" : "transparent",
                     transition: "background 0.15s",
                   }}
                   onMouseEnter={e => {
-                    if (restock.label !== "En retard — contacter")
+                    if (restock.color !== T.red)
                       (e.currentTarget as HTMLElement).style.background = T.cardAlt;
                   }}
                   onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.background = restock.label === "En retard — contacter" ? "#fff5f5" : "transparent";
+                    (e.currentTarget as HTMLElement).style.background = restock.color === T.red ? "#fff5f5" : "transparent";
                   }}
                 >
                   <td style={tdStyle}>
@@ -108,11 +110,11 @@ export default function WidgetClients({ leads, onOpenLead }: Props) {
                     <div style={{ fontSize: 10, color: T.textLight }}>{lead.type}</div>
                   </td>
                   <td style={{ ...tdStyle, color: lastDays > 30 ? T.orange : T.text }}>
-                    {lastDays === 0 ? "Aujourd'hui" : lastDays === 1 ? "Hier" : `Il y a ${lastDays}j`}
+                    {lastDays === 0 ? t("ws.clients.today", "Aujourd'hui") : lastDays === 1 ? t("ws.clients.yesterday", "Hier") : `${t("ws.clients.ago", "Il y a")} ${lastDays}j`}
                   </td>
                   <td style={{ ...tdStyle, fontWeight: 700, color: T.main }}>{fmt(lead.estimated_value)}</td>
                   <td style={tdStyle}>{fmt(lead.monthly_volume_goal)}/mois</td>
-                  <td style={tdStyle}>~30 jours</td>
+                  <td style={tdStyle}>{t("ws.clients.thirty_days", "~30 jours")}</td>
                   <td style={tdStyle}>
                     <span style={{
                       background: restock.bg, color: restock.color,
@@ -123,7 +125,7 @@ export default function WidgetClients({ leads, onOpenLead }: Props) {
                   </td>
                   <td style={tdStyle}>
                     <span style={{ background: "#dcfce7", color: "#15803d", padding: "3px 8px", borderRadius: 6, fontSize: 11, fontWeight: 700 }}>
-                      Client actif
+                      {t("ws.clients.active_client", "Client actif")}
                     </span>
                   </td>
                 </tr>

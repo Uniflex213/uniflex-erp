@@ -3,6 +3,7 @@ import { supabase } from "../../supabaseClient";
 import { T } from "../../theme";
 import { TeamMember } from "./teamTypes";
 import { fmtCurrency, fmtPct } from "./teamUtils";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 type Period = "month" | "quarter" | "year";
 
@@ -29,6 +30,7 @@ interface CommissionConfig {
 }
 
 export default function TeamCommissionsTab({ members }: Props) {
+  const { t } = useLanguage();
   const [period, setPeriod] = useState<Period>("month");
   const [configs, setConfigs] = useState<CommissionConfig[]>([]);
   const [loading, setLoading] = useState(false);
@@ -87,13 +89,13 @@ export default function TeamCommissionsTab({ members }: Props) {
     <div style={{ padding: "24px 28px", maxWidth: 1100 }}>
       {/* Period selector */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: T.text }}>Commissions d'équipe</h3>
+        <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: T.text }}>{t("team_commissions.title", "Commissions d'équipe")}</h3>
         <div style={{ display: "flex", borderRadius: 8, overflow: "hidden", border: `1px solid ${T.border}` }}>
           {(
             [
-              ["month",   "Ce mois"],
-              ["quarter", "Ce trimestre"],
-              ["year",    "Cette année"],
+              ["month",   t("team_commissions.this_month", "Ce mois")],
+              ["quarter", t("team_commissions.this_quarter", "Ce trimestre")],
+              ["year",    t("team_commissions.this_year", "Cette année")],
             ] as [Period, string][]
           ).map(([k, l]) => (
             <button
@@ -115,7 +117,7 @@ export default function TeamCommissionsTab({ members }: Props) {
       </div>
 
       {loading ? (
-        <div style={{ color: T.textMid, fontSize: 13, textAlign: "center", padding: 32 }}>Chargement des taux...</div>
+        <div style={{ color: T.textMid, fontSize: 13, textAlign: "center", padding: 32 }}>{t("team_commissions.loading_rates", "Chargement des taux...")}</div>
       ) : (
         <>
           {/* Commission table */}
@@ -124,7 +126,7 @@ export default function TeamCommissionsTab({ members }: Props) {
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                 <thead>
                   <tr style={{ background: T.bg }}>
-                    {["Membre", "Ventes brutes", "Taux", "Commission brute", "Déductions", "Commission nette", "Statut"].map(h => (
+                    {[t("team_commissions.member", "Membre"), t("team_commissions.gross_sales", "Ventes brutes"), t("team_commissions.rate", "Taux"), t("team_commissions.gross_commission", "Commission brute"), t("team_commissions.deductions", "Déductions"), t("team_commissions.net_commission", "Commission nette"), t("common.status", "Statut")].map(h => (
                       <th
                         key={h}
                         style={{
@@ -209,7 +211,7 @@ export default function TeamCommissionsTab({ members }: Props) {
           {/* Ranking bar chart */}
           <div style={{ background: T.bgCard, borderRadius: 16, border: `1px solid ${T.border}`, padding: "20px 24px" }}>
             <h4 style={{ margin: "0 0 16px", fontSize: 13, fontWeight: 800, color: T.text }}>
-              Classement des commissions
+              {t("team_commissions.ranking", "Classement des commissions")}
             </h4>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {sorted.map((row, idx) => (
@@ -247,7 +249,7 @@ export default function TeamCommissionsTab({ members }: Props) {
               ))}
               {rows.length === 0 && (
                 <div style={{ color: T.textMid, fontSize: 13, textAlign: "center", padding: 24 }}>
-                  Aucun membre dans l'équipe.
+                  {t("team_commissions.no_members", "Aucun membre dans l'équipe.")}
                 </div>
               )}
             </div>

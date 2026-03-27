@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { CRMLead, STAGES, Stage, STAGE_COLORS, TEMP_COLORS } from "../crmTypes";
 import { T, fmt } from "./workstationTypes";
 import { useCurrentAgent } from "../../hooks/useCurrentAgent";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   leads: CRMLead[];
@@ -12,6 +13,7 @@ interface Props {
 const ACTIVE_STAGES: Stage[] = ["Nouveau Lead", "Premier Contact", "Qualification", "Proposition Envoyée", "Négociation"];
 
 export default function WidgetPipeline({ leads, onOpenLead, onNavigatePipeline }: Props) {
+  const { t } = useLanguage();
   const agent = useCurrentAgent();
   const myLeads = useMemo(() => leads.filter(l => l.assigned_agent_id === agent.id), [leads, agent.id]);
 
@@ -34,16 +36,16 @@ export default function WidgetPipeline({ leads, onOpenLead, onNavigatePipeline }
     <div style={{ background: T.card, borderRadius: 16, border: `1px solid ${T.border}`, padding: 24, boxShadow: "0 2px 12px rgba(0,0,0,0.06)", height: "100%" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
         <div>
-          <div style={{ fontWeight: 800, fontSize: 15, color: T.text }}>Mon Pipeline</div>
+          <div style={{ fontWeight: 800, fontSize: 15, color: T.text }}>{t("ws.pipeline.title", "Mon Pipeline")}</div>
           <div style={{ fontSize: 12, color: T.textMid, marginTop: 2 }}>
-            {myLeads.filter(l => ACTIVE_STAGES.includes(l.stage as Stage)).length} leads actifs · {fmt(totalPipelineValue)}
+            {myLeads.filter(l => ACTIVE_STAGES.includes(l.stage as Stage)).length} {t("ws.pipeline.active_leads", "leads actifs")} · {fmt(totalPipelineValue)}
           </div>
         </div>
         <button
           onClick={onNavigatePipeline}
           style={{ background: "none", border: `1px solid ${T.border}`, borderRadius: 8, padding: "5px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer", color: T.main, fontFamily: "inherit" }}
         >
-          Voir tout →
+          {t("ws.pipeline.view_all", "Voir tout →")}
         </button>
       </div>
 
@@ -72,7 +74,7 @@ export default function WidgetPipeline({ leads, onOpenLead, onNavigatePipeline }
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 4, maxHeight: 220, overflowY: "auto" }}>
                   {stageLeads.length === 0 && (
-                    <div style={{ fontSize: 11, color: T.textLight, fontStyle: "italic", padding: "6px 8px" }}>Vide</div>
+                    <div style={{ fontSize: 11, color: T.textLight, fontStyle: "italic", padding: "6px 8px" }}>{t("ws.pipeline.empty", "Vide")}</div>
                   )}
                   {stageLeads.map(lead => (
                     <div

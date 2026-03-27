@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { T } from "../../theme";
 import { Team, TeamMember, TeamActivityItem } from "./teamTypes";
 import { fmtCurrency, fmtPct, timeAgo } from "./teamUtils";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 function Avatar({ member, size = 36 }: { member: TeamMember; size?: number }) {
   return (
@@ -37,7 +38,7 @@ function KpiCard({ label, value, sub, trend, color }: {
       {sub && <div style={{ fontSize: 11, color: T.textLight, marginTop: 4 }}>{sub}</div>}
       {trend && (
         <div style={{ fontSize: 10, color: trend.startsWith("+") ? T.green : T.red, fontWeight: 700, marginTop: 4 }}>
-          {trend} vs mois dernier
+          {trend}
         </div>
       )}
     </div>
@@ -53,6 +54,7 @@ interface Props {
 }
 
 export default function TeamOverviewTab({ team, members, activity }: Props) {
+  const { t } = useLanguage();
   const [period, setPeriod] = useState<Period>("month");
 
   const totalSales = members.reduce((s, m) => s + (m.sales_mtd ?? 0), 0);
@@ -69,18 +71,18 @@ export default function TeamOverviewTab({ team, members, activity }: Props) {
   return (
     <div style={{ padding: "24px 28px", display: "flex", flexDirection: "column", gap: 24, maxWidth: 1100 }}>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-        <KpiCard label="Ventes totales (MTD)" value={fmtCurrency(totalSales)} trend="+14%" color={T.main} />
-        <KpiCard label="Leads actifs" value={String(totalLeads)} sub="dans le pipeline" />
-        <KpiCard label="Deals fermés (ce mois)" value={`${totalDeals} deals`} sub={fmtCurrency(totalSales * 0.6)} />
-        <KpiCard label="Taux de conversion" value={fmtPct(avgConversion)} trend="+2.3%" />
-        <KpiCard label="Commission totale" value={fmtCurrency(totalCommission)} color={T.gold} />
+        <KpiCard label={t("team_overview.total_sales_mtd", "Ventes totales (MTD)")} value={fmtCurrency(totalSales)} trend="+14%" color={T.main} />
+        <KpiCard label={t("team_overview.active_leads", "Leads actifs")} value={String(totalLeads)} sub={t("team_overview.in_pipeline", "dans le pipeline")} />
+        <KpiCard label={t("team_overview.deals_closed_month", "Deals fermés (ce mois)")} value={`${totalDeals} deals`} sub={fmtCurrency(totalSales * 0.6)} />
+        <KpiCard label={t("team_overview.conversion_rate", "Taux de conversion")} value={fmtPct(avgConversion)} trend="+2.3%" />
+        <KpiCard label={t("team_overview.total_commission", "Commission totale")} value={fmtCurrency(totalCommission)} color={T.gold} />
       </div>
 
       {team.monthly_target > 0 && (
         <div style={{ background: T.bgCard, borderRadius: 14, padding: "16px 20px", border: `1px solid ${T.border}` }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: T.text }}>Objectif mensuel</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: T.text }}>{t("team_overview.monthly_target", "Objectif mensuel")}</div>
               <div style={{ fontSize: 11, color: T.textLight }}>{fmtCurrency(totalSales)} / {fmtCurrency(team.monthly_target)}</div>
             </div>
             <div style={{ fontSize: 20, fontWeight: 900, color: targetPct >= 1 ? T.green : T.main }}>
@@ -99,9 +101,9 @@ export default function TeamOverviewTab({ team, members, activity }: Props) {
 
       <div style={{ background: T.bgCard, borderRadius: 16, border: `1px solid ${T.border}`, overflow: "hidden" }}>
         <div style={{ padding: "16px 20px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h3 style={{ margin: 0, fontSize: 14, fontWeight: 800, color: T.text }}>Leaderboard</h3>
+          <h3 style={{ margin: 0, fontSize: 14, fontWeight: 800, color: T.text }}>{t("team_overview.leaderboard", "Leaderboard")}</h3>
           <div style={{ display: "flex", borderRadius: 8, overflow: "hidden", border: `1px solid ${T.border}` }}>
-            {([["month", "Ce mois"], ["week", "Cette semaine"], ["today", "Aujourd'hui"]] as [Period, string][]).map(([k, l]) => (
+            {([["month", t("team_overview.this_month", "Ce mois")], ["week", t("team_overview.this_week", "Cette semaine")], ["today", t("team_overview.today", "Aujourd'hui")]] as [Period, string][]).map(([k, l]) => (
               <button
                 key={k}
                 onClick={() => setPeriod(k)}
@@ -141,7 +143,7 @@ export default function TeamOverviewTab({ team, members, activity }: Props) {
                     background: member.is_online ? "#dcfce7" : "#f3f4f6",
                     color: member.is_online ? T.green : T.textLight,
                   }}>
-                    {member.is_online ? "● En ligne" : "Hors ligne"}
+                    {member.is_online ? t("team_overview.online", "En ligne") : t("team_overview.offline", "Hors ligne")}
                   </span>
                 </div>
                 <div style={{ fontSize: 11, color: T.textLight }}>{member.region}</div>
@@ -157,7 +159,7 @@ export default function TeamOverviewTab({ team, members, activity }: Props) {
 
       <div style={{ background: T.bgCard, borderRadius: 16, border: `1px solid ${T.border}`, overflow: "hidden" }}>
         <div style={{ padding: "16px 20px", borderBottom: `1px solid ${T.border}` }}>
-          <h3 style={{ margin: 0, fontSize: 14, fontWeight: 800, color: T.text }}>Activité récente</h3>
+          <h3 style={{ margin: 0, fontSize: 14, fontWeight: 800, color: T.text }}>{t("team_overview.recent_activity", "Activité récente")}</h3>
         </div>
         <div>
           {activity.map((item, idx) => (

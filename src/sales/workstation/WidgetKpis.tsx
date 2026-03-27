@@ -6,6 +6,7 @@ import { useCurrentAgent } from "../../hooks/useCurrentAgent";
 import { useTeamAgents } from "../../hooks/useAgents";
 import { useUserPreferences } from "../../hooks/useUserPreferences";
 import PersonalSamplesModal from "./PersonalSamplesModal";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   leads: CRMLead[];
@@ -17,6 +18,7 @@ type Goals = { sales: number; newLeads: number; activities: number };
 const DEFAULT_GOALS: Goals = { sales: 150000, newLeads: 8, activities: 60 };
 
 export default function WidgetKpis({ leads, samples = [], allSamples = [] }: Props) {
+  const { t } = useLanguage();
   const agent = useCurrentAgent();
   const agents = useTeamAgents();
   const { prefs, loaded: prefsLoaded, updatePref } = useUserPreferences();
@@ -105,21 +107,21 @@ export default function WidgetKpis({ leads, samples = [], allSamples = [] }: Pro
   return (
     <div style={{ background: T.card, borderRadius: 16, border: `1px solid ${T.border}`, padding: 24, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-        <div style={{ fontWeight: 800, fontSize: 15, color: T.text }}>Mes KPIs</div>
+        <div style={{ fontWeight: 800, fontSize: 15, color: T.text }}>{t("ws.kpis.title", "Mes KPIs")}</div>
         <button
           onClick={() => { setDraftGoals(goals); setEditingGoals(!editingGoals); }}
           style={{ background: editingGoals ? T.main : T.cardAlt, color: editingGoals ? "#fff" : T.textMid, border: "none", borderRadius: 8, padding: "5px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
         >
-          {editingGoals ? "Annuler" : "Objectifs"}
+          {editingGoals ? t("common.cancel", "Annuler") : t("ws.kpis.goals", "Objectifs")}
         </button>
       </div>
 
       {editingGoals ? (
         <div style={{ marginBottom: 16 }}>
           {[
-            { label: "Objectif ventes (CAD)", key: "sales" as keyof Goals, step: 5000 },
-            { label: "Nouveaux leads", key: "newLeads" as keyof Goals, step: 1 },
-            { label: "Activités / mois", key: "activities" as keyof Goals, step: 5 },
+            { label: t("ws.kpis.sales_goal", "Objectif ventes (CAD)"), key: "sales" as keyof Goals, step: 5000 },
+            { label: t("ws.kpis.new_leads", "Nouveaux leads"), key: "newLeads" as keyof Goals, step: 1 },
+            { label: t("ws.kpis.activities_month", "Activités / mois"), key: "activities" as keyof Goals, step: 5 },
           ].map(({ label, key, step }) => (
             <div key={key} style={{ marginBottom: 10 }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: T.textMid, marginBottom: 4 }}>{label}</div>
@@ -136,20 +138,20 @@ export default function WidgetKpis({ leads, samples = [], allSamples = [] }: Pro
             onClick={saveGoals}
             style={{ background: T.main, color: "#fff", border: "none", borderRadius: 8, padding: "8px 20px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", width: "100%" }}
           >
-            Sauvegarder
+            {t("common.save", "Enregistrer")}
           </button>
         </div>
       ) : (
         <>
           <div style={{ fontSize: 11, fontWeight: 800, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>
-            Performance ce mois
+            {t("ws.kpis.perf_month", "Performance ce mois")}
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
             {[
-              { label: "Leads créés", value: thisMonthLeads.length, compare: diff(thisMonthLeads.length, lastMonthLeads.length) },
-              { label: "Taux conv.", value: `${conversionRate.toFixed(0)}%`, compare: null },
-              { label: "Deals fermés", value: closedThisMonth.length, compare: diff(closedThisMonth.length, closedLastMonth.length) },
-              { label: "Activités", value: activitiesThisMonth, compare: null },
+              { label: t("ws.kpis.leads_created", "Leads créés"), value: thisMonthLeads.length, compare: diff(thisMonthLeads.length, lastMonthLeads.length) },
+              { label: t("ws.kpis.conv_rate", "Taux conv."), value: `${conversionRate.toFixed(0)}%`, compare: null },
+              { label: t("ws.kpis.deals_closed", "Deals fermés"), value: closedThisMonth.length, compare: diff(closedThisMonth.length, closedLastMonth.length) },
+              { label: t("ws.kpis.activities", "Activités"), value: activitiesThisMonth, compare: null },
             ].map(({ label, value, compare }) => (
               <div key={label} style={{ background: T.cardAlt, borderRadius: 10, padding: "10px 12px" }}>
                 <div style={{ fontSize: 18, fontWeight: 900, color: T.main }}>{value}{compare}</div>
@@ -161,21 +163,21 @@ export default function WidgetKpis({ leads, samples = [], allSamples = [] }: Pro
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
             <div style={{ background: `${T.green}15`, borderRadius: 10, padding: "10px 12px" }}>
               <div style={{ fontSize: 15, fontWeight: 900, color: T.greenDark }}>{fmt(revenueThisMonth)}</div>
-              <div style={{ fontSize: 10, color: T.textLight, marginTop: 2, fontWeight: 600 }}>Revenu généré</div>
+              <div style={{ fontSize: 10, color: T.textLight, marginTop: 2, fontWeight: 600 }}>{t("ws.kpis.revenue_gen", "Revenu généré")}</div>
             </div>
             <div style={{ background: `${T.main}10`, borderRadius: 10, padding: "10px 12px" }}>
               <div style={{ fontSize: 15, fontWeight: 900, color: T.main }}>{fmt(commissionEstimated)}</div>
-              <div style={{ fontSize: 10, color: T.textLight, marginTop: 2, fontWeight: 600 }}>Commission est.</div>
+              <div style={{ fontSize: 10, color: T.textLight, marginTop: 2, fontWeight: 600 }}>{t("ws.kpis.commission_est", "Commission est.")}</div>
             </div>
           </div>
 
           <div style={{ fontSize: 11, fontWeight: 800, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>
-            Objectifs mensuels
+            {t("ws.kpis.monthly_goals", "Objectifs mensuels")}
           </div>
           {[
-            { label: "Ventes", pct: salesPct, current: fmt(revenueThisMonth), target: fmt(goals.sales) },
-            { label: "Nouveaux leads", pct: leadsPct, current: String(thisMonthLeads.length), target: String(goals.newLeads) },
-            { label: "Activités", pct: actPct, current: String(activitiesThisMonth), target: String(goals.activities) },
+            { label: t("ws.kpis.sales", "Ventes"), pct: salesPct, current: fmt(revenueThisMonth), target: fmt(goals.sales) },
+            { label: t("ws.kpis.new_leads", "Nouveaux leads"), pct: leadsPct, current: String(thisMonthLeads.length), target: String(goals.newLeads) },
+            { label: t("ws.kpis.activities", "Activités"), pct: actPct, current: String(activitiesThisMonth), target: String(goals.activities) },
           ].map(({ label, pct, current, target }) => (
             <div key={label} style={{ marginBottom: 10 }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4, fontSize: 12 }}>
@@ -188,13 +190,13 @@ export default function WidgetKpis({ leads, samples = [], allSamples = [] }: Pro
                   background: pct >= 100 ? T.green : pct >= 60 ? T.orange : T.main,
                 }} />
               </div>
-              <div style={{ fontSize: 10, color: T.textLight, marginTop: 3 }}>{pct.toFixed(0)}% atteint</div>
+              <div style={{ fontSize: 10, color: T.textLight, marginTop: 3 }}>{pct.toFixed(0)}% {t("ws.kpis.achieved", "atteint")}</div>
             </div>
           ))}
 
           <div style={{ marginTop: 12, padding: "10px 12px", background: T.cardAlt, borderRadius: 10 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: T.textMid, marginBottom: 4 }}>
-              Classement équipe
+              {t("ws.kpis.team_ranking", "Classement équipe")}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div style={{
@@ -206,11 +208,11 @@ export default function WidgetKpis({ leads, samples = [], allSamples = [] }: Pro
               </div>
               <div>
                 <div style={{ fontSize: 13, fontWeight: 800 }}>
-                  {myRank === 1 ? "Leader du classement !" : `#${myRank} sur ${leaderboard.length} agents`}
+                  {myRank === 1 ? t("ws.kpis.leader", "Leader du classement !") : `#${myRank} ${t("ws.kpis.of", "sur")} ${leaderboard.length} ${t("ws.kpis.agents", "agents")}`}
                 </div>
                 {myRank > 1 && gapToLeader > 0 && (
                   <div style={{ fontSize: 11, color: T.textMid }}>
-                    {fmt(gapToLeader)} derrière {leader.agent.name.split(" ")[0]}
+                    {fmt(gapToLeader)} {t("ws.kpis.behind", "derrière")} {leader.agent.name.split(" ")[0]}
                   </div>
                 )}
               </div>
@@ -228,7 +230,7 @@ export default function WidgetKpis({ leads, samples = [], allSamples = [] }: Pro
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
               <div style={{ fontSize: 11, fontWeight: 800, color: "#9a7209", textTransform: "uppercase", letterSpacing: 0.5 }}>
-                Mes Samples
+                {t("ws.kpis.my_samples", "Mes Samples")}
               </div>
               {myFollowUpRequired > 0 && (
                 <span style={{
@@ -236,26 +238,26 @@ export default function WidgetKpis({ leads, samples = [], allSamples = [] }: Pro
                   fontWeight: 800, padding: "2px 7px",
                   animation: "pulse 2s infinite",
                 }}>
-                  {myFollowUpRequired} follow-up
+                  {myFollowUpRequired} {t("ws.kpis.follow_up", "follow-up")}
                 </span>
               )}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6 }}>
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontSize: 18, fontWeight: 900, color: "#d4a017" }}>{myActiveSamples.length}</div>
-                <div style={{ fontSize: 9, color: T.textLight, fontWeight: 600 }}>Actifs</div>
+                <div style={{ fontSize: 9, color: T.textLight, fontWeight: 600 }}>{t("ws.kpis.active", "Actifs")}</div>
               </div>
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontSize: 18, fontWeight: 900, color: "#22c55e" }}>{myPositifs}</div>
-                <div style={{ fontSize: 9, color: T.textLight, fontWeight: 600 }}>Positifs</div>
+                <div style={{ fontSize: 9, color: T.textLight, fontWeight: 600 }}>{t("ws.kpis.positive", "Positifs")}</div>
               </div>
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontSize: 18, fontWeight: 900, color: T.textMid }}>{myFollowUpCompleted}</div>
-                <div style={{ fontSize: 9, color: T.textLight, fontWeight: 600 }}>Complétés</div>
+                <div style={{ fontSize: 9, color: T.textLight, fontWeight: 600 }}>{t("ws.kpis.completed", "Complétés")}</div>
               </div>
             </div>
             <div style={{ fontSize: 10, color: "#9a7209", marginTop: 6, fontWeight: 600, textAlign: "center" }}>
-              Voir mes analytics samples →
+              {t("ws.kpis.view_analytics", "Voir mes analytics samples →")}
             </div>
           </div>
         </>

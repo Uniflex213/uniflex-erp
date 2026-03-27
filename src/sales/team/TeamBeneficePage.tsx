@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../../supabaseClient";
 import { useAuth } from "../../contexts/AuthContext";
 import { T } from "../../theme";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD", minimumFractionDigits: 2 }).format(n);
@@ -84,6 +85,7 @@ const inputStyle: React.CSSProperties = {
 };
 
 export default function TeamBeneficePage() {
+  const { t } = useLanguage();
   const { profile } = useAuth();
   const teamId = profile?.team_id ?? null;
 
@@ -249,12 +251,12 @@ export default function TeamBeneficePage() {
   const marginPct = revenue > 0 ? (netProfit / revenue) * 100 : 0;
   const profitColor = netProfit >= 0 ? T.green : T.red;
 
-  const periodLabel = period === "month" ? "Ce mois" : period === "quarter" ? "Ce trimestre" : "Cette année";
+  const periodLabel = period === "month" ? t("team_benefice.this_month", "Ce mois") : period === "quarter" ? t("team_benefice.this_quarter", "Ce trimestre") : t("team_benefice.this_year", "Cette année");
 
   if (!teamId) {
     return (
       <div style={{ padding: "24px 28px", background: T.bg, minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
-        <div style={{ color: T.textMid, fontSize: 14 }}>Vous n'êtes pas assigné à une équipe.</div>
+        <div style={{ color: T.textMid, fontSize: 14 }}>{t("team_benefice.no_team", "Vous n'êtes pas assigné à une équipe.")}</div>
       </div>
     );
   }
@@ -262,7 +264,7 @@ export default function TeamBeneficePage() {
   if (loading) {
     return (
       <div style={{ padding: "24px 28px", background: T.bg, minHeight: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Inter, system-ui, sans-serif" }}>
-        <div style={{ fontSize: 14, color: T.textMid }}>Chargement des données de bénéfice...</div>
+        <div style={{ fontSize: 14, color: T.textMid }}>{t("team_benefice.loading", "Chargement des données de bénéfice...")}</div>
       </div>
     );
   }
@@ -271,12 +273,12 @@ export default function TeamBeneficePage() {
     <div style={{ padding: "24px 28px", background: T.bg, minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
         <div>
-          <h1 style={{ fontSize: 22, fontWeight: 800, color: T.text, margin: "0 0 4px" }}>Bénéfice Équipe</h1>
-          <div style={{ fontSize: 13, color: T.textMid }}>Analyse de rentabilité — commandes facturées par SCI</div>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: T.text, margin: "0 0 4px" }}>{t("team_benefice.title", "Bénéfice Équipe")}</h1>
+          <div style={{ fontSize: 13, color: T.textMid }}>{t("team_benefice.subtitle", "Analyse de rentabilité — commandes facturées par SCI")}</div>
         </div>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <div style={{ display: "flex", borderRadius: 8, overflow: "hidden", border: `1px solid ${T.border}` }}>
-            {([["month", "Mois"], ["quarter", "Trimestre"], ["year", "Année"]] as [typeof period, string][]).map(([k, l]) => (
+            {([["month", t("team_benefice.month", "Mois")], ["quarter", t("team_benefice.quarter", "Trimestre")], ["year", t("team_benefice.year", "Année")]] as [typeof period, string][]).map(([k, l]) => (
               <button key={k} onClick={() => setPeriod(k)} style={{
                 padding: "7px 14px", border: "none", cursor: "pointer",
                 background: period === k ? T.main : T.bgCard,
@@ -295,7 +297,7 @@ export default function TeamBeneficePage() {
             }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-            Ajouter dépense
+            {t("team_benefice.add_expense", "Ajouter dépense")}
           </button>
         </div>
       </div>
@@ -303,11 +305,11 @@ export default function TeamBeneficePage() {
       {/* KPI Row */}
       <div style={{ display: "flex", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
         {[
-          { label: "Revenus", value: fmt(revenue), color: T.main, bg: `${T.main}15`, sub: periodLabel },
-          { label: "Coûts produits", value: fmt(costs), color: T.red, bg: T.redBg, sub: "Prix coutants" },
-          { label: "Dépenses", value: fmt(totalExpenses), color: T.orange, bg: T.orangeBg, sub: `${expenses.length} entrée(s)` },
-          { label: "Commissions", value: fmt(totalCommissions), color: T.cyan, bg: T.cyanBg, sub: `${members.length} membres` },
-          { label: "Bénéfice net", value: fmt(netProfit), color: profitColor, bg: netProfit >= 0 ? T.greenBg : T.redBg, sub: fmtPct(marginPct) + " marge" },
+          { label: t("team_benefice.revenue", "Revenus"), value: fmt(revenue), color: T.main, bg: `${T.main}15`, sub: periodLabel },
+          { label: t("team_benefice.product_costs", "Coûts produits"), value: fmt(costs), color: T.red, bg: T.redBg, sub: t("team_benefice.cost_prices", "Prix coutants") },
+          { label: t("team_benefice.expenses", "Dépenses"), value: fmt(totalExpenses), color: T.orange, bg: T.orangeBg, sub: `${expenses.length} ${t("team_benefice.entries", "entrée(s)")}` },
+          { label: t("team_benefice.commissions", "Commissions"), value: fmt(totalCommissions), color: T.cyan, bg: T.cyanBg, sub: `${members.length} ${t("team_benefice.members", "membres")}` },
+          { label: t("team_benefice.net_profit", "Bénéfice net"), value: fmt(netProfit), color: profitColor, bg: netProfit >= 0 ? T.greenBg : T.redBg, sub: fmtPct(marginPct) + ` ${t("team_benefice.margin", "marge")}` },
         ].map(k => (
           <div key={k.label} style={{ flex: "1 1 160px", background: T.bgCard, borderRadius: 12, padding: "16px 18px", border: `1px solid ${T.border}` }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>{k.label}</div>
@@ -335,13 +337,13 @@ export default function TeamBeneficePage() {
               position: "absolute", inset: 0, display: "flex",
               flexDirection: "column", alignItems: "center", justifyContent: "center",
             }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5 }}>Marge nette</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5 }}>{t("team_benefice.net_margin", "Marge nette")}</div>
               <div style={{ fontSize: 28, fontWeight: 900, color: profitColor }}>{fmtPct(marginPct)}</div>
               <div style={{ fontSize: 12, fontWeight: 600, color: T.textMid }}>{fmt(netProfit)}</div>
             </div>
           </div>
           <div style={{ fontSize: 12, color: T.textMid, textAlign: "center" }}>
-            Revenu − Coûts − Dépenses − Commissions
+            {t("team_benefice.formula", "Revenu − Coûts − Dépenses − Commissions")}
           </div>
         </div>
       </div>
@@ -350,16 +352,16 @@ export default function TeamBeneficePage() {
       <div style={{ background: T.bgCard, borderRadius: 12, border: `1px solid ${T.border}`, overflow: "hidden", marginBottom: 24 }}>
         <div style={{ padding: "14px 20px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{ width: 3, height: 18, borderRadius: 2, background: T.cyan }} />
-          <span style={{ fontSize: 14, fontWeight: 800, color: T.text }}>Commissions par membre</span>
+          <span style={{ fontSize: 14, fontWeight: 800, color: T.text }}>{t("team_benefice.commissions_by_member", "Commissions par membre")}</span>
         </div>
         {memberCommissions.length === 0 ? (
-          <div style={{ padding: 24, textAlign: "center", color: T.textMid, fontSize: 13 }}>Aucun membre dans l'équipe.</div>
+          <div style={{ padding: 24, textAlign: "center", color: T.textMid, fontSize: 13 }}>{t("team_benefice.no_members", "Aucun membre dans l'équipe.")}</div>
         ) : (
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ background: T.bg }}>
-                  {["Vendeur", "Code", "Ventes facturées", "Taux", "Commission"].map(h => (
+                  {[t("team_benefice.seller", "Vendeur"), t("team_benefice.code", "Code"), t("team_benefice.billed_sales", "Ventes facturées"), t("team_benefice.rate", "Taux"), t("team_benefice.commission", "Commission")].map(h => (
                     <th key={h} style={{ padding: "10px 16px", textAlign: "left", fontSize: 10, fontWeight: 800, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, whiteSpace: "nowrap" }}>{h}</th>
                   ))}
                 </tr>
@@ -387,7 +389,7 @@ export default function TeamBeneficePage() {
                   );
                 })}
                 <tr style={{ borderTop: `2px solid ${T.border}`, background: T.bg }}>
-                  <td colSpan={3} style={{ padding: "11px 16px", fontWeight: 900, color: T.text, fontSize: 13 }}>TOTAL COMMISSIONS</td>
+                  <td colSpan={3} style={{ padding: "11px 16px", fontWeight: 900, color: T.text, fontSize: 13 }}>{t("team_benefice.total_commissions", "TOTAL COMMISSIONS")}</td>
                   <td style={{ padding: "11px 16px", color: T.textMid }}>—</td>
                   <td style={{ padding: "11px 16px", fontWeight: 900, color: T.cyan, fontSize: 14 }}>{fmt(totalCommissions)}</td>
                 </tr>
@@ -401,19 +403,19 @@ export default function TeamBeneficePage() {
       <div style={{ background: T.bgCard, borderRadius: 12, border: `1px solid ${T.border}`, overflow: "hidden" }}>
         <div style={{ padding: "14px 20px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{ width: 3, height: 18, borderRadius: 2, background: T.orange }} />
-          <span style={{ fontSize: 14, fontWeight: 800, color: T.text }}>Dépenses d'équipe</span>
+          <span style={{ fontSize: 14, fontWeight: 800, color: T.text }}>{t("team_benefice.team_expenses", "Dépenses d'équipe")}</span>
           <span style={{ background: T.orangeBg, color: T.orange, borderRadius: 20, padding: "1px 8px", fontSize: 11, fontWeight: 700, marginLeft: 4 }}>{expenses.length}</span>
         </div>
         {expenses.length === 0 ? (
           <div style={{ padding: 32, textAlign: "center", color: T.textMid, fontSize: 13 }}>
-            Aucune dépense enregistrée. Cliquez sur « Ajouter dépense » pour commencer.
+            {t("team_benefice.no_expenses", "Aucune dépense enregistrée. Cliquez sur « Ajouter dépense » pour commencer.")}
           </div>
         ) : (
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ background: T.bg }}>
-                  {["Date", "Libellé", "Catégorie", "Montant", "Notes", ""].map(h => (
+                  {[t("common.date", "Date"), t("team_benefice.label", "Libellé"), t("team_benefice.category", "Catégorie"), t("team_benefice.amount", "Montant"), "Notes", ""].map(h => (
                     <th key={h} style={{ padding: "10px 16px", textAlign: "left", fontSize: 10, fontWeight: 800, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5 }}>{h}</th>
                   ))}
                 </tr>
@@ -444,7 +446,7 @@ export default function TeamBeneficePage() {
               </tbody>
               <tfoot>
                 <tr style={{ borderTop: `2px solid ${T.border}`, background: T.bg }}>
-                  <td colSpan={3} style={{ padding: "11px 16px", fontWeight: 900, color: T.text, fontSize: 13 }}>TOTAL DÉPENSES</td>
+                  <td colSpan={3} style={{ padding: "11px 16px", fontWeight: 900, color: T.text, fontSize: 13 }}>{t("team_benefice.total_expenses", "TOTAL DÉPENSES")}</td>
                   <td style={{ padding: "11px 16px", fontWeight: 900, color: T.red, fontSize: 14 }}>{fmt(totalExpenses)}</td>
                   <td colSpan={2} />
                 </tr>
@@ -459,7 +461,7 @@ export default function TeamBeneficePage() {
         <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
           <div style={{ background: T.bgCard, borderRadius: 16, width: "100%", maxWidth: 480, boxShadow: "0 24px 64px rgba(0,0,0,0.35)", fontFamily: "Inter, system-ui, sans-serif" }}>
             <div style={{ padding: "18px 24px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h2 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: T.text }}>Ajouter une dépense</h2>
+              <h2 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: T.text }}>{t("team_benefice.add_expense_title", "Ajouter une dépense")}</h2>
               <button onClick={() => setShowExpenseModal(false)} style={{ background: "none", border: "none", cursor: "pointer", color: T.textMid, padding: 4 }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
               </button>
@@ -467,19 +469,19 @@ export default function TeamBeneficePage() {
             <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 14 }}>
               <div>
                 <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>
-                  Libellé <span style={{ color: T.red }}>*</span>
+                  {t("team_benefice.label", "Libellé")} <span style={{ color: T.red }}>*</span>
                 </label>
                 <input
                   style={inputStyle}
                   value={expenseForm.label}
                   onChange={e => setExpenseForm(f => ({ ...f, label: e.target.value }))}
-                  placeholder="Ex: Déplacement client..."
+                  placeholder={t("team_benefice.label_placeholder", "Ex: Déplacement client...")}
                 />
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                 <div>
                   <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>
-                    Montant ($) <span style={{ color: T.red }}>*</span>
+                    {t("team_benefice.amount_label", "Montant ($)")} <span style={{ color: T.red }}>*</span>
                   </label>
                   <input
                     type="number" step="0.01" min="0"
@@ -490,7 +492,7 @@ export default function TeamBeneficePage() {
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>Date</label>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>{t("common.date", "Date")}</label>
                   <input
                     type="date"
                     style={inputStyle}
@@ -500,7 +502,7 @@ export default function TeamBeneficePage() {
                 </div>
               </div>
               <div>
-                <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>Catégorie</label>
+                <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>{t("team_benefice.category", "Catégorie")}</label>
                 <select
                   style={inputStyle}
                   value={expenseForm.category}
@@ -515,7 +517,7 @@ export default function TeamBeneficePage() {
                   style={{ ...inputStyle, minHeight: 70, resize: "vertical" }}
                   value={expenseForm.notes}
                   onChange={e => setExpenseForm(f => ({ ...f, notes: e.target.value }))}
-                  placeholder="Notes optionnelles..."
+                  placeholder={t("team_benefice.notes_placeholder", "Notes optionnelles...")}
                 />
               </div>
             </div>
@@ -524,7 +526,7 @@ export default function TeamBeneficePage() {
                 onClick={() => setShowExpenseModal(false)}
                 style={{ background: T.bg, color: T.textMid, border: `1px solid ${T.border}`, borderRadius: 8, padding: "9px 20px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
               >
-                Annuler
+                {t("common.cancel", "Annuler")}
               </button>
               <button
                 onClick={handleSaveExpense}
@@ -539,7 +541,7 @@ export default function TeamBeneficePage() {
                 }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>
-                {savingExpense ? "Sauvegarde..." : "Enregistrer"}
+                {savingExpense ? t("common.saving", "Sauvegarde...") : t("common.save", "Enregistrer")}
               </button>
             </div>
           </div>

@@ -3,6 +3,7 @@ import { Team, TeamMember } from "./teamTypes";
 import { fmtCurrency, fmtPct, timeAgo } from "./teamUtils";
 import { supabase } from "../../supabaseClient";
 import { T } from "../../theme";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 function Avatar({ member, size = 44 }: { member: TeamMember; size?: number }) {
   return (
@@ -34,6 +35,7 @@ interface Props {
 }
 
 export default function TeamMembersTab({ team, members, currentMemberId, isLeader, onMembersChange }: Props) {
+  const { t } = useLanguage();
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [codeActive, setCodeActive] = useState(team.code_active);
@@ -64,7 +66,7 @@ export default function TeamMembersTab({ team, members, currentMemberId, isLeade
           marginBottom: 20, display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap",
         }}>
           <div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, marginBottom: 4 }}>Code d'invitation</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, marginBottom: 4 }}>{t("team_members.invite_code", "Code d'invitation")}</div>
             <div style={{ fontSize: 20, fontWeight: 900, fontFamily: "monospace", letterSpacing: 3, color: T.main }}>
               {team.join_code}
             </div>
@@ -77,10 +79,10 @@ export default function TeamMembersTab({ team, members, currentMemberId, isLeade
               cursor: "pointer", fontFamily: "inherit", fontSize: 12, fontWeight: 700, transition: "all 0.2s",
             }}
           >
-            {copied ? "✅ Copié !" : "Copier le code"}
+            {copied ? t("team_members.copied", "Copié !") : t("team_members.copy_code", "Copier le code")}
           </button>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: "auto" }}>
-            <span style={{ fontSize: 12, color: T.textLight }}>Code actif</span>
+            <span style={{ fontSize: 12, color: T.textLight }}>{t("team_members.code_active", "Code actif")}</span>
             <div
               onClick={handleToggleCode}
               style={{
@@ -116,11 +118,11 @@ export default function TeamMembersTab({ team, members, currentMemberId, isLeade
                 <span style={{ fontSize: 14, fontWeight: 800, color: T.text }}>{member.agent_name}</span>
                 {member.role === "leader" && (
                   <span style={{ fontSize: 10, fontWeight: 700, background: "#fef3c7", color: "#92400e", borderRadius: 4, padding: "1px 6px" }}>
-                    👑 Chef d'équipe
+                    {t("team_members.team_leader", "Chef d'équipe")}
                   </span>
                 )}
                 {member.id === currentMemberId && (
-                  <span style={{ fontSize: 10, color: T.textLight }}>(vous)</span>
+                  <span style={{ fontSize: 10, color: T.textLight }}>({t("common.you", "vous")})</span>
                 )}
               </div>
               <div style={{ display: "flex", gap: 16, fontSize: 11, color: T.textLight, flexWrap: "wrap" }}>
@@ -132,11 +134,11 @@ export default function TeamMembersTab({ team, members, currentMemberId, isLeade
                 {member.is_online ? (
                   <span style={{ fontSize: 10, color: T.green, fontWeight: 700, display: "flex", alignItems: "center", gap: 4 }}>
                     <span style={{ width: 7, height: 7, borderRadius: "50%", background: T.green, display: "inline-block", boxShadow: `0 0 0 3px ${T.green}30`, animation: "pulse 1.5s infinite" }} />
-                    En ligne
+                    {t("team_members.online", "En ligne")}
                   </span>
                 ) : (
                   <span style={{ fontSize: 10, color: T.textLight }}>
-                    ⚫ Hors ligne · Dernière connexion {timeAgo(member.last_seen_at)}
+                    {t("team_members.offline", "Hors ligne")} · {t("team_members.last_seen", "Dernière connexion")} {timeAgo(member.last_seen_at)}
                   </span>
                 )}
               </div>
@@ -144,10 +146,10 @@ export default function TeamMembersTab({ team, members, currentMemberId, isLeade
 
             <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
               {[
-                { label: "Leads actifs", value: String(member.leads_active ?? 0) },
-                { label: "Ventes MTD", value: fmtCurrency(member.sales_mtd ?? 0) },
-                { label: "Deals", value: String(member.deals_closed ?? 0) },
-                { label: "Conversion", value: fmtPct(member.conversion_rate ?? 0) },
+                { label: t("team_members.active_leads", "Leads actifs"), value: String(member.leads_active ?? 0) },
+                { label: t("team_members.sales_mtd", "Ventes MTD"), value: fmtCurrency(member.sales_mtd ?? 0) },
+                { label: t("team_members.deals", "Deals"), value: String(member.deals_closed ?? 0) },
+                { label: t("team_members.conversion", "Conversion"), value: fmtPct(member.conversion_rate ?? 0) },
               ].map(({ label, value }) => (
                 <div key={label} style={{ textAlign: "center" }}>
                   <div style={{ fontSize: 14, fontWeight: 900, color: T.text }}>{value}</div>
@@ -160,16 +162,16 @@ export default function TeamMembersTab({ team, members, currentMemberId, isLeade
               <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
                 {confirmRemove === member.id ? (
                   <>
-                    <span style={{ fontSize: 11, color: T.red, fontWeight: 600 }}>Retirer ?</span>
-                    <button onClick={() => handleRemove(member.id)} style={{ padding: "5px 10px", borderRadius: 6, border: "none", background: T.red, color: "#fff", cursor: "pointer", fontFamily: "inherit", fontSize: 11, fontWeight: 700 }}>Oui</button>
-                    <button onClick={() => setConfirmRemove(null)} style={{ padding: "5px 10px", borderRadius: 6, border: `1px solid ${T.border}`, background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 11 }}>Non</button>
+                    <span style={{ fontSize: 11, color: T.red, fontWeight: 600 }}>{t("team_members.remove_confirm", "Retirer ?")} </span>
+                    <button onClick={() => handleRemove(member.id)} style={{ padding: "5px 10px", borderRadius: 6, border: "none", background: T.red, color: "#fff", cursor: "pointer", fontFamily: "inherit", fontSize: 11, fontWeight: 700 }}>{t("common.yes", "Oui")}</button>
+                    <button onClick={() => setConfirmRemove(null)} style={{ padding: "5px 10px", borderRadius: 6, border: `1px solid ${T.border}`, background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 11 }}>{t("common.no", "Non")}</button>
                   </>
                 ) : (
                   <button
                     onClick={() => setConfirmRemove(member.id)}
                     style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${T.red}40`, background: T.bgCard, color: T.red, cursor: "pointer", fontFamily: "inherit", fontSize: 11, fontWeight: 600 }}
                   >
-                    Retirer
+                    {t("team_members.remove", "Retirer")}
                   </button>
                 )}
               </div>

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { InvoiceDoc, T, fmt, fmtDate } from "./toInvoiceTypes";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   docs: InvoiceDoc[];
@@ -24,6 +25,7 @@ function PaidTable({ docs, onDocClick, isGodAdmin, onReopenDoc }: {
   isGodAdmin?: boolean;
   onReopenDoc?: (doc: InvoiceDoc) => void;
 }) {
+  const { t } = useLanguage();
   const thStyle: React.CSSProperties = {
     textAlign: "left", fontSize: 10, fontWeight: 700, color: T.textMid,
     textTransform: "uppercase", letterSpacing: 0.6, padding: "8px 12px 10px",
@@ -78,7 +80,7 @@ function PaidTable({ docs, onDocClick, isGodAdmin, onReopenDoc }: {
                         cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap",
                       }}
                     >
-                      Rouvrir
+                      {t("paid.reopen")}
                     </button>
                   </td>
                 )}
@@ -92,6 +94,7 @@ function PaidTable({ docs, onDocClick, isGodAdmin, onReopenDoc }: {
 }
 
 export default function TabPaid({ docs, onDocClick, isGodAdmin, onReopenDoc }: Props) {
+  const { t } = useLanguage();
   const [filterClient, setFilterClient] = useState("");
   const [filterMonth, setFilterMonth] = useState("");
 
@@ -133,8 +136,8 @@ export default function TabPaid({ docs, onDocClick, isGodAdmin, onReopenDoc }: P
   if (paidDocs.length === 0) {
     return (
       <div style={{ background: T.card, borderRadius: 12, border: `1px solid ${T.border}`, padding: 40, textAlign: "center" }}>
-        <div style={{ fontSize: 15, fontWeight: 700, color: T.textMid, marginBottom: 4 }}>Aucune facture payee</div>
-        <div style={{ fontSize: 13, color: T.textLight }}>Les factures completement payees apparaitront ici.</div>
+        <div style={{ fontSize: 15, fontWeight: 700, color: T.textMid, marginBottom: 4 }}>{t("paid.no_invoices")}</div>
+        <div style={{ fontSize: 13, color: T.textLight }}>{t("paid.will_appear")}</div>
       </div>
     );
   }
@@ -146,43 +149,43 @@ export default function TabPaid({ docs, onDocClick, isGodAdmin, onReopenDoc }: P
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
         </div>
         <div>
-          <div style={{ fontSize: 14, fontWeight: 800, color: "#166534" }}>Section fermee — Factures payees</div>
+          <div style={{ fontSize: 14, fontWeight: 800, color: "#166534" }}>{t("paid.closed_section")}</div>
           <div style={{ fontSize: 12, color: "#15803d", marginTop: 2 }}>
-            Ces factures sont completement payees et fermees. {!isGodAdmin && "Seul un administrateur peut les rouvrir."}
+            {t("paid.fully_paid_info")} {!isGodAdmin && t("paid.admin_only")}
           </div>
         </div>
         <div style={{ marginLeft: "auto", textAlign: "right" }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: "#15803d", textTransform: "uppercase", letterSpacing: 0.5 }}>Total paye</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "#15803d", textTransform: "uppercase", letterSpacing: 0.5 }}>{t("paid.total_paid")}</div>
           <div style={{ fontSize: 20, fontWeight: 800, color: "#166534" }}>{fmt(totalPaid)}</div>
-          <div style={{ fontSize: 11, color: "#15803d" }}>{filtered.length} facture{filtered.length !== 1 ? "s" : ""}</div>
+          <div style={{ fontSize: 11, color: "#15803d" }}>{filtered.length} {t("paid.invoice_count")}</div>
         </div>
       </div>
 
       <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-        <input value={filterClient} onChange={e => setFilterClient(e.target.value)} placeholder="Filtrer par client..." style={inputStyle} />
+        <input value={filterClient} onChange={e => setFilterClient(e.target.value)} placeholder={t("paid.filter_client")} style={inputStyle} />
         <input type="month" value={filterMonth} onChange={e => setFilterMonth(e.target.value)} style={inputStyle} />
         <button onClick={exportCSV} style={{ background: T.cardAlt, color: T.text, border: `1px solid ${T.border}`, borderRadius: 7, padding: "7px 14px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", marginLeft: "auto" }}>
-          Export CSV
+          {t("paid.export_csv")}
         </button>
       </div>
 
       {orderDocs.length > 0 && (
         <div>
-          <SectionHeader label="Commandes" count={orderDocs.length} color={T.green} />
+          <SectionHeader label={t("paid.orders")} count={orderDocs.length} color={T.green} />
           <PaidTable docs={orderDocs} onDocClick={onDocClick} isGodAdmin={isGodAdmin} onReopenDoc={onReopenDoc} />
         </div>
       )}
 
       {pickupDocs.length > 0 && (
         <div>
-          <SectionHeader label="Pickup Tickets" count={pickupDocs.length} color={T.blue} />
+          <SectionHeader label={t("paid.pickup_tickets")} count={pickupDocs.length} color={T.blue} />
           <PaidTable docs={pickupDocs} onDocClick={onDocClick} isGodAdmin={isGodAdmin} onReopenDoc={onReopenDoc} />
         </div>
       )}
 
       {filtered.length === 0 && (
         <div style={{ background: T.card, borderRadius: 12, border: `1px solid ${T.border}`, padding: 32, textAlign: "center" }}>
-          <div style={{ fontSize: 13, color: T.textMid }}>Aucun resultat pour ce filtre.</div>
+          <div style={{ fontSize: 13, color: T.textMid }}>{t("paid.no_results")}</div>
         </div>
       )}
     </div>

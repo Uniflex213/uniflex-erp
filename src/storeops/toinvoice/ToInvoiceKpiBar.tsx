@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { InvoiceDoc, T, fmt, fmtDate, daysSince } from "./toInvoiceTypes";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   docs: InvoiceDoc[];
@@ -39,6 +40,7 @@ function KpiCard({
 }
 
 export default function ToInvoiceKpiBar({ docs }: Props) {
+  const { t } = useLanguage();
   const [modal, setModal] = useState<KpiModalData | null>(null);
 
   const toSend = docs.filter(d => d.billing_status === "unbilled");
@@ -72,55 +74,55 @@ export default function ToInvoiceKpiBar({ docs }: Props) {
     <>
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 20 }}>
         <KpiCard
-          label="A envoyer" value={String(toSend.length)}
+          label={t("kpi.to_send")} value={String(toSend.length)}
           sub={toSend.length > 0 ? fmt(toSendVal) : undefined}
           warn={toSend.length > 0}
-          onClick={toSend.length > 0 ? () => setModal({ title: "Documents a envoyer a SCI", rows: toSend, columns: ["document", "client", "valeur", "age"] }) : undefined}
+          onClick={toSend.length > 0 ? () => setModal({ title: t("kpi.modal_docs_to_send"), rows: toSend, columns: ["document", "client", "valeur", "age"] }) : undefined}
         />
         <KpiCard
-          label="En attente SCI" value={String(sent.length)}
+          label={t("kpi.waiting_sci")} value={String(sent.length)}
           sub={sent.length > 0 ? fmt(sentVal) : undefined}
-          onClick={sent.length > 0 ? () => setModal({ title: "Documents envoyes — en attente de facturation", rows: sent, columns: ["document", "client", "valeur", "envoye"] }) : undefined}
+          onClick={sent.length > 0 ? () => setModal({ title: t("kpi.modal_docs_waiting"), rows: sent, columns: ["document", "client", "valeur", "envoye"] }) : undefined}
         />
         <KpiCard
-          label="Factures ce mois" value={String(billedThisMonth.length)}
+          label={t("kpi.invoices_month")} value={String(billedThisMonth.length)}
           sub={billedThisMonth.length > 0 ? fmt(billedVal) : undefined}
           accent
-          onClick={billedThisMonth.length > 0 ? () => setModal({ title: "Factures ce mois", rows: billedThisMonth, columns: ["document", "client", "valeur", "facture"] }) : undefined}
+          onClick={billedThisMonth.length > 0 ? () => setModal({ title: t("kpi.modal_invoices_month"), rows: billedThisMonth, columns: ["document", "client", "valeur", "facture"] }) : undefined}
         />
         <KpiCard
-          label="Solde impaye" value={fmt(unpaidVal)}
-          sub={`${unpaidBilled.length} facture${unpaidBilled.length !== 1 ? "s" : ""}`}
+          label={t("kpi.unpaid_balance")} value={fmt(unpaidVal)}
+          sub={`${unpaidBilled.length} ${unpaidBilled.length !== 1 ? t("kpi.invoices_s") : t("kpi.invoice_s")}`}
           warn={unpaidVal > 0}
-          onClick={unpaidBilled.length > 0 ? () => setModal({ title: "Factures impayees", rows: unpaidBilled, columns: ["document", "client", "valeur", "facture"] }) : undefined}
+          onClick={unpaidBilled.length > 0 ? () => setModal({ title: t("kpi.modal_unpaid"), rows: unpaidBilled, columns: ["document", "client", "valeur", "facture"] }) : undefined}
         />
         <KpiCard
-          label="Partiellement paye" value={String(partialDocs.length)}
-          sub={partialDocs.length > 0 ? `${partialDocs.reduce((a, d) => a + (d.paid_amount || 0), 0).toFixed(0)}$ recu` : undefined}
+          label={t("kpi.partially_paid")} value={String(partialDocs.length)}
+          sub={partialDocs.length > 0 ? `${partialDocs.reduce((a, d) => a + (d.paid_amount || 0), 0).toFixed(0)}$ ${t("kpi.received")}` : undefined}
           accent={partialDocs.length > 0}
-          onClick={partialDocs.length > 0 ? () => setModal({ title: "Factures partiellement payees", rows: partialDocs, columns: ["document", "client", "valeur", "facture"] }) : undefined}
+          onClick={partialDocs.length > 0 ? () => setModal({ title: t("kpi.modal_partial"), rows: partialDocs, columns: ["document", "client", "valeur", "facture"] }) : undefined}
         />
         <KpiCard
-          label="Total paye" value={fmt(paidVal)}
-          sub={`${paidDocs.length} facture${paidDocs.length !== 1 ? "s" : ""} fermee${paidDocs.length !== 1 ? "s" : ""}`}
+          label={t("kpi.total_paid")} value={fmt(paidVal)}
+          sub={`${paidDocs.length} ${paidDocs.length !== 1 ? t("kpi.invoices_s") : t("kpi.invoice_s")} ${t("kpi.closed")}`}
           success
         />
         <KpiCard
-          label="Delai moy." value={avgDelay > 0 ? `${avgDelay}j` : "—"}
-          sub="entre envoi et facturation"
+          label={t("kpi.avg_delay")} value={avgDelay > 0 ? `${avgDelay}j` : "—"}
+          sub={t("kpi.between_send_bill")}
         />
         <KpiCard
-          label="En retard (7j+)" value={String(late.length)}
+          label={t("kpi.late_7d")} value={String(late.length)}
           warn={late.length > 0}
-          sub="envoyes sans reponse"
-          onClick={late.length > 0 ? () => setModal({ title: "Documents en retard (+7 jours sans reponse)", rows: late, columns: ["document", "client", "valeur", "envoye"] }) : undefined}
+          sub={t("kpi.sent_no_response")}
+          onClick={late.length > 0 ? () => setModal({ title: t("kpi.modal_late"), rows: late, columns: ["document", "client", "valeur", "envoye"] }) : undefined}
         />
         {litigeDocs.length > 0 && (
           <KpiCard
-            label="En litige" value={String(litigeDocs.length)}
+            label={t("kpi.in_dispute")} value={String(litigeDocs.length)}
             warn
             sub={fmt(litigeDocs.reduce((a, d) => a + d.value, 0))}
-            onClick={() => setModal({ title: "Factures en litige", rows: litigeDocs, columns: ["document", "client", "valeur", "facture"] })}
+            onClick={() => setModal({ title: t("kpi.modal_dispute"), rows: litigeDocs, columns: ["document", "client", "valeur", "facture"] })}
           />
         )}
       </div>

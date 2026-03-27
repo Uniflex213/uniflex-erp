@@ -1,5 +1,6 @@
 import React from "react";
 import { InvoiceDoc, T, fmt, fmtDate } from "./toInvoiceTypes";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   docs: InvoiceDoc[];
@@ -21,8 +22,9 @@ function BarChart({ data }: { data: { label: string; value: number; color?: stri
 }
 
 function PieChart({ slices }: { slices: { label: string; value: number; color: string }[] }) {
+  const { t } = useLanguage();
   const total = slices.reduce((a, s) => a + s.value, 0);
-  if (total === 0) return <div style={{ fontSize: 13, color: T.textMid, padding: 20 }}>Aucune donnée</div>;
+  if (total === 0) return <div style={{ fontSize: 13, color: T.textMid, padding: 20 }}>{t("analytics.no_data")}</div>;
   let cumulative = 0;
   const paths = slices.map(s => {
     const pct = s.value / total;
@@ -66,6 +68,7 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 }
 
 export default function TabAnalytics({ docs }: Props) {
+  const { t } = useLanguage();
   const now = new Date();
 
   const last6Months = Array.from({ length: 6 }, (_, i) => {
@@ -122,49 +125,49 @@ export default function TabAnalytics({ docs }: Props) {
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
       <div style={{ gridColumn: "1 / -1" }}>
-        <Card title="Volume facturé par mois (6 derniers mois)">
+        <Card title={t("analytics.billed_volume_6m")}>
           <BarChart data={monthlyBilled} />
         </Card>
       </div>
 
-      <Card title="Délais moyens">
+      <Card title={t("analytics.avg_delays")}>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: `1px solid ${T.border}` }}>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Récupération → Envoi SCI</div>
-              <div style={{ fontSize: 11, color: T.textLight }}>Est-ce qu'on traîne avant d'envoyer ?</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{t("analytics.pickup_to_send")}</div>
+              <div style={{ fontSize: 11, color: T.textLight }}>{t("analytics.slow_sending")}</div>
             </div>
             <div style={{ fontSize: 22, fontWeight: 800, color: avgSendDelay > 3 ? T.orange : T.green }}>{avgSendDelay > 0 ? `${avgSendDelay}j` : "—"}</div>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0" }}>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Envoi SCI → Facturation confirmée</div>
-              <div style={{ fontSize: 11, color: T.textLight }}>Délai de traitement par SCI</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{t("analytics.send_to_billed")}</div>
+              <div style={{ fontSize: 11, color: T.textLight }}>{t("analytics.sci_processing")}</div>
             </div>
             <div style={{ fontSize: 22, fontWeight: 800, color: avgBillDelay > 7 ? T.orange : T.green }}>{avgBillDelay > 0 ? `${avgBillDelay}j` : "—"}</div>
           </div>
         </div>
       </Card>
 
-      <Card title="Répartition Pickups vs Commandes">
+      <Card title={t("analytics.pickup_vs_orders")}>
         <PieChart slices={[
-          { label: "Pickup tickets", value: pickupCount, color: T.blue },
-          { label: "Commandes", value: orderCount, color: T.green },
+          { label: t("analytics.pickup_tickets"), value: pickupCount, color: T.blue },
+          { label: t("analytics.orders"), value: orderCount, color: T.green },
         ]} />
       </Card>
 
-      <Card title="Valeur non-facturée (backlog)">
+      <Card title={t("analytics.unbilled_backlog")}>
         <div style={{ textAlign: "center", padding: "16px 0" }}>
           <div style={{ fontSize: 32, fontWeight: 800, color: backlog > 0 ? T.red : T.green }}>{fmt(backlog)}</div>
           <div style={{ fontSize: 12, color: T.textMid, marginTop: 6 }}>
-            {docs.filter(d => d.billing_status !== "billed_by_sci").length} document{docs.filter(d => d.billing_status !== "billed_by_sci").length !== 1 ? "s" : ""} non-facturés
+            {docs.filter(d => d.billing_status !== "billed_by_sci").length} {t("analytics.unbilled_docs")}
           </div>
         </div>
       </Card>
 
-      <Card title="Top clients — valeur facturée">
+      <Card title={t("analytics.top_clients")}>
         {clientTotals.length === 0 ? (
-          <div style={{ fontSize: 13, color: T.textMid }}>Aucune donnée disponible.</div>
+          <div style={{ fontSize: 13, color: T.textMid }}>{t("analytics.no_data_available")}</div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {clientTotals.map(([name, val], i) => {
@@ -188,11 +191,11 @@ export default function TabAnalytics({ docs }: Props) {
 
       {docsWithEcart.length > 0 && (
         <div style={{ gridColumn: "1 / -1" }}>
-          <Card title={`Documents avec écart de montant (${docsWithEcart.length})`}>
+          <Card title={`${t("analytics.ecart_docs")} (${docsWithEcart.length})`}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr>
-                  {["# Document", "Client", "Valeur doc.", "Montant SCI", "Écart", "Date facturé"].map(h => (
+                  {[t("analytics.doc_number"), t("analytics.client"), t("analytics.doc_value"), t("analytics.sci_amount"), t("analytics.ecart"), t("analytics.billed_date")].map(h => (
                     <th key={h} style={{ textAlign: "left", fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.6, padding: "6px 10px 8px", borderBottom: `1px solid ${T.border}` }}>{h}</th>
                   ))}
                 </tr>

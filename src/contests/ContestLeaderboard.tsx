@@ -2,6 +2,7 @@ import React from 'react';
 import { Trophy } from 'lucide-react';
 import { ContestParticipant } from './contestTypes';
 import { T } from '../theme';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const rankColors = ['#ffd700', '#c0c0c0', '#cd7f32'];
 
@@ -12,12 +13,13 @@ interface Props {
 }
 
 export default function ContestLeaderboard({ participants, highlightUserId, compact }: Props) {
+  const { t } = useLanguage();
   const sorted = [...participants].sort((a, b) => b.total_points - a.total_points);
 
   if (sorted.length === 0) {
     return (
       <div style={{ textAlign: 'center', padding: 24, color: T.textLight, fontSize: 13 }}>
-        Aucun participant inscrit
+        {t("contest_leaderboard.no_participants", "Aucun participant inscrit")}
       </div>
     );
   }
@@ -25,7 +27,7 @@ export default function ContestLeaderboard({ participants, highlightUserId, comp
   return (
     <div>
       {sorted.map((p, i) => {
-        const name = p.profile?.full_name || 'Utilisateur';
+        const name = p.profile?.full_name || t("common.user", "Utilisateur");
         const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
         const isHighlighted = p.user_id === highlightUserId;
 
@@ -83,7 +85,7 @@ export default function ContestLeaderboard({ participants, highlightUserId, comp
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: compact ? 12 : 13, fontWeight: isHighlighted ? 700 : 500, color: T.text }}>
                 {name}
-                {isHighlighted && <span style={{ fontSize: 10, color: T.main, marginLeft: 4 }}>(vous)</span>}
+                {isHighlighted && <span style={{ fontSize: 10, color: T.main, marginLeft: 4 }}>({t("common.you", "vous")})</span>}
               </div>
             </div>
 

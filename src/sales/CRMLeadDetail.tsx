@@ -14,6 +14,7 @@ import { useAuth } from "../contexts/AuthContext";
 import ClientForm from "../clients/ClientForm";
 import { Client, EMPTY_CLIENT } from "../clients/clientTypes";
 import { MOCK_PRICELISTS } from "../pricelist/pricelistTypes";
+import { useLanguage } from "../i18n/LanguageContext";
 import { T } from "../theme";
 const fmtDateTime = (iso: string) => new Date(iso).toLocaleDateString("fr-CA", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 const daysBetween = (a: string, b: string) => Math.round((new Date(b).getTime() - new Date(a).getTime()) / 86400000);
@@ -28,6 +29,7 @@ interface Props {
 }
 
 export default function CRMLeadDetail({ lead, onBack, onUpdate, onNavigate, leadSamples = [], onAddSample }: Props) {
+  const { t } = useLanguage();
   const { profile, realProfile } = useAuth();
   const ownerId = realProfile?.id ?? profile?.id ?? null;
   const { addActivity: persistActivity, addReminder: persistReminder, updateReminder: persistUpdateReminder } = useApp();
@@ -168,7 +170,7 @@ export default function CRMLeadDetail({ lead, onBack, onUpdate, onNavigate, lead
           }}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-          Retour au pipeline
+          {t("crm.back_to_pipeline", "Retour au pipeline")}
         </button>
 
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
@@ -186,21 +188,21 @@ export default function CRMLeadDetail({ lead, onBack, onUpdate, onNavigate, lead
               }}>
                 {lead.assigned_agent_initials}
               </div>
-              <span style={{ fontSize: 13, color: T.textMid }}>Assigné à <strong style={{ color: T.text }}>{lead.assigned_agent_name}</strong></span>
+              <span style={{ fontSize: 13, color: T.textMid }}>{t("crm.assigned_to_label", "Assigné à")} <strong style={{ color: T.text }}>{lead.assigned_agent_name}</strong></span>
             </div>
           </div>
 
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <ActionBtn label="📦 Demander un Sample" color="#d4a017" textColor="#000" onClick={() => setShowSampleRequest(true)} />
+            <ActionBtn label={`📦 ${t("crm.request_sample", "Demander un Sample")}`} color="#d4a017" textColor="#000" onClick={() => setShowSampleRequest(true)} />
             {lead.stage === "Fermé Gagné" && !lead.is_converted && (
-              <ActionBtn label="Convertir en client" color={T.green} onClick={() => setShowConvertModal(true)} />
+              <ActionBtn label={t("crm.convert_to_client", "Convertir en client")} color={T.green} onClick={() => setShowConvertModal(true)} />
             )}
             {lead.is_converted && (
               <span style={{ fontSize: 12, fontWeight: 700, background: "rgba(34,197,94,0.15)", color: T.green, padding: "8px 14px", borderRadius: 8, display: "flex", alignItems: "center", gap: 6 }}>
-                Converti en client
+                {t("crm.converted_to_client", "Converti en client")}
               </span>
             )}
-            <ActionBtn label="Créer une pricelist" color={T.main} onClick={() => onNavigate?.("pricelist", {
+            <ActionBtn label={t("crm.create_pricelist", "Créer une pricelist")} color={T.main} onClick={() => onNavigate?.("pricelist", {
               companyName: lead.company_name,
               address: lead.address,
               contactName: `${lead.contact_first_name} ${lead.contact_last_name}`,
@@ -209,7 +211,7 @@ export default function CRMLeadDetail({ lead, onBack, onUpdate, onNavigate, lead
               destination: lead.region,
               leadId: lead.id,
             })} />
-            <ActionBtn label="Passer une commande" color="#0891b2" onClick={() => onNavigate?.("orders", {
+            <ActionBtn label={t("crm.place_order", "Passer une commande")} color="#0891b2" onClick={() => onNavigate?.("orders", {
               companyName: lead.company_name,
               address: lead.address,
               contactName: `${lead.contact_first_name} ${lead.contact_last_name}`,
@@ -223,19 +225,19 @@ export default function CRMLeadDetail({ lead, onBack, onUpdate, onNavigate, lead
       </div>
 
       <div style={{ display: "flex", gap: 0, padding: "0 24px", background: T.card, borderBottom: `1px solid ${T.border}` }}>
-        {(["info", "timeline", "samples", "reminders", "files", "notes"] as const).map(t => (
+        {(["info", "timeline", "samples", "reminders", "files", "notes"] as const).map(tb => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
+            key={tb}
+            onClick={() => setTab(tb)}
             style={{
               padding: "12px 18px", border: "none", background: "none", cursor: "pointer",
-              fontSize: 13, fontWeight: tab === t ? 700 : 400,
-              color: tab === t ? T.main : T.textMid,
-              borderBottom: tab === t ? `2px solid ${T.main}` : "2px solid transparent",
+              fontSize: 13, fontWeight: tab === tb ? 700 : 400,
+              color: tab === tb ? T.main : T.textMid,
+              borderBottom: tab === tb ? `2px solid ${T.main}` : "2px solid transparent",
               fontFamily: "inherit", transition: "all 0.15s",
             }}
           >
-            {t === "info" ? "Informations" : t === "timeline" ? `Timeline (${activities.length})` : t === "samples" ? `Samples (${leadSamples.length})` : t === "reminders" ? `Reminders (${overdueReminders.length > 0 ? `🔴 ${overdueReminders.length} en retard` : reminders.filter(r => !r.completed).length})` : t === "files" ? `Fichiers (${files.length})` : "Notes"}
+            {tb === "info" ? t("crm.tab_info", "Informations") : tb === "timeline" ? `Timeline (${activities.length})` : tb === "samples" ? `Samples (${leadSamples.length})` : tb === "reminders" ? `Reminders (${overdueReminders.length > 0 ? `🔴 ${overdueReminders.length} ${t("crm.overdue_label", "en retard")}` : reminders.filter(r => !r.completed).length})` : tb === "files" ? `${t("crm.files_tab", "Fichiers")} (${files.length})` : "Notes"}
           </button>
         ))}
       </div>
@@ -261,12 +263,12 @@ export default function CRMLeadDetail({ lead, onBack, onUpdate, onNavigate, lead
         {tab === "timeline" && (
           <div style={{ maxWidth: 760 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: T.text }}>Historique des activités</h3>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: T.text }}>{t("crm.activity_history", "Historique des activités")}</h3>
               <button
                 onClick={() => setShowAddActivity(true)}
                 style={{ padding: "9px 18px", borderRadius: 8, border: "none", background: T.main, color: "#fff", cursor: "pointer", fontSize: 13, fontWeight: 600, fontFamily: "inherit" }}
               >
-                + Ajouter une activité
+                + {t("crm.add_activity", "Ajouter une activité")}
               </button>
             </div>
             <div style={{ position: "relative" }}>
@@ -279,7 +281,7 @@ export default function CRMLeadDetail({ lead, onBack, onUpdate, onNavigate, lead
                   onClick={() => setShowAllActivities(true)}
                   style={{ marginLeft: 48, fontSize: 13, color: T.main, background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}
                 >
-                  Voir tout l'historique ({activities.length} activités)
+                  {t("crm.view_all_history", "Voir tout l'historique")} ({activities.length} {t("crm.activities_label", "activités")})
                 </button>
               )}
             </div>
@@ -289,59 +291,59 @@ export default function CRMLeadDetail({ lead, onBack, onUpdate, onNavigate, lead
         {tab === "reminders" && (
           <div style={{ maxWidth: 680 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: T.text }}>Reminders & Tâches</h3>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: T.text }}>{t("crm.reminders_tasks", "Reminders & Tâches")}</h3>
               <button
                 onClick={() => setShowAddReminder(true)}
                 style={{ padding: "9px 18px", borderRadius: 8, border: "none", background: T.main, color: "#fff", cursor: "pointer", fontSize: 13, fontWeight: 600, fontFamily: "inherit" }}
               >
-                + Nouveau rappel
+                + {t("crm.new_reminder", "Nouveau rappel")}
               </button>
             </div>
 
             {overdueReminders.length > 0 && (
-              <ReminderGroup title="En retard" reminders={overdueReminders} variant="overdue" onComplete={completeReminder} onDelete={deleteReminder} />
+              <ReminderGroup title={t("crm.overdue", "En retard")} reminders={overdueReminders} variant="overdue" onComplete={completeReminder} onDelete={deleteReminder} />
             )}
             {todayReminders.length > 0 && (
-              <ReminderGroup title="Aujourd'hui" reminders={todayReminders} variant="today" onComplete={completeReminder} onDelete={deleteReminder} />
+              <ReminderGroup title={t("crm.today", "Aujourd'hui")} reminders={todayReminders} variant="today" onComplete={completeReminder} onDelete={deleteReminder} />
             )}
             {upcomingReminders.length > 0 && (
-              <ReminderGroup title="À venir" reminders={upcomingReminders} variant="upcoming" onComplete={completeReminder} onDelete={deleteReminder} />
+              <ReminderGroup title={t("crm.upcoming", "À venir")} reminders={upcomingReminders} variant="upcoming" onComplete={completeReminder} onDelete={deleteReminder} />
             )}
             {completedReminders.length > 0 && (
-              <ReminderGroup title="Complétés" reminders={completedReminders} variant="completed" onComplete={completeReminder} onDelete={deleteReminder} />
+              <ReminderGroup title={t("crm.completed", "Complétés")} reminders={completedReminders} variant="completed" onComplete={completeReminder} onDelete={deleteReminder} />
             )}
             {reminders.length === 0 && (
-              <div style={{ textAlign: "center", padding: 40, color: T.textLight }}>Aucun rappel pour ce lead.</div>
+              <div style={{ textAlign: "center", padding: 40, color: T.textLight }}>{t("crm.no_reminders", "Aucun rappel pour ce lead.")}</div>
             )}
           </div>
         )}
 
         {tab === "files" && (
           <div style={{ maxWidth: 680 }}>
-            <h3 style={{ margin: "0 0 20px", fontSize: 16, fontWeight: 700, color: T.text }}>Fichiers & Documents</h3>
+            <h3 style={{ margin: "0 0 20px", fontSize: 16, fontWeight: 700, color: T.text }}>{t("crm.files_documents", "Fichiers & Documents")}</h3>
             <div style={{
               border: `2px dashed ${T.border}`, borderRadius: 12, padding: 40,
               textAlign: "center", color: T.textLight, marginBottom: 20,
               background: T.bg, cursor: "pointer",
             }}>
               <div style={{ fontSize: 32, marginBottom: 8 }}>📎</div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: T.textMid, marginBottom: 4 }}>Glisser les fichiers ici</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: T.textMid, marginBottom: 4 }}>{t("crm.drop_files_here", "Glisser les fichiers ici")}</div>
               <div style={{ fontSize: 12 }}>PDF, DOC, DOCX, XLS, XLSX, JPG, PNG — max 10 MB</div>
             </div>
-            {files.length === 0 && <div style={{ textAlign: "center", color: T.textLight, fontSize: 13 }}>Aucun fichier attaché.</div>}
+            {files.length === 0 && <div style={{ textAlign: "center", color: T.textLight, fontSize: 13 }}>{t("crm.no_files", "Aucun fichier attaché.")}</div>}
           </div>
         )}
 
         {tab === "notes" && (
           <div style={{ maxWidth: 680 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: T.text }}>Notes rapides</h3>
-              {saveIndicator && <span style={{ fontSize: 12, color: T.green, fontWeight: 600 }}>Sauvegardé ✓</span>}
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: T.text }}>{t("crm.quick_notes", "Notes rapides")}</h3>
+              {saveIndicator && <span style={{ fontSize: 12, color: T.green, fontWeight: 600 }}>{t("crm.saved", "Sauvegardé")} ✓</span>}
             </div>
             <textarea
               value={notes}
               onChange={e => handleNotesChange(e.target.value)}
-              placeholder="Notes générales sur ce lead..."
+              placeholder={t("crm.notes_placeholder", "Notes générales sur ce lead...")}
               style={{
                 width: "100%", minHeight: 280, padding: 16, borderRadius: 10,
                 border: `1px solid ${T.border}`, fontSize: 14, lineHeight: 1.6,
@@ -351,7 +353,7 @@ export default function CRMLeadDetail({ lead, onBack, onUpdate, onNavigate, lead
               }}
             />
             <div style={{ fontSize: 11, color: T.textLight, marginTop: 6 }}>
-              Dernière modification: {fmtDateTime(lead.updated_at)}
+              {t("crm.last_modified", "Dernière modification")}: {fmtDateTime(lead.updated_at)}
             </div>
           </div>
         )}
@@ -478,27 +480,28 @@ export default function CRMLeadDetail({ lead, onBack, onUpdate, onNavigate, lead
 function InfoSection({ lead, daysSinceCreation, daysToTarget, probColor }: {
   lead: CRMLead; daysSinceCreation: number; daysToTarget: number | null; probColor: string;
 }) {
+  const { t } = useLanguage();
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, maxWidth: 900 }}>
-      <Card title="Coordonnées">
-        <InfoRow label="Compagnie" value={lead.company_name} />
-        <InfoRow label="Contact" value={`${lead.contact_first_name} ${lead.contact_last_name}`} />
-        {lead.contact_title && <InfoRow label="Poste" value={lead.contact_title} />}
-        <InfoRow label="Téléphone" value={lead.phone ? <a href={`tel:${lead.phone}`} style={{ color: "#111" }}>{lead.phone}</a> : "—"} />
-        <InfoRow label="Email" value={lead.email ? <a href={`mailto:${lead.email}`} style={{ color: "#111" }}>{lead.email}</a> : "—"} />
-        {lead.website && <InfoRow label="Site web" value={<a href={`https://${lead.website}`} target="_blank" rel="noreferrer" style={{ color: "#111" }}>{lead.website}</a>} />}
-        {lead.address && <InfoRow label="Adresse" value={lead.address} />}
-        <InfoRow label="Région" value={lead.region || "—"} />
-        {lead.postal_code && <InfoRow label="Code postal" value={lead.postal_code} />}
+      <Card title={t("crm.contact_info", "Coordonnées")}>
+        <InfoRow label={t("crm.company", "Compagnie")} value={lead.company_name} />
+        <InfoRow label={t("crm.contact", "Contact")} value={`${lead.contact_first_name} ${lead.contact_last_name}`} />
+        {lead.contact_title && <InfoRow label={t("crm.position_title", "Poste")} value={lead.contact_title} />}
+        <InfoRow label={t("phone", "Téléphone")} value={lead.phone ? <a href={`tel:${lead.phone}`} style={{ color: "#111" }}>{lead.phone}</a> : "—"} />
+        <InfoRow label={t("email", "Email")} value={lead.email ? <a href={`mailto:${lead.email}`} style={{ color: "#111" }}>{lead.email}</a> : "—"} />
+        {lead.website && <InfoRow label={t("crm.website", "Site web")} value={<a href={`https://${lead.website}`} target="_blank" rel="noreferrer" style={{ color: "#111" }}>{lead.website}</a>} />}
+        {lead.address && <InfoRow label={t("address", "Adresse")} value={lead.address} />}
+        <InfoRow label={t("crm.region", "Région")} value={lead.region || "—"} />
+        {lead.postal_code && <InfoRow label={t("crm.postal_code", "Code postal")} value={lead.postal_code} />}
       </Card>
 
-      <Card title="Détails du lead">
-        <InfoRow label="Type" value={<span style={{ color: TYPE_COLORS[lead.type as keyof typeof TYPE_COLORS], fontWeight: 600 }}>{lead.type}</span>} />
-        <InfoRow label="Source" value={lead.source} />
-        <InfoRow label="Valeur estimée/an" value={<strong style={{ color: "#111" }}>{new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD", minimumFractionDigits: 0 }).format(lead.estimated_value)}</strong>} />
-        {lead.monthly_volume > 0 && <InfoRow label="Volume mensuel" value={`${lead.monthly_volume} gallons`} />}
+      <Card title={t("crm.lead_details", "Détails du lead")}>
+        <InfoRow label={t("type", "Type")} value={<span style={{ color: TYPE_COLORS[lead.type as keyof typeof TYPE_COLORS], fontWeight: 600 }}>{lead.type}</span>} />
+        <InfoRow label={t("crm.source", "Source")} value={lead.source} />
+        <InfoRow label={t("crm.estimated_value_annual", "Valeur estimée/an")} value={<strong style={{ color: "#111" }}>{new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD", minimumFractionDigits: 0 }).format(lead.estimated_value)}</strong>} />
+        {lead.monthly_volume > 0 && <InfoRow label={t("crm.monthly_volume", "Volume mensuel")} value={`${lead.monthly_volume} gallons`} />}
         {lead.products_interest?.length > 0 && (
-          <InfoRow label="Produits d'intérêt" value={
+          <InfoRow label={t("crm.products_of_interest", "Produits d'intérêt")} value={
             <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
               {lead.products_interest.map(p => (
                 <span key={p} style={{ fontSize: 11, padding: "2px 7px", borderRadius: 5, background: "rgba(99,102,241,0.08)", color: "#111" }}>{p}</span>
@@ -506,7 +509,7 @@ function InfoSection({ lead, daysSinceCreation, daysToTarget, probColor }: {
             </div>
           } />
         )}
-        <InfoRow label="Probabilité" value={
+        <InfoRow label={t("crm.closing_probability", "Probabilité")} value={
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ flex: 1, height: 6, background: "rgba(0,0,0,0.04)", borderRadius: 3, overflow: "hidden" }}>
               <div style={{ width: `${lead.closing_probability}%`, height: "100%", background: probColor, borderRadius: 3, transition: "width 0.4s" }} />
@@ -514,29 +517,29 @@ function InfoSection({ lead, daysSinceCreation, daysToTarget, probColor }: {
             <strong style={{ color: probColor }}>{lead.closing_probability}%</strong>
           </div>
         } />
-        <InfoRow label="Créé le" value={new Date(lead.created_at).toLocaleDateString("fr-CA")} />
-        {lead.target_closing_date && <InfoRow label="Date cible" value={
+        <InfoRow label={t("crm.created_at", "Créé le")} value={new Date(lead.created_at).toLocaleDateString("fr-CA")} />
+        {lead.target_closing_date && <InfoRow label={t("crm.target_closing_date", "Date cible")} value={
           <span style={{ color: daysToTarget !== null && daysToTarget < 0 ? "#ef4444" : "#1c1c1e" }}>
             {new Date(lead.target_closing_date).toLocaleDateString("fr-CA")}
-            {daysToTarget !== null && daysToTarget < 0 && ` (Dépassé de ${Math.abs(daysToTarget)}j)`}
-            {daysToTarget !== null && daysToTarget >= 0 && ` (dans ${daysToTarget}j)`}
+            {daysToTarget !== null && daysToTarget < 0 && ` (${t("crm.overdue_by", "Dépassé de")} ${Math.abs(daysToTarget)}j)`}
+            {daysToTarget !== null && daysToTarget >= 0 && ` (${t("crm.in_days", "dans")} ${daysToTarget}j)`}
           </span>
         } />}
-        <InfoRow label="Dans le pipeline" value={<span style={{ color: "#8e8e93" }}>{daysSinceCreation} jours</span>} />
+        <InfoRow label={t("crm.in_pipeline", "Dans le pipeline")} value={<span style={{ color: "#8e8e93" }}>{daysSinceCreation} {t("crm.days", "jours")}</span>} />
       </Card>
 
-      <Card title="Objectifs & Progression" style={{ gridColumn: "1 / -1" }}>
+      <Card title={t("crm.goals_progress", "Objectifs & Progression")} style={{ gridColumn: "1 / -1" }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 24 }}>
           <div>
-            <div style={{ fontSize: 11, color: "#8e8e93", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>Objectif revenu annuel</div>
+            <div style={{ fontSize: 11, color: "#8e8e93", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>{t("crm.annual_revenue_goal", "Objectif revenu annuel")}</div>
             <div style={{ fontSize: 22, fontWeight: 800, color: "#111" }}>{new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD", minimumFractionDigits: 0 }).format(lead.annual_revenue_goal)}</div>
           </div>
           <div>
-            <div style={{ fontSize: 11, color: "#8e8e93", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>Volume mensuel cible</div>
+            <div style={{ fontSize: 11, color: "#8e8e93", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>{t("crm.monthly_volume_target", "Volume mensuel cible")}</div>
             <div style={{ fontSize: 22, fontWeight: 800, color: "#111" }}>{lead.monthly_volume_goal} gal</div>
           </div>
           <div>
-            <div style={{ fontSize: 11, color: "#8e8e93", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>Probabilité de closing</div>
+            <div style={{ fontSize: 11, color: "#8e8e93", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>{t("crm.closing_probability", "Probabilité de closing")}</div>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <div style={{ fontSize: 32, fontWeight: 900, color: probColor }}>{lead.closing_probability}%</div>
               <div style={{ flex: 1 }}>
@@ -588,6 +591,7 @@ function ActionBtn({ label, color, textColor = "#fff", onClick }: { label: strin
 }
 
 function ActivityEntry({ activity }: { activity: CRMActivity }) {
+  const { t } = useLanguage();
   const isAutomatic = activity.type === "Changement d'étape" || activity.type === "Lead créé";
   return (
     <div style={{ display: "flex", gap: 16, marginBottom: 16, position: "relative" }}>
@@ -624,7 +628,7 @@ function ActivityEntry({ activity }: { activity: CRMActivity }) {
           </span>
         )}
         {activity.call_duration && <span style={{ fontSize: 11, color: "#8e8e93" }}>{activity.call_duration} min · </span>}
-        <span style={{ fontSize: 11, color: "#8e8e93" }}>par {activity.logged_by_name}</span>
+        <span style={{ fontSize: 11, color: "#8e8e93" }}>{t("crm.by_agent", "par")} {activity.logged_by_name}</span>
       </div>
     </div>
   );
@@ -637,6 +641,7 @@ function ReminderGroup({ title, reminders, variant, onComplete, onDelete }: {
   onComplete: (id: string) => void;
   onDelete: (id: string) => void;
 }) {
+  const { t } = useLanguage();
   const bgMap = { overdue: "rgba(239,68,68,0.06)", today: "rgba(245,158,11,0.06)", upcoming: "#fff", completed: "#f9fafb" };
   const colorMap = { overdue: "#ef4444", today: "#d97706", upcoming: "#1c1c1e", completed: "#8e8e93" };
 
@@ -664,7 +669,7 @@ function ReminderGroup({ title, reminders, variant, onComplete, onDelete }: {
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 600, fontSize: 13, color: variant === "completed" ? "#8e8e93" : "#1c1c1e", textDecoration: r.completed ? "line-through" : "none" }}>{r.title}</div>
               <div style={{ fontSize: 11, color: "#8e8e93", marginTop: 2 }}>
-                {variant === "overdue" ? <span style={{ color: "#ef4444", fontWeight: 600 }}>En retard de {daysLate}j</span> : new Date(r.reminder_at).toLocaleDateString("fr-CA", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                {variant === "overdue" ? <span style={{ color: "#ef4444", fontWeight: 600 }}>{t("crm.overdue_by", "En retard de")} {daysLate}j</span> : new Date(r.reminder_at).toLocaleDateString("fr-CA", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                 {" · "}{r.recurrence !== "Aucune" ? `🔄 ${r.recurrence}` : ""}{r.notes && ` · ${r.notes}`}
               </div>
             </div>
@@ -682,6 +687,7 @@ function ReminderGroup({ title, reminders, variant, onComplete, onDelete }: {
 }
 
 function AddActivityModal({ onSave, onClose }: { onSave: (act: Partial<CRMActivity>) => void; onClose: () => void }) {
+  const { t } = useLanguage();
   const { profile } = useAuth();
   const actAgentName = profile?.full_name || "Agent";
   const actAgentInitials = actAgentName.split(" ").map((n: string) => n[0]).join("").toUpperCase();
@@ -719,19 +725,19 @@ function AddActivityModal({ onSave, onClose }: { onSave: (act: Partial<CRMActivi
   };
 
   return (
-    <Modal title="Ajouter une activité" onClose={onClose} onSave={handleSave}>
-      <Field label="Type d'activité">
+    <Modal title={t("crm.add_activity", "Ajouter une activité")} onClose={onClose} onSave={handleSave}>
+      <Field label={t("crm.activity_type", "Type d'activité")}>
         <select value={type} onChange={e => setType(e.target.value as ActivityType)} style={selStyle}>
-          {types.map(t => <option key={t} value={t}>{ACTIVITY_ICONS[t]} {t}</option>)}
+          {types.map(tp => <option key={tp} value={tp}>{ACTIVITY_ICONS[tp]} {tp}</option>)}
         </select>
       </Field>
 
       {type === "Appel" && (
         <>
-          <Field label="Durée (minutes)">
+          <Field label={t("crm.duration_minutes", "Durée (minutes)")}>
             <input type="number" value={callDuration} onChange={e => setCallDuration(e.target.value)} style={inpStyle} />
           </Field>
-          <Field label="Résultat">
+          <Field label={t("crm.result", "Résultat")}>
             <div style={{ display: "flex", gap: 12 }}>
               {(["Positif", "Neutre", "Négatif"] as const).map(r => (
                 <label key={r} style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", fontSize: 13 }}>
@@ -745,44 +751,44 @@ function AddActivityModal({ onSave, onClose }: { onSave: (act: Partial<CRMActivi
       )}
 
       {(type === "Email envoyé" || type === "Email reçu") && (
-        <Field label="Objet">
+        <Field label={t("crm.subject", "Objet")}>
           <input value={emailSubject} onChange={e => setEmailSubject(e.target.value)} style={inpStyle} />
         </Field>
       )}
 
       {type === "Rencontre / Visite" && (
         <>
-          <Field label="Lieu">
+          <Field label={t("crm.location", "Lieu")}>
             <input value={meetingLocation} onChange={e => setMeetingLocation(e.target.value)} style={inpStyle} />
           </Field>
-          <Field label="Durée (minutes)">
+          <Field label={t("crm.duration_minutes", "Durée (minutes)")}>
             <input type="number" value={meetingDuration} onChange={e => setMeetingDuration(e.target.value)} style={inpStyle} />
           </Field>
-          <Field label="Personnes présentes">
+          <Field label={t("crm.attendees", "Personnes présentes")}>
             <input value={meetingAttendees} onChange={e => setMeetingAttendees(e.target.value)} style={inpStyle} />
           </Field>
         </>
       )}
 
       {type === "Proposition / Soumission" && (
-        <Field label="Montant proposé ($)">
+        <Field label={t("crm.proposed_amount", "Montant proposé ($)")}>
           <input type="number" value={proposalAmount} onChange={e => setProposalAmount(e.target.value)} style={inpStyle} />
         </Field>
       )}
 
       {type === "Raison de perte" && (
-        <Field label="Raison">
+        <Field label={t("crm.reason", "Raison")}>
           <select value={lossReason} onChange={e => setLossReason(e.target.value)} style={selStyle}>
             {["Prix trop élevé", "Compétiteur choisi", "Pas de budget", "Timing pas bon", "Pas de réponse", "Mauvais fit produit", "Autre"].map(r => <option key={r} value={r}>{r}</option>)}
           </select>
         </Field>
       )}
 
-      <Field label="Description / Résumé">
+      <Field label={t("crm.description_summary", "Description / Résumé")}>
         <textarea value={description} onChange={e => setDescription(e.target.value)} style={{ ...inpStyle, height: 90, resize: "vertical", paddingTop: 10 }} />
       </Field>
 
-      <Field label="Date et heure">
+      <Field label={t("crm.date_time", "Date et heure")}>
         <input type="datetime-local" value={activityAt} onChange={e => setActivityAt(e.target.value)} style={inpStyle} />
       </Field>
     </Modal>
@@ -790,6 +796,7 @@ function AddActivityModal({ onSave, onClose }: { onSave: (act: Partial<CRMActivi
 }
 
 function AddReminderModal({ onSave, onClose }: { onSave: (rem: Partial<CRMReminder>) => void; onClose: () => void }) {
+  const { t } = useLanguage();
   const { profile } = useAuth();
   const [title, setTitle] = useState("");
   const [reminderAt, setReminderAt] = useState(new Date(Date.now() + 86400000).toISOString().slice(0, 16));
@@ -803,14 +810,14 @@ function AddReminderModal({ onSave, onClose }: { onSave: (rem: Partial<CRMRemind
   };
 
   return (
-    <Modal title="Nouveau rappel" onClose={onClose} onSave={handleSave}>
-      <Field label="Titre *">
-        <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Rappel de suivi..." style={inpStyle} required />
+    <Modal title={t("crm.new_reminder", "Nouveau rappel")} onClose={onClose} onSave={handleSave}>
+      <Field label={`${t("crm.title", "Titre")} *`}>
+        <input value={title} onChange={e => setTitle(e.target.value)} placeholder={t("crm.follow_up_reminder", "Rappel de suivi...")} style={inpStyle} required />
       </Field>
-      <Field label="Date et heure *">
+      <Field label={`${t("crm.date_time", "Date et heure")} *`}>
         <input type="datetime-local" value={reminderAt} onChange={e => setReminderAt(e.target.value)} style={inpStyle} />
       </Field>
-      <Field label="Priorité">
+      <Field label={t("crm.priority_label", "Priorité")}>
         <div style={{ display: "flex", gap: 12 }}>
           {(["Haute", "Moyenne", "Basse"] as const).map(p => {
             const c = { Haute: "#ef4444", Moyenne: "#f59e0b", Basse: "#8e8e93" }[p];
@@ -823,12 +830,12 @@ function AddReminderModal({ onSave, onClose }: { onSave: (rem: Partial<CRMRemind
           })}
         </div>
       </Field>
-      <Field label="Récurrence">
+      <Field label={t("crm.recurrence", "Récurrence")}>
         <select value={recurrence} onChange={e => setRecurrence(e.target.value as Recurrence)} style={selStyle}>
           {(["Aucune", "Quotidien", "Chaque 2 jours", "Hebdomadaire", "Bi-hebdomadaire", "Mensuel"] as const).map(r => <option key={r} value={r}>{r}</option>)}
         </select>
       </Field>
-      <Field label="Notes additionnelles">
+      <Field label={t("crm.additional_notes", "Notes additionnelles")}>
         <textarea value={notes} onChange={e => setNotes(e.target.value)} style={{ ...inpStyle, height: 70, resize: "vertical", paddingTop: 10 }} />
       </Field>
     </Modal>
@@ -836,6 +843,7 @@ function AddReminderModal({ onSave, onClose }: { onSave: (rem: Partial<CRMRemind
 }
 
 function Modal({ title, onClose, onSave, children }: { title: string; onClose: () => void; onSave: () => void; children: React.ReactNode }) {
+  const { t } = useLanguage();
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
       <div style={{ background: T.bgCard, borderRadius: 16, width: "100%", maxWidth: 520, maxHeight: "90vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
@@ -845,8 +853,8 @@ function Modal({ title, onClose, onSave, children }: { title: string; onClose: (
         </div>
         <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 14 }}>{children}</div>
         <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(0,0,0,0.07)", display: "flex", gap: 10, justifyContent: "flex-end" }}>
-          <button onClick={onClose} style={{ padding: "10px 20px", borderRadius: 8, border: "1px solid #ddd", background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 14 }}>Annuler</button>
-          <button onClick={onSave} style={{ padding: "10px 20px", borderRadius: 8, border: "none", background: "#111", color: "#fff", cursor: "pointer", fontFamily: "inherit", fontSize: 14, fontWeight: 700 }}>Enregistrer</button>
+          <button onClick={onClose} style={{ padding: "10px 20px", borderRadius: 8, border: "1px solid #ddd", background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 14 }}>{t("cancel", "Annuler")}</button>
+          <button onClick={onSave} style={{ padding: "10px 20px", borderRadius: 8, border: "none", background: "#111", color: "#fff", cursor: "pointer", fontFamily: "inherit", fontSize: 14, fontWeight: 700 }}>{t("save", "Enregistrer")}</button>
         </div>
       </div>
     </div>

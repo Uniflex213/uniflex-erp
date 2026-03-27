@@ -6,6 +6,7 @@ import { Team, TeamMember } from "./teamTypes";
 import TeamGoalsTab from "./TeamGoalsTab";
 import TeamPricesPage from "./TeamPricesPage";
 import TeamBeneficePage from "./TeamBeneficePage";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD", minimumFractionDigits: 2 }).format(n);
@@ -45,14 +46,7 @@ interface MemberStats {
 
 type TabKey = "apercu" | "commissions" | "activite" | "objectifs" | "team_prices" | "benefice";
 
-const TABS: { key: TabKey; label: string }[] = [
-  { key: "apercu", label: "Aperçu" },
-  { key: "commissions", label: "Commissions" },
-  { key: "activite", label: "Activité" },
-  { key: "objectifs", label: "Objectifs" },
-  { key: "team_prices", label: "Team Prices" },
-  { key: "benefice", label: "Bénéfice" },
-];
+const TAB_KEYS: TabKey[] = ["apercu", "commissions", "activite", "objectifs", "team_prices", "benefice"];
 
 const inputStyle: React.CSSProperties = {
   padding: "6px 10px",
@@ -69,6 +63,7 @@ const inputStyle: React.CSSProperties = {
 };
 
 export default function TeamLeaderDashboard() {
+  const { t } = useLanguage();
   const { profile } = useAuth();
   const [activeTab, setActiveTab] = useState<TabKey>("apercu");
   const [resolvedTeamId, setResolvedTeamId] = useState<string | null>(profile?.team_id ?? null);
@@ -101,32 +96,42 @@ export default function TeamLeaderDashboard() {
   return (
     <div style={{ background: T.bg, minHeight: "100%", padding: "24px 28px", fontFamily: "Inter, system-ui, sans-serif" }}>
       <div style={{ marginBottom: 20 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: T.text, margin: "0 0 4px" }}>Tableau de bord — Chef d'équipe</h1>
-        <div style={{ fontSize: 13, color: T.textMid }}>Gérez votre équipe, commissions et performance</div>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: T.text, margin: "0 0 4px" }}>{t("team_leader.title", "Tableau de bord — Chef d'équipe")}</h1>
+        <div style={{ fontSize: 13, color: T.textMid }}>{t("team_leader.subtitle", "Gérez votre équipe, commissions et performance")}</div>
       </div>
 
       <div style={{ display: "flex", gap: 0, borderBottom: `1px solid ${T.border}`, marginBottom: 24, overflowX: "auto" }}>
-        {TABS.map(t => (
+        {TAB_KEYS.map(key => {
+          const labels: Record<TabKey, string> = {
+            apercu: t("team_leader.tab_overview", "Aperçu"),
+            commissions: t("team_leader.tab_commissions", "Commissions"),
+            activite: t("team_leader.tab_activity", "Activité"),
+            objectifs: t("team_leader.tab_goals", "Objectifs"),
+            team_prices: t("team_leader.tab_prices", "Team Prices"),
+            benefice: t("team_leader.tab_profit", "Bénéfice"),
+          };
+          return (
           <button
-            key={t.key}
-            onClick={() => setActiveTab(t.key)}
+            key={key}
+            onClick={() => setActiveTab(key)}
             style={{
               background: "none",
               border: "none",
-              borderBottom: activeTab === t.key ? `2px solid ${T.main}` : "2px solid transparent",
+              borderBottom: activeTab === key ? `2px solid ${T.main}` : "2px solid transparent",
               marginBottom: -1,
               padding: "10px 18px",
               fontSize: 13,
-              fontWeight: activeTab === t.key ? 700 : 500,
-              color: activeTab === t.key ? T.main : T.textMid,
+              fontWeight: activeTab === key ? 700 : 500,
+              color: activeTab === key ? T.main : T.textMid,
               cursor: "pointer",
               fontFamily: "inherit",
               whiteSpace: "nowrap",
             }}
           >
-            {t.label}
+            {labels[key]}
           </button>
-        ))}
+          );
+        })}
       </div>
 
       {activeTab === "apercu" && <ApercuTab teamId={teamId} />}
@@ -136,7 +141,7 @@ export default function TeamLeaderDashboard() {
         <TeamGoalsTab team={teamObj} members={teamMembers} isLeader={true} />
       )}
       {activeTab === "objectifs" && !teamObj && (
-        <div style={{ color: T.textMid, fontSize: 14, padding: 24 }}>Chargement de l'équipe...</div>
+        <div style={{ color: T.textMid, fontSize: 14, padding: 24 }}>{t("team_leader.loading_team", "Chargement de l'équipe...")}</div>
       )}
       {activeTab === "team_prices" && <TeamPricesPage />}
       {activeTab === "benefice" && <TeamBeneficePage />}
@@ -145,6 +150,7 @@ export default function TeamLeaderDashboard() {
 }
 
 function ActiviteTab({ teamId }: { teamId: string | null }) {
+  const { t } = useLanguage();
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [orders, setOrders] = useState<{ id: string; vendeur_code: string | null; subtotal_after_discount: number | null; subtotal: number | null; created_at: string; client_name?: string }[]>([]);
   const [loading, setLoading] = useState(true);
@@ -173,8 +179,8 @@ function ActiviteTab({ teamId }: { teamId: string | null }) {
     load();
   }, [teamId]);
 
-  if (!teamId) return <div style={{ color: T.textMid, fontSize: 14, padding: 24 }}>Vous n'êtes pas assigné à une équipe.</div>;
-  if (loading) return <div style={{ color: T.textMid, fontSize: 14, padding: 24, textAlign: "center" }}>Chargement...</div>;
+  if (!teamId) return <div style={{ color: T.textMid, fontSize: 14, padding: 24 }}>{t("team_leader.no_team_assigned", "Vous n'êtes pas assigné à une équipe.")}</div>;
+  if (loading) return <div style={{ color: T.textMid, fontSize: 14, padding: 24, textAlign: "center" }}>{t("common.loading", "Chargement...")}</div>;
 
   const memberByCode: Record<string, MemberRow> = {};
   for (const m of members) { if (m.seller_code) memberByCode[m.seller_code] = m; }
@@ -188,9 +194,9 @@ function ActiviteTab({ teamId }: { teamId: string | null }) {
   const ordersMonth = orders.length;
 
   const kpis = [
-    { label: "Aujourd'hui", value: String(ordersToday), icon: "📅" },
-    { label: "Cette semaine", value: String(ordersWeek), icon: "📊" },
-    { label: "Ce mois", value: String(ordersMonth), icon: "📈" },
+    { label: t("team_leader.today", "Aujourd'hui"), value: String(ordersToday), icon: "📅" },
+    { label: t("team_leader.this_week", "Cette semaine"), value: String(ordersWeek), icon: "📊" },
+    { label: t("team_leader.this_month", "Ce mois"), value: String(ordersMonth), icon: "📈" },
   ];
 
   return (
@@ -209,12 +215,12 @@ function ActiviteTab({ teamId }: { teamId: string | null }) {
 
       <div style={{ background: T.bgCard, borderRadius: 12, border: `1px solid ${T.border}`, overflow: "hidden" }}>
         <div style={{ padding: "14px 20px", borderBottom: `1px solid ${T.border}` }}>
-          <span style={{ fontSize: 14, fontWeight: 800, color: T.text }}>Commandes récentes de l'équipe</span>
+          <span style={{ fontSize: 14, fontWeight: 800, color: T.text }}>{t("team_leader.recent_team_orders", "Commandes récentes de l'équipe")}</span>
         </div>
         {orders.length === 0 ? (
           <div style={{ padding: 40, textAlign: "center", color: T.textMid, fontSize: 13 }}>
             <div style={{ fontSize: 32, marginBottom: 8 }}>📭</div>
-            Aucune commande ce mois-ci
+            {t("team_leader.no_orders_month", "Aucune commande ce mois-ci")}
           </div>
         ) : (
           <div style={{ maxHeight: 500, overflowY: "auto" }}>
@@ -243,7 +249,7 @@ function ActiviteTab({ teamId }: { teamId: string | null }) {
                   </div>
                   {isToday && (
                     <span style={{ fontSize: 9, fontWeight: 800, background: `${T.main}15`, color: T.main, padding: "2px 6px", borderRadius: 4 }}>
-                      AUJOURD'HUI
+                      {t("team_leader.today_badge", "AUJOURD'HUI")}
                     </span>
                   )}
                 </div>
@@ -257,6 +263,7 @@ function ActiviteTab({ teamId }: { teamId: string | null }) {
 }
 
 function ApercuTab({ teamId }: { teamId: string | null }) {
+  const { t } = useLanguage();
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [stats, setStats] = useState<MemberStats[]>([]);
   const [loading, setLoading] = useState(true);
@@ -303,11 +310,11 @@ function ApercuTab({ teamId }: { teamId: string | null }) {
   useEffect(() => { load(); }, [load]);
 
   if (!teamId) {
-    return <div style={{ color: T.textMid, fontSize: 14, padding: 24 }}>Vous n'êtes pas assigné à une équipe.</div>;
+    return <div style={{ color: T.textMid, fontSize: 14, padding: 24 }}>{t("team_leader.no_team_assigned", "Vous n'êtes pas assigné à une équipe.")}</div>;
   }
 
   if (loading) {
-    return <div style={{ color: T.textMid, fontSize: 14, padding: 24, textAlign: "center" }}>Chargement...</div>;
+    return <div style={{ color: T.textMid, fontSize: 14, padding: 24, textAlign: "center" }}>{t("common.loading", "Chargement...")}</div>;
   }
 
   const totalSales = stats.reduce((s, r) => s + r.salesMTD, 0);
@@ -318,10 +325,10 @@ function ApercuTab({ teamId }: { teamId: string | null }) {
   const sortedByRank = [...stats].sort((a, b) => b.salesMTD - a.salesMTD);
 
   const kpis = [
-    { label: "Ventes totales MTD", value: fmt(totalSales), color: T.main, bg: `${T.main}15` },
-    { label: "Commissions dues", value: fmt(totalCommissions), color: T.green, bg: T.greenBg },
-    { label: "Nb membres", value: String(members.length), color: T.cyan, bg: T.cyanBg },
-    { label: "Nb commandes", value: String(totalOrders), color: T.orange, bg: T.orangeBg },
+    { label: t("team_leader.total_sales_mtd", "Ventes totales MTD"), value: fmt(totalSales), color: T.main, bg: `${T.main}15` },
+    { label: t("team_leader.commissions_due", "Commissions dues"), value: fmt(totalCommissions), color: T.green, bg: T.greenBg },
+    { label: t("team_leader.member_count", "Nb membres"), value: String(members.length), color: T.cyan, bg: T.cyanBg },
+    { label: t("team_leader.order_count", "Nb commandes"), value: String(totalOrders), color: T.orange, bg: T.orangeBg },
   ];
 
   return (
@@ -337,16 +344,16 @@ function ApercuTab({ teamId }: { teamId: string | null }) {
 
       <div style={{ background: T.bgCard, borderRadius: 12, border: `1px solid ${T.border}`, overflow: "hidden", marginBottom: 24 }}>
         <div style={{ padding: "14px 20px", borderBottom: `1px solid ${T.border}` }}>
-          <span style={{ fontSize: 14, fontWeight: 800, color: T.text }}>Membres de l'équipe — MTD</span>
+          <span style={{ fontSize: 14, fontWeight: 800, color: T.text }}>{t("team_leader.team_members_mtd", "Membres de l'équipe — MTD")}</span>
         </div>
         {stats.length === 0 ? (
-          <div style={{ padding: 32, textAlign: "center", color: T.textMid, fontSize: 13 }}>Aucun membre dans cette équipe.</div>
+          <div style={{ padding: 32, textAlign: "center", color: T.textMid, fontSize: 13 }}>{t("team_leader.no_members", "Aucun membre dans cette équipe.")}</div>
         ) : (
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ background: T.bg }}>
-                  {["Rang", "Membre", "Code vendeur", "Ventes MTD", "Commission due", "Rôle"].map(h => (
+                  {[t("team_leader.rank", "Rang"), t("team_leader.member", "Membre"), t("team_leader.seller_code", "Code vendeur"), t("team_leader.sales_mtd", "Ventes MTD"), t("team_leader.commission_due", "Commission due"), t("team_leader.role", "Rôle")].map(h => (
                     <th key={h} style={{ padding: "10px 16px", textAlign: "left", fontSize: 10, fontWeight: 800, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5 }}>{h}</th>
                   ))}
                 </tr>
@@ -405,7 +412,7 @@ function ApercuTab({ teamId }: { teamId: string | null }) {
                           color: row.member.role === "leader" ? T.orange : T.blue,
                           padding: "2px 8px", borderRadius: 6, fontSize: 10, fontWeight: 800, textTransform: "uppercase",
                         }}>
-                          {row.member.role === "leader" ? "Chef" : "Membre"}
+                          {row.member.role === "leader" ? t("team_leader.chief", "Chef") : t("team_leader.member_role", "Membre")}
                         </span>
                       </td>
                     </tr>
@@ -421,6 +428,7 @@ function ApercuTab({ teamId }: { teamId: string | null }) {
 }
 
 function CommissionsTab({ teamId }: { teamId: string | null }) {
+  const { t } = useLanguage();
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [configs, setConfigs] = useState<CommissionConfig[]>([]);
   const [orders, setOrders] = useState<OrderRow[]>([]);
@@ -504,11 +512,11 @@ function CommissionsTab({ teamId }: { teamId: string | null }) {
   };
 
   if (!teamId) {
-    return <div style={{ color: T.textMid, fontSize: 14, padding: 24 }}>Vous n'êtes pas assigné à une équipe.</div>;
+    return <div style={{ color: T.textMid, fontSize: 14, padding: 24 }}>{t("team_leader.no_team_assigned", "Vous n'êtes pas assigné à une équipe.")}</div>;
   }
 
   if (loading) {
-    return <div style={{ color: T.textMid, fontSize: 14, padding: 24, textAlign: "center" }}>Chargement...</div>;
+    return <div style={{ color: T.textMid, fontSize: 14, padding: 24, textAlign: "center" }}>{t("common.loading", "Chargement...")}</div>;
   }
 
   const totalSales = members.reduce((s, m) => s + getMemberSales(m), 0);
@@ -521,7 +529,7 @@ function CommissionsTab({ teamId }: { teamId: string | null }) {
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20, flexWrap: "wrap" }}>
-        <span style={{ fontSize: 14, fontWeight: 700, color: T.text }}>Appliquer à tous :</span>
+        <span style={{ fontSize: 14, fontWeight: 700, color: T.text }}>{t("team_leader.apply_to_all", "Appliquer à tous")} :</span>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <input
             type="number"
@@ -542,7 +550,7 @@ function CommissionsTab({ teamId }: { teamId: string | null }) {
               fontFamily: "inherit", opacity: applyingAll ? 0.6 : 1,
             }}
           >
-            {applyingAll ? "Application..." : "Appliquer à tous"}
+            {applyingAll ? t("team_leader.applying", "Application...") : t("team_leader.apply_to_all", "Appliquer à tous")}
           </button>
         </div>
       </div>
@@ -552,7 +560,7 @@ function CommissionsTab({ teamId }: { teamId: string | null }) {
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: T.bg }}>
-                {["Vendeur", "Code", "Ventes MTD", "Taux %", "Commission brute", ""].map(h => (
+                {[t("team_leader.seller", "Vendeur"), t("team_leader.code", "Code"), t("team_leader.sales_mtd", "Ventes MTD"), t("team_leader.rate_pct", "Taux %"), t("team_leader.gross_commission", "Commission brute"), ""].map(h => (
                   <th key={h} style={{ padding: "11px 16px", textAlign: "left", fontSize: 10, fontWeight: 800, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>
@@ -614,9 +622,9 @@ function CommissionsTab({ teamId }: { teamId: string | null }) {
                         {saved[m.id] ? (
                           <>
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
-                            Sauvegardé
+                            {t("common.saved", "Sauvegardé")}
                           </>
-                        ) : saving[m.id] ? "Sauvegarde..." : "Sauvegarder"}
+                        ) : saving[m.id] ? t("common.saving", "Sauvegarde...") : t("common.save", "Sauvegarder")}
                       </button>
                     </td>
                   </tr>
@@ -635,7 +643,7 @@ function CommissionsTab({ teamId }: { teamId: string | null }) {
       </div>
 
       <div style={{ marginTop: 16, padding: "12px 16px", background: T.blueBg, borderRadius: 10, fontSize: 12, color: T.textMid, lineHeight: 1.6 }}>
-        Les taux sont sauvegardés dans <strong>team_commission_configs</strong> et utilisés pour le calcul du bénéfice d'équipe.
+        {t("team_leader.rates_info", "Les taux sont sauvegardés dans team_commission_configs et utilisés pour le calcul du bénéfice d'équipe.")}
       </div>
     </div>
   );

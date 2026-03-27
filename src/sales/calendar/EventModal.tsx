@@ -3,6 +3,7 @@ import { T } from "../../theme";
 import { useCurrentAgent } from "../../hooks/useCurrentAgent";
 import { CalendarEvent, DEFAULT_LABELS, EventLabel, REMINDER_OPTIONS, RECURRENCE_OPTIONS } from "./calendarTypes";
 import { getLabelColor } from "./calendarUtils";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 function Field({ label, children, required }: { label: string; children: React.ReactNode; required?: boolean }) {
   return (
@@ -41,6 +42,7 @@ function nowTimeStr(offsetH = 0) {
 }
 
 export default function EventModal({ defaultDate, defaultHour, editEvent, customLabels = [], onSave, onClose }: Props) {
+  const { t } = useLanguage();
   const agent = useCurrentAgent();
   const allLabels = [...DEFAULT_LABELS, ...customLabels];
   const defaultDateStr = defaultDate ? defaultDate.toISOString().split("T")[0] : todayStr();
@@ -123,17 +125,17 @@ export default function EventModal({ defaultDate, defaultHour, editEvent, custom
           display: "flex", justifyContent: "space-between", alignItems: "center",
         }}>
           <h2 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: T.text }}>
-            {editEvent ? "Modifier l'événement" : "Nouvel événement"}
+            {editEvent ? t("cal.modal.edit", "Modifier l'événement") : t("cal.modal.new", "Nouvel événement")}
           </h2>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 20, color: T.textLight }}>✕</button>
         </div>
 
         <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 16, maxHeight: "calc(90vh - 130px)", overflowY: "auto" }}>
-          <Field label="Titre" required>
+          <Field label={t("cal.modal.title_label", "Titre")} required>
             <input
               value={title}
               onChange={e => setTitle(e.target.value)}
-              placeholder="Titre de l'événement"
+              placeholder={t("cal.modal.title_ph", "Titre de l'événement")}
               autoFocus
               style={{ ...inputStyle, fontSize: 14, fontWeight: 600, borderColor: title ? T.main : T.border }}
             />
@@ -142,30 +144,30 @@ export default function EventModal({ defaultDate, defaultHour, editEvent, custom
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, fontWeight: 600, color: T.text }}>
               <input type="checkbox" checked={allDay} onChange={e => setAllDay(e.target.checked)} style={{ width: 16, height: 16 }} />
-              Journée entière
+              {t("cal.modal.all_day", "Journée entière")}
             </label>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <Field label="Date de début" required>
+            <Field label={t("cal.modal.start_date", "Date de début")} required>
               <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={inputStyle} />
             </Field>
             {!allDay && (
-              <Field label="Heure de début" required>
+              <Field label={t("cal.modal.start_time", "Heure de début")} required>
                 <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} style={inputStyle} />
               </Field>
             )}
-            <Field label="Date de fin" required>
+            <Field label={t("cal.modal.end_date", "Date de fin")} required>
               <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={inputStyle} />
             </Field>
             {!allDay && (
-              <Field label="Heure de fin" required>
+              <Field label={t("cal.modal.end_time", "Heure de fin")} required>
                 <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} style={inputStyle} />
               </Field>
             )}
           </div>
 
-          <Field label="Label de couleur">
+          <Field label={t("cal.modal.color_label", "Label de couleur")}>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {allLabels.map(l => (
                 <button
@@ -184,12 +186,12 @@ export default function EventModal({ defaultDate, defaultHour, editEvent, custom
               ))}
             </div>
             <div style={{ fontSize: 10, color: T.textLight, marginTop: 4 }}>
-              Sélectionné : {allLabels.find(l => l.key === label)?.name}
+              {t("cal.modal.selected", "Sélectionné")} : {allLabels.find(l => l.key === label)?.name}
             </div>
           </Field>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <Field label="Importance">
+            <Field label={t("cal.modal.importance", "Importance")}>
               <div style={{ display: "flex", gap: 6 }}>
                 {(["Haute", "Normale", "Basse"] as const).map(imp => (
                   <button
@@ -202,13 +204,13 @@ export default function EventModal({ defaultDate, defaultHour, editEvent, custom
                       cursor: "pointer", fontFamily: "inherit", fontSize: 10, fontWeight: 700,
                     }}
                   >
-                    {imp === "Haute" ? "▲ Haute" : imp === "Normale" ? "— Normale" : "▼ Basse"}
+                    {imp === "Haute" ? `▲ ${t("cal.modal.high", "Haute")}` : imp === "Normale" ? `— ${t("cal.modal.normal", "Normale")}` : `▼ ${t("cal.modal.low", "Basse")}`}
                   </button>
                 ))}
               </div>
             </Field>
 
-            <Field label="Rappel">
+            <Field label={t("cal.modal.reminder", "Rappel")}>
               <select value={reminder ?? ""} onChange={e => setReminder(e.target.value === "" ? null : Number(e.target.value))} style={inputStyle}>
                 {REMINDER_OPTIONS.map(r => (
                   <option key={r.label} value={r.value ?? ""}>{r.label}</option>

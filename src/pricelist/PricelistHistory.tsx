@@ -1,6 +1,7 @@
 import React from "react";
 import { Pricelist } from "./pricelistTypes";
 import { T } from "../theme";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const pulseStyle = `
 @keyframes pricelistBtnPulse {
@@ -57,13 +58,14 @@ interface Props {
 }
 
 export default function PricelistHistory({ pricelists, onCreateNew, onDuplicate, onDelete, onGeneratePDF }: Props) {
+  const { t } = useLanguage();
   return (
     <div>
       <style>{pulseStyle}</style>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <div>
-          <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 800 }}>Générateur de Pricelist</h2>
-          <p style={{ margin: 0, color: T.textMid, fontSize: 14 }}>{pricelists.length} pricelist(s) générée(s)</p>
+          <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 800 }}>{t("pricelist.generator_title")}</h2>
+          <p style={{ margin: 0, color: T.textMid, fontSize: 14 }}>{pricelists.length} {t("pricelist.generated_count")}</p>
         </div>
         <button
           onClick={onCreateNew}
@@ -74,26 +76,26 @@ export default function PricelistHistory({ pricelists, onCreateNew, onDuplicate,
             animation: "pricelistBtnPulse 2.5s ease-in-out infinite",
           }}
         >
-          + CRÉER UNE PRICELIST
+          {t("pricelist.create_btn")}
         </button>
       </div>
 
       <div style={{ background: T.card, borderRadius: 14, border: `1px solid ${T.border}`, overflow: "hidden" }}>
         <div style={{ padding: "14px 20px", borderBottom: `1px solid ${T.border}`, background: "#f8f9fb" }}>
-          <span style={{ fontWeight: 800, fontSize: 13 }}>Historique des pricelists</span>
+          <span style={{ fontWeight: 800, fontSize: 13 }}>{t("pricelist.history_title")}</span>
         </div>
 
         {pricelists.length === 0 ? (
           <div style={{ padding: "48px 24px", textAlign: "center", color: T.textLight }}>
             <div style={{ fontSize: 36, marginBottom: 12 }}>📄</div>
-            <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6 }}>Aucune pricelist générée</div>
-            <div style={{ fontSize: 13 }}>Cliquez sur "CRÉER UNE PRICELIST" pour commencer.</div>
+            <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6 }}>{t("pricelist.no_pricelist")}</div>
+            <div style={{ fontSize: 13 }}>{t("pricelist.no_pricelist_hint")}</div>
           </div>
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
             <thead>
               <tr style={{ background: "#f8f9fb" }}>
-                {["Date de création", "Client", "Type", "Produits", "Validité", "Actions"].map(h => (
+                {[t("pricelist.col_creation_date"), t("pricelist.col_client"), t("pricelist.col_type"), t("pricelist.col_products"), t("pricelist.col_validity"), t("pricelist.col_actions")].map(h => (
                   <th key={h} style={{ padding: "10px 16px", textAlign: "left", fontWeight: 700, fontSize: 11, textTransform: "uppercase", letterSpacing: 0.3, color: T.textLight, borderBottom: `1px solid ${T.border}` }}>{h}</th>
                 ))}
               </tr>
@@ -123,35 +125,35 @@ export default function PricelistHistory({ pricelists, onCreateNew, onDuplicate,
                         {pl.clientType}
                       </span>
                     </td>
-                    <td style={{ padding: "14px 16px", color: T.textMid }}>{pl.lines.length} produit(s)</td>
+                    <td style={{ padding: "14px 16px", color: T.textMid }}>{pl.lines.length} {t("pricelist.product_count")}</td>
                     <td style={{ padding: "14px 16px" }}>
                       <span style={{
                         fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 4,
                         background: expired ? T.redBg : "#dcfce7",
                         color: expired ? T.red : "#15803d",
                       }}>
-                        {expired ? "Expirée" : `Valide jusqu'au ${fmtDate(pl.validUntil)}`}
+                        {expired ? t("pricelist.expired") : `${t("pricelist.valid_until")} ${fmtDate(pl.validUntil)}`}
                       </span>
                     </td>
                     <td style={{ padding: "14px 16px" }}>
                       <div style={{ display: "flex", gap: 6 }}>
                         <button
                           onClick={() => onGeneratePDF(pl)}
-                          title="Voir / Télécharger PDF"
+                          title={t("pricelist.see_pdf")}
                           style={{ background: "#eff6ff", color: "#1d4ed8", border: "none", borderRadius: 7, padding: "6px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 700, fontFamily: "inherit" }}
                         >
                           <PdfIcon /> PDF
                         </button>
                         <button
                           onClick={() => onDuplicate(pl)}
-                          title="Dupliquer"
+                          title={t("pricelist.duplicate")}
                           style={{ background: "#f0fdf4", color: "#15803d", border: "none", borderRadius: 7, padding: "6px 9px", cursor: "pointer", display: "flex", alignItems: "center" }}
                         >
                           <CopyIcon />
                         </button>
                         <button
                           onClick={() => onDelete(pl.id)}
-                          title="Supprimer"
+                          title={t("pricelist.delete")}
                           style={{ background: T.redBg, color: T.red, border: "none", borderRadius: 7, padding: "6px 9px", cursor: "pointer", display: "flex", alignItems: "center" }}
                         >
                           <TrashIcon />

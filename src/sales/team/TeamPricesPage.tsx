@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../../supabaseClient";
 import { useAuth } from "../../contexts/AuthContext";
 import { T } from "../../theme";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD", minimumFractionDigits: 2 }).format(n);
@@ -59,6 +60,7 @@ function emptyForm(): FormState {
 }
 
 export default function TeamPricesPage() {
+  const { t } = useLanguage();
   const { profile } = useAuth();
   const teamId = profile?.team_id ?? null;
 
@@ -122,10 +124,10 @@ export default function TeamPricesPage() {
       }
 
       if (toInsert.length === 0) {
-        setSyncMsg("Tous les produits actifs sont déjà synchronisés.");
+        setSyncMsg(t("team_prices.all_synced", "Tous les produits actifs sont déjà synchronisés."));
       } else {
         await supabase.from("team_prices").insert(toInsert);
-        setSyncMsg(`${toInsert.length} produit(s) ajouté(s) avec succès.`);
+        setSyncMsg(`${toInsert.length} ${t("team_prices.products_added", "produit(s) ajouté(s) avec succès.")}`);
         load();
       }
     } finally {
@@ -201,7 +203,7 @@ export default function TeamPricesPage() {
   if (!teamId) {
     return (
       <div style={{ padding: "24px 28px", background: T.bg, minHeight: "100%", fontFamily: "Inter, system-ui, sans-serif" }}>
-        <div style={{ color: T.textMid, fontSize: 14 }}>Vous n'êtes pas assigné à une équipe.</div>
+        <div style={{ color: T.textMid, fontSize: 14 }}>{t("team_prices.no_team", "Vous n'êtes pas assigné à une équipe.")}</div>
       </div>
     );
   }
@@ -216,10 +218,10 @@ export default function TeamPricesPage() {
               background: T.greenBg, color: T.green,
               padding: "2px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700,
             }}>
-              Prix équipe actifs
+              {t("team_prices.active_prices", "Prix équipe actifs")}
             </span>
           </div>
-          <p style={{ margin: 0, fontSize: 13, color: T.textMid }}>Catalogue de prix spécifique à votre équipe</p>
+          <p style={{ margin: 0, fontSize: 13, color: T.textMid }}>{t("team_prices.subtitle", "Catalogue de prix spécifique à votre équipe")}</p>
         </div>
         <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
           {syncMsg && (
@@ -241,7 +243,7 @@ export default function TeamPricesPage() {
               <polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" />
               <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
             </svg>
-            {syncing ? "Synchronisation..." : "Synchroniser depuis Produits"}
+            {syncing ? t("team_prices.syncing", "Synchronisation...") : t("team_prices.sync_from_products", "Synchroniser depuis Produits")}
           </button>
           <button
             onClick={openCreate}
@@ -254,16 +256,16 @@ export default function TeamPricesPage() {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-            Nouveau prix
+            {t("team_prices.new_price", "Nouveau prix")}
           </button>
         </div>
       </div>
 
       <div style={{ display: "flex", gap: 14, marginBottom: 24, flexWrap: "wrap" }}>
         {[
-          { label: "Produits total", value: items.length, color: T.main, bg: `${T.main}15` },
-          { label: "Actifs", value: activeCount, color: T.green, bg: T.greenBg },
-          { label: "Inactifs", value: items.length - activeCount, color: T.orange, bg: T.orangeBg },
+          { label: t("team_prices.total_products", "Produits total"), value: items.length, color: T.main, bg: `${T.main}15` },
+          { label: t("team_prices.active", "Actifs"), value: activeCount, color: T.green, bg: T.greenBg },
+          { label: t("team_prices.inactive", "Inactifs"), value: items.length - activeCount, color: T.orange, bg: T.orangeBg },
         ].map(s => (
           <div key={s.label} style={{ flex: "1 1 180px", background: T.bgCard, borderRadius: 12, padding: "16px 20px", border: `1px solid ${T.border}` }}>
             <div style={{ fontSize: 24, fontWeight: 900, color: s.color, marginBottom: 4 }}>{s.value}</div>
@@ -280,26 +282,26 @@ export default function TeamPricesPage() {
             </svg>
             <input
               type="text" value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="Rechercher par nom ou SKU..."
+              placeholder={t("team_prices.search_placeholder", "Rechercher par nom ou SKU...")}
               style={{ border: "none", background: "transparent", outline: "none", fontSize: 13, width: "100%", fontFamily: "inherit", color: T.text }}
             />
           </div>
         </div>
 
         {loading ? (
-          <div style={{ padding: 40, textAlign: "center", color: T.textMid }}>Chargement...</div>
+          <div style={{ padding: 40, textAlign: "center", color: T.textMid }}>{t("common.loading", "Chargement...")}</div>
         ) : filtered.length === 0 ? (
           <div style={{ padding: 40, textAlign: "center", color: T.textMid }}>
             {items.length === 0
-              ? "Aucun prix d'équipe. Cliquez sur « Synchroniser depuis Produits » ou « Nouveau prix »."
-              : "Aucun résultat."}
+              ? t("team_prices.no_prices", "Aucun prix d'équipe. Cliquez sur « Synchroniser depuis Produits » ou « Nouveau prix ».")
+              : t("team_prices.no_results", "Aucun résultat.")}
           </div>
         ) : (
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ background: T.bg }}>
-                  {["Produit", "SKU", "Format", "Prix unitaire", "Unité", "Statut", ""].map(h => (
+                  {[t("team_prices.product", "Produit"), "SKU", "Format", t("team_prices.unit_price", "Prix unitaire"), t("team_prices.unit", "Unité"), t("common.status", "Statut"), ""].map(h => (
                     <th key={h} style={{ textAlign: "left", padding: "10px 16px", fontSize: 10, fontWeight: 800, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5 }}>{h}</th>
                   ))}
                 </tr>
@@ -322,7 +324,7 @@ export default function TeamPricesPage() {
                     </td>
                     <td style={{ padding: "12px 16px" }}>
                       <span style={{ fontSize: 13, fontWeight: 700, color: item.unit_price > 0 ? T.text : T.orange }}>
-                        {item.unit_price > 0 ? fmt(item.unit_price) : "Non défini"}
+                        {item.unit_price > 0 ? fmt(item.unit_price) : t("team_prices.not_defined", "Non défini")}
                       </span>
                     </td>
                     <td style={{ padding: "12px 16px", fontSize: 12, color: T.textMid }}>{item.price_unit}</td>
@@ -336,7 +338,7 @@ export default function TeamPricesPage() {
                           <circle cx={item.is_active ? "28" : "12"} cy="12" r="8" fill="#fff" />
                         </svg>
                         <span style={{ fontSize: 12, fontWeight: 600, color: item.is_active ? T.green : T.textLight }}>
-                          {item.is_active ? "Actif" : "Inactif"}
+                          {item.is_active ? t("team_prices.active", "Actif") : t("team_prices.inactive_status", "Inactif")}
                         </span>
                       </button>
                     </td>
@@ -347,7 +349,7 @@ export default function TeamPricesPage() {
                           style={{ background: T.bgCard2, color: T.textMid, border: "none", borderRadius: 6, padding: "5px 10px", cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "inherit", display: "flex", alignItems: "center", gap: 4 }}
                         >
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
-                          Modifier
+                          {t("common.edit", "Modifier")}
                         </button>
                         <button
                           onClick={() => handleDelete(item.id)}
@@ -371,7 +373,7 @@ export default function TeamPricesPage() {
           <div style={{ background: T.bgCard, borderRadius: 16, width: "100%", maxWidth: 520, boxShadow: "0 24px 64px rgba(0,0,0,0.3)", fontFamily: "Inter, system-ui, sans-serif" }}>
             <div style={{ padding: "18px 24px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <h2 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: T.text }}>
-                {editItem ? "Modifier le prix" : "Nouveau prix d'équipe"}
+                {editItem ? t("team_prices.edit_price", "Modifier le prix") : t("team_prices.new_team_price", "Nouveau prix d'équipe")}
               </h2>
               <button onClick={() => setShowForm(false)} style={{ background: "none", border: "none", cursor: "pointer", color: T.textMid, padding: 4 }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
@@ -381,7 +383,7 @@ export default function TeamPricesPage() {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                 <div style={{ gridColumn: "1 / -1" }}>
                   <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>
-                    Nom du produit <span style={{ color: T.red }}>*</span>
+                    {t("team_prices.product_name", "Nom du produit")} <span style={{ color: T.red }}>*</span>
                   </label>
                   <input style={inputStyle} value={form.product_name} onChange={e => setForm(f => ({ ...f, product_name: e.target.value }))} placeholder="Ex: Revêtement Toiture..." />
                 </div>
@@ -390,15 +392,15 @@ export default function TeamPricesPage() {
                   <input style={inputStyle} value={form.sku} onChange={e => setForm(f => ({ ...f, sku: e.target.value }))} placeholder="Ex: SKU-001" />
                 </div>
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>Ordre d'affichage</label>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>{t("team_prices.sort_order", "Ordre d'affichage")}</label>
                   <input type="number" style={inputStyle} value={form.sort_order} onChange={e => setForm(f => ({ ...f, sort_order: Number(e.target.value) }))} min={0} />
                 </div>
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>Prix unitaire ($)</label>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>{t("team_prices.unit_price_label", "Prix unitaire ($)")}</label>
                   <input type="number" step="0.01" min="0" style={inputStyle} value={form.unit_price || ""} onChange={e => setForm(f => ({ ...f, unit_price: Number(e.target.value) }))} placeholder="0.00" />
                 </div>
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>Unité</label>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>{t("team_prices.unit", "Unité")}</label>
                   <select style={inputStyle} value={form.price_unit} onChange={e => setForm(f => ({ ...f, price_unit: e.target.value }))}>
                     {PRICE_UNITS.map(u => <option key={u} value={u}>{u}</option>)}
                   </select>
@@ -441,7 +443,7 @@ export default function TeamPricesPage() {
                     <circle cx={form.is_active ? "28" : "12"} cy="12" r="8" fill="#fff" />
                   </svg>
                   <span style={{ fontSize: 13, fontWeight: 600, color: form.is_active ? T.green : T.textMid }}>
-                    {form.is_active ? "Actif" : "Inactif"}
+                    {form.is_active ? t("team_prices.active", "Actif") : t("team_prices.inactive_status", "Inactif")}
                   </span>
                 </button>
               </div>
@@ -451,7 +453,7 @@ export default function TeamPricesPage() {
                 onClick={() => setShowForm(false)}
                 style={{ background: T.bg, color: T.textMid, border: `1px solid ${T.border}`, borderRadius: 8, padding: "9px 20px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
               >
-                Annuler
+                {t("common.cancel", "Annuler")}
               </button>
               <button
                 onClick={handleSave}
@@ -466,7 +468,7 @@ export default function TeamPricesPage() {
                 }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>
-                {saving ? "Sauvegarde..." : editItem ? "Sauvegarder" : "Créer"}
+                {saving ? t("common.saving", "Sauvegarde...") : editItem ? t("common.save", "Sauvegarder") : t("common.create", "Créer")}
               </button>
             </div>
           </div>

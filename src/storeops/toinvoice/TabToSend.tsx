@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { InvoiceDoc, T, fmt, fmtDate, daysSince, PICKUP_STATUS_CONFIG } from "./toInvoiceTypes";
 import { supabase } from "../../supabaseClient";
 import EmailToolModal from "./EmailToolModal";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   docs: InvoiceDoc[];
@@ -79,6 +80,7 @@ function DocsTable({
   onSendOne: (d: InvoiceDoc) => void;
   onMarkBilled: (d: InvoiceDoc) => void;
 }) {
+  const { t } = useLanguage();
   const thStyle: React.CSSProperties = {
     textAlign: "left", fontSize: 10, fontWeight: 700, color: T.textMid,
     textTransform: "uppercase", letterSpacing: 0.6, padding: "8px 12px 10px",
@@ -133,13 +135,13 @@ function DocsTable({
                         onClick={() => onSendOne(d)}
                         style={{ background: T.main, color: "#fff", border: "none", borderRadius: 6, padding: "5px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}
                       >
-                        Envoyer à SCI
+                        {t("tosend.send_sci")}
                       </button>
                       <button
                         onClick={() => onMarkBilled(d)}
                         style={{ background: T.greenBg, color: T.green, border: "none", borderRadius: 6, padding: "5px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}
                       >
-                        Marquer facturé
+                        {t("tosend.mark_billed")}
                       </button>
                     </div>
                   </td>
@@ -154,6 +156,7 @@ function DocsTable({
 }
 
 export default function TabToSend({ docs, onRefresh, onDocClick }: Props) {
+  const { t } = useLanguage();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [emailDocs, setEmailDocs] = useState<InvoiceDoc[] | null>(null);
 
@@ -195,8 +198,8 @@ export default function TabToSend({ docs, onRefresh, onDocClick }: Props) {
     return (
       <div style={{ background: T.card, borderRadius: 12, border: `1px solid ${T.border}`, padding: 40, textAlign: "center" }}>
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke={T.green} strokeWidth="1.5" style={{ marginBottom: 12 }}><polyline points="20 6 9 17 4 12"/></svg>
-        <div style={{ fontSize: 16, fontWeight: 700, color: T.green, marginBottom: 4 }}>Tout est à jour</div>
-        <div style={{ fontSize: 13, color: T.textMid }}>Aucun document en attente d'envoi à SCI.</div>
+        <div style={{ fontSize: 16, fontWeight: 700, color: T.green, marginBottom: 4 }}>{t("tosend.all_up_to_date")}</div>
+        <div style={{ fontSize: 13, color: T.textMid }}>{t("tosend.no_pending")}</div>
       </div>
     );
   }
@@ -206,26 +209,26 @@ export default function TabToSend({ docs, onRefresh, onDocClick }: Props) {
       {over7.length > 0 && (
         <div style={{ background: T.redBg, border: `1px solid ${T.red}40`, borderRadius: 10, padding: "10px 16px", marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={T.red} strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <span style={{ fontSize: 13, fontWeight: 700, color: T.red }}>URGENT — {over7.length} document{over7.length !== 1 ? "s" : ""} en attente depuis plus de 7 jours. Envoyer à SCI immédiatement.</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: T.red }}>{t("tosend.urgent_7d").replace("{count}", String(over7.length))}</span>
         </div>
       )}
       {over3.length > 0 && over7.length === 0 && (
         <div style={{ background: T.orangeBg, border: `1px solid ${T.orange}40`, borderRadius: 10, padding: "10px 16px", marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={T.orange} strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          <span style={{ fontSize: 13, fontWeight: 600, color: T.orange }}>{over3.length} document{over3.length !== 1 ? "s" : ""} en attente depuis plus de 3 jours — envoyer à SCI rapidement.</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: T.orange }}>{t("tosend.warning_3d").replace("{count}", String(over3.length))}</span>
         </div>
       )}
 
       {selectedDocs.length > 0 && (
         <div style={{ background: T.mainBg, border: `1px solid ${T.main}30`, borderRadius: 10, padding: "10px 16px", marginBottom: 12, display: "flex", alignItems: "center", gap: 12 }}>
           <span style={{ fontSize: 13, fontWeight: 600, color: T.main }}>
-            {selectedDocs.length} document{selectedDocs.length !== 1 ? "s" : ""} sélectionné{selectedDocs.length !== 1 ? "s" : ""} — {fmt(selectedDocs.reduce((a, d) => a + d.value, 0))}
+            {selectedDocs.length} {t("tosend.selected_docs")} — {fmt(selectedDocs.reduce((a, d) => a + d.value, 0))}
           </span>
           <button
             onClick={() => setEmailDocs(selectedDocs)}
             style={{ background: T.main, color: "#fff", border: "none", borderRadius: 7, padding: "6px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", marginLeft: "auto" }}
           >
-            Envoyer la sélection à SCI
+            {t("tosend.send_selection")}
           </button>
         </div>
       )}
@@ -233,7 +236,7 @@ export default function TabToSend({ docs, onRefresh, onDocClick }: Props) {
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
         {orderDocs.length > 0 && (
           <div>
-            <SectionHeader label="Commandes" count={orderDocs.length} color={T.green} />
+            <SectionHeader label={t("tosend.orders")} count={orderDocs.length} color={T.green} />
             <DocsTable
               docs={orderDocs}
               selected={selected}
@@ -249,7 +252,7 @@ export default function TabToSend({ docs, onRefresh, onDocClick }: Props) {
 
         {pickupDocs.length > 0 && (
           <div>
-            <SectionHeader label="Pickup Tickets" count={pickupDocs.length} color={T.blue} />
+            <SectionHeader label={t("tosend.pickup_tickets")} count={pickupDocs.length} color={T.blue} />
             <DocsTable
               docs={pickupDocs}
               selected={selected}

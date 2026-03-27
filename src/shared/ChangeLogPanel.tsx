@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ChangeLogEntry, fetchChangeLogs, CHANGE_TYPE_LABELS, CHANGE_TYPE_COLORS, ChangeType } from "./changeLogUtils";
 import { T } from "../theme";
+import { useLanguage } from "../i18n/LanguageContext";
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleString("fr-CA", {
@@ -18,6 +19,7 @@ interface Props {
 export default function ChangeLogPanel({ entityType, entityId, refreshKey = 0 }: Props) {
   const [logs, setLogs] = useState<ChangeLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useLanguage();
 
   useEffect(() => {
     setLoading(true);
@@ -30,7 +32,7 @@ export default function ChangeLogPanel({ entityType, entityId, refreshKey = 0 }:
   if (loading) {
     return (
       <div style={{ padding: "32px 0", textAlign: "center", color: T.textLight, fontSize: 13 }}>
-        Chargement de l'historique...
+        {t("changelog.loading")}
       </div>
     );
   }
@@ -41,7 +43,7 @@ export default function ChangeLogPanel({ entityType, entityId, refreshKey = 0 }:
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ marginBottom: 10, opacity: 0.4 }}>
           <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
         </svg>
-        <div>Aucun historique de modifications</div>
+        <div>{t("changelog.no_history")}</div>
       </div>
     );
   }

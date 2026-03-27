@@ -5,6 +5,7 @@ import { logActivity } from "../../lib/activityLogger";
 import { useAuth } from "../../contexts/AuthContext";
 import { AdminProfile } from "./adminTypes";
 import { T } from "../../theme";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 type Props = {
   target: AdminProfile;
@@ -19,11 +20,12 @@ export default function SuspendModal({ target, onClose, onDone }: Props) {
   const [untilDate, setUntilDate] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const { t } = useLanguage();
 
   const isSuspended = target.is_suspended;
 
   const submit = async () => {
-    if (!isSuspended && !reason.trim()) { setError("Une raison est requise."); return; }
+    if (!isSuspended && !reason.trim()) { setError(t("suspend.reason_required")); return; }
     setSubmitting(true);
     setError("");
     try {
@@ -36,7 +38,7 @@ export default function SuspendModal({ target, onClose, onDone }: Props) {
       }
       onDone();
     } catch {
-      setError("Une erreur est survenue.");
+      setError(t("suspend.error"));
     } finally {
       setSubmitting(false);
     }
@@ -47,7 +49,7 @@ export default function SuspendModal({ target, onClose, onDone }: Props) {
       <div style={{ background: T.bgCard, borderRadius: 16, width: 440, boxShadow: "0 20px 60px rgba(0,0,0,0.2)", overflow: "hidden" }}>
         <div style={{ padding: "20px 24px 16px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <h2 style={{ fontSize: 18, fontWeight: 700, color: T.text, margin: 0 }}>
-            {isSuspended ? "Lever la suspension" : "Suspendre l'utilisateur"}
+            {isSuspended ? t("suspend.unsuspend_title") : t("suspend.suspend_title")}
           </h2>
           <button onClick={onClose} style={{ border: "none", background: "none", cursor: "pointer" }}><X size={18} /></button>
         </div>
@@ -64,16 +66,16 @@ export default function SuspendModal({ target, onClose, onDone }: Props) {
           {!isSuspended && (
             <>
               <div style={{ marginBottom: 16 }}>
-                <label style={{ fontSize: 12, fontWeight: 600, color: T.mid, display: "block", marginBottom: 6 }}>Raison *</label>
-                <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={3} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 14, resize: "vertical", boxSizing: "border-box" }} placeholder="Décrivez la raison..." />
+                <label style={{ fontSize: 12, fontWeight: 600, color: T.mid, display: "block", marginBottom: 6 }}>{t("suspend.reason")}</label>
+                <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={3} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 14, resize: "vertical", boxSizing: "border-box" }} placeholder={t("suspend.reason_placeholder")} />
               </div>
               <div style={{ marginBottom: 8 }}>
-                <label style={{ fontSize: 12, fontWeight: 600, color: T.mid, display: "block", marginBottom: 8 }}>Durée</label>
+                <label style={{ fontSize: 12, fontWeight: 600, color: T.mid, display: "block", marginBottom: 8 }}>{t("suspend.duration")}</label>
                 <div style={{ display: "flex", gap: 12 }}>
                   {(["indefinite", "date"] as const).map((d) => (
                     <label key={d} style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", fontSize: 13 }}>
                       <input type="radio" value={d} checked={duration === d} onChange={() => setDuration(d)} />
-                      {d === "indefinite" ? "Indéfini" : "Jusqu'à une date"}
+                      {d === "indefinite" ? t("suspend.indefinite") : t("suspend.until_date")}
                     </label>
                   ))}
                 </div>
@@ -86,7 +88,7 @@ export default function SuspendModal({ target, onClose, onDone }: Props) {
 
           {isSuspended && (
             <p style={{ fontSize: 13, color: T.mid }}>
-              Cet utilisateur est actuellement suspendu.{target.suspension_reason ? ` Raison: "${target.suspension_reason}"` : ""} Confirmer pour lever la suspension?
+              {t("suspend.currently_suspended")}{target.suspension_reason ? ` Raison: "${target.suspension_reason}"` : ""} {t("suspend.confirm_lift")}
             </p>
           )}
 
@@ -94,9 +96,9 @@ export default function SuspendModal({ target, onClose, onDone }: Props) {
         </div>
 
         <div style={{ padding: "0 24px 20px", display: "flex", gap: 10, justifyContent: "flex-end" }}>
-          <button onClick={onClose} style={{ padding: "9px 20px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, fontSize: 14, cursor: "pointer" }}>Annuler</button>
+          <button onClick={onClose} style={{ padding: "9px 20px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, fontSize: 14, cursor: "pointer" }}>{t("cancel")}</button>
           <button onClick={submit} disabled={submitting} style={{ padding: "9px 24px", borderRadius: 8, border: "none", background: isSuspended ? T.green : T.red, color: "#fff", fontSize: 14, fontWeight: 600, cursor: submitting ? "not-allowed" : "pointer", opacity: submitting ? 0.7 : 1 }}>
-            {submitting ? "..." : isSuspended ? "Lever la suspension" : "Suspendre"}
+            {submitting ? "..." : isSuspended ? t("suspend.lift") : t("suspend.suspend")}
           </button>
         </div>
       </div>

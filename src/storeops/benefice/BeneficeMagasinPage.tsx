@@ -6,6 +6,7 @@ import ProfitCircle from "./ProfitCircle";
 import ProfitInvoiceLog from "./ProfitInvoiceLog";
 import ProfitDetailModal from "./ProfitDetailModal";
 import AddExpenseModal from "./AddExpenseModal";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface ProductCostMap {
   [productId: string]: number;
@@ -58,6 +59,7 @@ function buildWeeks(docs: BilledDoc[], generalExpenses: StoreExpense[]): WeekDat
 
 export default function BeneficeMagasinPage() {
   const { profile, storeCode } = useAuth();
+  const { t } = useLanguage();
   const [docs, setDocs] = useState<BilledDoc[]>([]);
   const [generalExpenses, setGeneralExpenses] = useState<StoreExpense[]>([]);
   const [loading, setLoading] = useState(true);
@@ -228,7 +230,7 @@ export default function BeneficeMagasinPage() {
   if (loading) {
     return (
       <div style={{ padding: "28px 32px", background: T.cardAlt, minHeight: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ fontSize: 14, color: T.textMid }}>Chargement des donnees de benefice...</div>
+        <div style={{ fontSize: 14, color: T.textMid }}>{t("benefice.loading")}</div>
       </div>
     );
   }
@@ -266,26 +268,26 @@ export default function BeneficeMagasinPage() {
               </svg>
             </div>
             <div>
-              <div style={{ fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 1 }}>Benefice Hebdomadaire</div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 1 }}>{t("benefice.weekly_profit")}</div>
               <div style={{ fontSize: 22, fontWeight: 900, color: profitColor, lineHeight: 1, marginTop: 2 }}>{fmt(totals.profit)}</div>
             </div>
           </div>
 
           <div style={{ display: "flex", gap: 20 }}>
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 9, fontWeight: 700, color: T.textMid, textTransform: "uppercase" }}>Revenus</div>
+              <div style={{ fontSize: 9, fontWeight: 700, color: T.textMid, textTransform: "uppercase" }}>{t("benefice.revenue")}</div>
               <div style={{ fontSize: 14, fontWeight: 800, color: T.text }}>{fmt(totals.revenue)}</div>
             </div>
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 9, fontWeight: 700, color: T.textMid, textTransform: "uppercase" }}>Couts</div>
+              <div style={{ fontSize: 9, fontWeight: 700, color: T.textMid, textTransform: "uppercase" }}>{t("benefice.costs")}</div>
               <div style={{ fontSize: 14, fontWeight: 800, color: T.red }}>{fmt(totals.cost)}</div>
             </div>
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 9, fontWeight: 700, color: T.textMid, textTransform: "uppercase" }}>Depenses</div>
+              <div style={{ fontSize: 9, fontWeight: 700, color: T.textMid, textTransform: "uppercase" }}>{t("benefice.expenses")}</div>
               <div style={{ fontSize: 14, fontWeight: 800, color: T.orange }}>{fmt(totals.expenses)}</div>
             </div>
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 9, fontWeight: 700, color: T.textMid, textTransform: "uppercase" }}>Marge</div>
+              <div style={{ fontSize: 9, fontWeight: 700, color: T.textMid, textTransform: "uppercase" }}>{t("benefice.margin")}</div>
               <div style={{ fontSize: 14, fontWeight: 800, color: profitColor }}>{fmtPct(marginPct)}</div>
             </div>
           </div>
@@ -299,8 +301,8 @@ export default function BeneficeMagasinPage() {
       <div style={{ padding: "28px 32px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 800, color: T.text, margin: 0 }}>Benefice Magasin</h1>
-            <div style={{ fontSize: 13, color: T.textMid, marginTop: 4 }}>Suivi des profits hebdomadaires sur les factures</div>
+            <h1 style={{ fontSize: 24, fontWeight: 800, color: T.text, margin: 0 }}>{t("benefice.store_profit")}</h1>
+            <div style={{ fontSize: 13, color: T.textMid, marginTop: 4 }}>{t("benefice.weekly_tracking")}</div>
           </div>
           <button
             onClick={() => setShowExpenseModal(true)}
@@ -311,7 +313,7 @@ export default function BeneficeMagasinPage() {
             }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Ajouter depense
+            {t("benefice.add_expense")}
           </button>
         </div>
 
@@ -353,7 +355,7 @@ export default function BeneficeMagasinPage() {
         <div style={{ marginBottom: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
             <div style={{ width: 3, height: 18, borderRadius: 2, background: T.green }} />
-            <span style={{ fontSize: 15, fontWeight: 800, color: T.text }}>Factures — {currentWeek?.label || "Cette semaine"}</span>
+            <span style={{ fontSize: 15, fontWeight: 800, color: T.text }}>{t("benefice.invoices")} — {currentWeek?.label || t("benefice.this_week", "Cette semaine")}</span>
             <span style={{ background: T.greenBg, color: T.green, borderRadius: 20, padding: "1px 9px", fontSize: 11, fontWeight: 700 }}>
               {currentWeek?.docs.length || 0}
             </span>

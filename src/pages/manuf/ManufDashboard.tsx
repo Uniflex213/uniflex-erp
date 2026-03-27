@@ -3,6 +3,7 @@ import { supabase } from "../../supabaseClient";
 import { STATUS_CONFIG } from "../../orders/orderTypes";
 import { SAMPLE_STATUS_COLORS, SAMPLE_STATUS_BG } from "../../sales/sampleTypes";
 import { T } from "../../theme";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 const fmt = (n: number) =>
   new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
@@ -42,6 +43,7 @@ interface RecentOrder { id: string; client: string; total: number; status: strin
 interface RecentSample { id: string; lead_company_name: string; agent_name: string; status: string; created_at: string; items?: { product_name: string }[]; }
 
 export default function ManufDashboard() {
+  const { t } = useLanguage();
   const [kpis, setKpis] = useState<KpiData>({ ordersEnCours: 0, aFacturer: 0, samplesEnAttente: 0, alertesStock: 0 });
   const [orders, setOrders] = useState<RecentOrder[]>([]);
   const [samples, setSamples] = useState<RecentSample[]>([]);
@@ -84,23 +86,23 @@ export default function ManufDashboard() {
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
     doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
-    doc.text("Résumé MANUF / SCI", 20, 24);
+    doc.text(t("manuf_dashboard.pdf_title", "Résumé MANUF / SCI"), 20, 24);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
-    doc.text(`Généré le ${new Date().toLocaleString("fr-CA")}`, 20, 32);
+    doc.text(`${t("manuf_dashboard.generated_on", "Généré le")} ${new Date().toLocaleString("fr-CA")}`, 20, 32);
     doc.setLineWidth(0.4);
     doc.line(20, 36, 190, 36);
 
     const kpiData = [
-      ["Commandes en cours", String(kpis.ordersEnCours)],
-      ["À facturer (SCI)", fmt(kpis.aFacturer)],
-      ["Échantillons en attente", String(kpis.samplesEnAttente)],
-      ["Alertes stock", String(kpis.alertesStock)],
+      [t("manuf_dashboard.orders_in_progress", "Commandes en cours"), String(kpis.ordersEnCours)],
+      [t("manuf_dashboard.to_invoice", "À facturer (SCI)"), fmt(kpis.aFacturer)],
+      [t("manuf_dashboard.samples_pending", "Échantillons en attente"), String(kpis.samplesEnAttente)],
+      [t("manuf_dashboard.stock_alerts", "Alertes stock"), String(kpis.alertesStock)],
     ];
     let y = 46;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(13);
-    doc.text("Indicateurs clés", 20, y);
+    doc.text(t("manuf_dashboard.key_indicators", "Indicateurs clés"), 20, y);
     y += 10;
     for (const [label, val] of kpiData) {
       doc.setFont("helvetica", "normal");
@@ -118,26 +120,26 @@ export default function ManufDashboard() {
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: T.text }}>Dashboard SCI</h1>
-            <span style={{ background: T.accentBg, color: T.accent, fontSize: 10, fontWeight: 800, padding: "3px 9px", borderRadius: 5, border: `1px solid ${T.accent}33`, letterSpacing: 0.4 }}>LECTURE SEULE</span>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: T.text }}>{t("manuf_dashboard.title", "Dashboard SCI")}</h1>
+            <span style={{ background: T.accentBg, color: T.accent, fontSize: 10, fontWeight: 800, padding: "3px 9px", borderRadius: 5, border: `1px solid ${T.accent}33`, letterSpacing: 0.4 }}>{t("manuf_common.read_only", "LECTURE SEULE")}</span>
           </div>
-          <p style={{ margin: 0, fontSize: 13, color: T.textMid }}>Vue d'ensemble de la plateforme pour l'équipe de fabrication.</p>
+          <p style={{ margin: 0, fontSize: 13, color: T.textMid }}>{t("manuf_dashboard.subtitle", "Vue d'ensemble de la plateforme pour l'équipe de fabrication.")}</p>
         </div>
         <button onClick={exportPDF} style={{ display: "flex", alignItems: "center", gap: 7, background: T.main, color: "#fff", border: "none", borderRadius: 9, padding: "10px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Exporter résumé PDF
+          {t("manuf_dashboard.export_pdf", "Exporter résumé PDF")}
         </button>
       </div>
 
       {loading ? (
-        <div style={{ textAlign: "center", padding: 60, color: T.textMid }}>Chargement...</div>
+        <div style={{ textAlign: "center", padding: 60, color: T.textMid }}>{t("common.loading", "Chargement...")}</div>
       ) : (
         <>
           <div style={{ display: "flex", gap: 16, marginBottom: 24 }}>
-            <KpiCard label="Commandes en cours" value={kpis.ordersEnCours}
+            <KpiCard label={t("manuf_dashboard.orders_in_progress", "Commandes en cours")} value={kpis.ordersEnCours}
               icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>}
-              color={T.main} bg={T.mainBg} sub="Statut non complété" />
-            <KpiCard label="À facturer (SCI)" value={fmt(kpis.aFacturer)}
+              color={T.main} bg={T.mainBg} sub={t("manuf_dashboard.not_completed", "Statut non complété")} />
+            <KpiCard label={t("manuf_dashboard.to_invoice", "À facturer (SCI)")} value={fmt(kpis.aFacturer)}
               icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>}
               color={T.green} bg={T.greenBg} sub="Non facturé par SCI" />
             <KpiCard label="Échantillons en attente" value={kpis.samplesEnAttente}

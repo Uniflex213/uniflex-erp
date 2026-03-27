@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { CRMLead, STAGE_COLORS, TEMP_COLORS } from "../crmTypes";
 import { T, fmt, daysSince } from "./workstationTypes";
 import { useCurrentAgent } from "../../hooks/useCurrentAgent";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   leads: CRMLead[];
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export default function WidgetDeals({ leads, onOpenLead }: Props) {
+  const { t } = useLanguage();
   const agent = useCurrentAgent();
   const myLeads = useMemo(() => leads.filter(l => l.assigned_agent_id === agent.id), [leads, agent.id]);
 
@@ -37,9 +39,9 @@ export default function WidgetDeals({ leads, onOpenLead }: Props) {
   if (dealLeads.length === 0) {
     return (
       <div style={{ background: T.card, borderRadius: 16, border: `1px solid ${T.border}`, padding: 24, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
-        <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 6 }}>Deals à closer cette semaine</div>
+        <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 6 }}>{t("ws.deals.title", "Deals à closer cette semaine")}</div>
         <div style={{ color: T.textLight, fontSize: 13, fontStyle: "italic", padding: "16px 0" }}>
-          Aucun deal en cours (Proposition envoyée ou Négociation)
+          {t("ws.deals.none", "Aucun deal en cours (Proposition envoyée ou Négociation)")}
         </div>
       </div>
     );
@@ -49,17 +51,17 @@ export default function WidgetDeals({ leads, onOpenLead }: Props) {
     <div style={{ background: T.card, borderRadius: 16, border: `1px solid ${T.border}`, padding: 24, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
         <div>
-          <div style={{ fontWeight: 800, fontSize: 15 }}>Deals à closer cette semaine</div>
+          <div style={{ fontWeight: 800, fontSize: 15 }}>{t("ws.deals.title", "Deals à closer cette semaine")}</div>
           <div style={{ fontSize: 12, color: T.textMid, marginTop: 2 }}>
-            {dealLeads.length} deal{dealLeads.length !== 1 ? "s" : ""} · valeur totale {fmt(dealLeads.reduce((s, l) => s + l.estimated_value, 0))}
+            {dealLeads.length} deal{dealLeads.length !== 1 ? "s" : ""} · {t("ws.deals.total_value", "valeur totale")} {fmt(dealLeads.reduce((s, l) => s + l.estimated_value, 0))}
           </div>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           <span style={{ background: "#dcfce7", color: "#15803d", padding: "3px 8px", borderRadius: 6, fontSize: 11, fontWeight: 700 }}>
-            {dealLeads.filter(l => l.closing_probability >= 70).length} chaud{dealLeads.filter(l => l.closing_probability >= 70).length !== 1 ? "s" : ""}
+            {dealLeads.filter(l => l.closing_probability >= 70).length} {t("ws.deals.hot", "chaud(s)")}
           </span>
           <span style={{ background: "#fef3c7", color: "#92400e", padding: "3px 8px", borderRadius: 6, fontSize: 11, fontWeight: 700 }}>
-            {dealLeads.filter(l => !hasNextAction(l)).length} sans action
+            {dealLeads.filter(l => !hasNextAction(l)).length} {t("ws.deals.no_action", "sans action")}
           </span>
         </div>
       </div>
@@ -68,7 +70,7 @@ export default function WidgetDeals({ leads, onOpenLead }: Props) {
         <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 780 }}>
           <thead>
             <tr style={{ background: T.cardAlt }}>
-              {["Lead", "Étape", "Valeur", "Temp.", "Jours dans étape", "Probabilité", "Prochaine action"].map(h => (
+              {[t("ws.deals.lead", "Lead"), t("ws.deals.stage", "Étape"), t("ws.deals.value", "Valeur"), t("ws.deals.temp", "Temp."), t("ws.deals.days_in_stage", "Jours dans étape"), t("ws.deals.probability", "Probabilité"), t("ws.deals.next_action", "Prochaine action")].map(h => (
                 <th key={h} style={thColor}>{h}</th>
               ))}
             </tr>
@@ -140,7 +142,7 @@ export default function WidgetDeals({ leads, onOpenLead }: Props) {
                   <td style={tdStyle}>
                     {noAction ? (
                       <span style={{ fontSize: 11, fontWeight: 700, color: T.orange }}>
-                        Aucune action planifiée
+                        {t("ws.deals.no_planned_action", "Aucune action planifiée")}
                       </span>
                     ) : (
                       <span style={{ fontSize: 11, color: T.text }}>{nextAction}</span>

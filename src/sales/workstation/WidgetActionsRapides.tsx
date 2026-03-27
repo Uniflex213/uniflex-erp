@@ -4,6 +4,7 @@ import { CRMLead, CRMActivity, CRMReminder, Priority } from "../crmTypes";
 import { T, mkId, isToday } from "./workstationTypes";
 import { useCurrentAgent } from "../../hooks/useCurrentAgent";
 import { useApp } from "../../AppContext";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   leads: CRMLead[];
@@ -15,6 +16,7 @@ interface Props {
 type ModalType = "appel" | "email" | "note" | "rappel" | null;
 
 export default function WidgetActionsRapides({ leads, onNavigateNewLead, onNavigatePricelist, onNavigateOrders }: Props) {
+  const { t } = useLanguage();
   const agent = useCurrentAgent();
   const { addActivity: persistActivity, addReminder: persistReminder } = useApp();
   const [modal, setModal] = useState<ModalType>(null);
@@ -84,13 +86,13 @@ export default function WidgetActionsRapides({ leads, onNavigateNewLead, onNavig
   };
 
   const actions = [
-    { id: "appel", icon: "📞", label: "Logger un appel", color: "#22c55e", count: todayCounts.appel },
-    { id: "email", icon: "📧", label: "Logger un email", color: "#3b82f6", count: todayCounts.email },
-    { id: "note", icon: "📝", label: "Nouvelle note", color: "#8b5cf6", count: todayCounts.note },
-    { id: "rappel", icon: "📅", label: "Nouveau rappel", color: T.orange, count: todayCounts.rappel },
-    { id: "lead", icon: "🆕", label: "Nouveau lead", color: T.main, count: null },
-    { id: "pricelist", icon: "📄", label: "Pricelist", color: "#0891b2", count: null },
-    { id: "orders", icon: "📦", label: "Commande", color: "#d97706", count: null },
+    { id: "appel", icon: "📞", label: t("ws.actions.log_call", "Logger un appel"), color: "#22c55e", count: todayCounts.appel },
+    { id: "email", icon: "📧", label: t("ws.actions.log_email", "Logger un email"), color: "#3b82f6", count: todayCounts.email },
+    { id: "note", icon: "📝", label: t("ws.actions.new_note", "Nouvelle note"), color: "#8b5cf6", count: todayCounts.note },
+    { id: "rappel", icon: "📅", label: t("ws.actions.new_reminder", "Nouveau rappel"), color: T.orange, count: todayCounts.rappel },
+    { id: "lead", icon: "🆕", label: t("ws.actions.new_lead", "Nouveau lead"), color: T.main, count: null },
+    { id: "pricelist", icon: "📄", label: t("ws.actions.pricelist", "Pricelist"), color: "#0891b2", count: null },
+    { id: "orders", icon: "📦", label: t("ws.actions.order", "Commande"), color: "#d97706", count: null },
   ] as const;
 
   const handleAction = (id: string) => {
@@ -108,7 +110,7 @@ export default function WidgetActionsRapides({ leads, onNavigateNewLead, onNavig
       <div style={{ background: T.card, borderRadius: 16, border: `1px solid ${T.border}`, padding: "16px 24px", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <div style={{ fontSize: 12, fontWeight: 800, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginRight: 4 }}>
-            Actions rapides
+            {t("ws.actions.title", "Actions rapides")}
           </div>
           {actions.map(a => (
             <button
@@ -167,7 +169,7 @@ export default function WidgetActionsRapides({ leads, onNavigateNewLead, onNavig
               created_at: new Date().toISOString(),
             });
             if (!andAnother) setModal(null);
-            showFlash("Appel enregistré");
+            showFlash(t("ws.actions.call_saved", "Appel enregistré"));
           }}
         />
       )}
@@ -188,7 +190,7 @@ export default function WidgetActionsRapides({ leads, onNavigateNewLead, onNavig
               created_at: new Date().toISOString(),
             });
             if (!andAnother) setModal(null);
-            showFlash("Email enregistré");
+            showFlash(t("ws.actions.email_saved", "Email enregistré"));
           }}
         />
       )}
@@ -208,7 +210,7 @@ export default function WidgetActionsRapides({ leads, onNavigateNewLead, onNavig
               created_at: new Date().toISOString(),
             });
             if (!andAnother) setModal(null);
-            showFlash("Note enregistrée");
+            showFlash(t("ws.actions.note_saved", "Note enregistrée"));
           }}
         />
       )}
@@ -230,7 +232,7 @@ export default function WidgetActionsRapides({ leads, onNavigateNewLead, onNavig
               created_at: new Date().toISOString(),
             });
             if (!andAnother) setModal(null);
-            showFlash("Rappel créé");
+            showFlash(t("ws.actions.reminder_created", "Rappel créé"));
           }}
         />
       )}
@@ -238,10 +240,12 @@ export default function WidgetActionsRapides({ leads, onNavigateNewLead, onNavig
   );
 }
 
-function ModalWrapper({ title, onClose, children, onSave, onSaveAndAdd, saveLabel = "Enregistrer" }: {
+function ModalWrapper({ title, onClose, children, onSave, onSaveAndAdd, saveLabel }: {
   title: string; onClose: () => void; children: React.ReactNode;
   onSave: () => void; onSaveAndAdd?: () => void; saveLabel?: string;
 }) {
+  const { t } = useLanguage();
+  const resolvedSaveLabel = saveLabel || t("common.save", "Enregistrer");
   return createPortal(
     <div
       style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}
@@ -256,10 +260,10 @@ function ModalWrapper({ title, onClose, children, onSave, onSaveAndAdd, saveLabe
         <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 20 }}>
           <div style={{ display: "flex", gap: 8 }}>
             <button onClick={onSave} style={{ flex: 1, background: T.main, color: "#fff", border: "none", borderRadius: 10, padding: "11px 0", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
-              {saveLabel}
+              {resolvedSaveLabel}
             </button>
             <button onClick={onClose} style={{ padding: "11px 20px", background: T.cardAlt, border: "none", borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
-              Annuler
+              {t("common.cancel", "Annuler")}
             </button>
           </div>
           {onSaveAndAdd && (
@@ -267,7 +271,7 @@ function ModalWrapper({ title, onClose, children, onSave, onSaveAndAdd, saveLabe
               onClick={onSaveAndAdd}
               style={{ width: "100%", background: "transparent", color: T.main, border: `1.5px dashed ${T.main}55`, borderRadius: 10, padding: "9px 0", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
             >
-              + Enregistrer et en ajouter un autre
+              {t("ws.actions.save_add_another", "+ Enregistrer et en ajouter un autre")}
             </button>
           )}
         </div>
@@ -278,12 +282,13 @@ function ModalWrapper({ title, onClose, children, onSave, onSaveAndAdd, saveLabe
 }
 
 function LeadSelect({ leads, value, onChange }: { leads: CRMLead[]; value: string; onChange: (id: string) => void }) {
+  const { t } = useLanguage();
   const iStyle = { width: "100%", border: `1.5px solid ${T.border}`, borderRadius: 8, padding: "8px 10px", fontSize: 13, fontFamily: "inherit", outline: "none", background: T.card };
   return (
     <div style={{ marginBottom: 14 }}>
       <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>Lead</label>
       <select value={value} onChange={e => onChange(e.target.value)} style={{ ...iStyle, cursor: "pointer" }}>
-        <option value="">Sélectionner un lead...</option>
+        <option value="">{t("ws.actions.select_lead", "Sélectionner un lead...")}</option>
         {leads.map(l => <option key={l.id} value={l.id}>{l.company_name}</option>)}
       </select>
     </div>
@@ -291,6 +296,7 @@ function LeadSelect({ leads, value, onChange }: { leads: CRMLead[]; value: strin
 }
 
 function AppelModal({ leads, onClose, onSave }: { leads: CRMLead[]; onClose: () => void; onSave: (leadId: string, data: any, andAnother?: boolean) => void }) {
+  const { t } = useLanguage();
   const [leadId, setLeadId] = useState("");
   const [duration, setDuration] = useState(10);
   const [result, setResult] = useState("Positif");
@@ -302,7 +308,7 @@ function AppelModal({ leads, onClose, onSave }: { leads: CRMLead[]; onClose: () 
 
   return (
     <ModalWrapper
-      title="📞 Logger un appel"
+      title={`📞 ${t("ws.actions.log_call", "Logger un appel")}`}
       onClose={onClose}
       onSave={() => isValid && onSave(leadId, { duration, result, summary })}
       onSaveAndAdd={() => { if (!isValid) return; onSave(leadId, { duration, result, summary }, true); reset(); }}
@@ -310,11 +316,11 @@ function AppelModal({ leads, onClose, onSave }: { leads: CRMLead[]; onClose: () 
       <LeadSelect leads={leads} value={leadId} onChange={setLeadId} />
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
         <div>
-          <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>Durée (min)</label>
+          <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>{t("ws.actions.duration", "Durée (min)")}</label>
           <input type="number" value={duration} min={1} onChange={e => setDuration(parseInt(e.target.value) || 0)} style={iStyle} />
         </div>
         <div>
-          <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>Résultat</label>
+          <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>{t("ws.actions.result", "Résultat")}</label>
           <select value={result} onChange={e => setResult(e.target.value)} style={{ ...iStyle, cursor: "pointer" }}>
             <option>Positif</option>
             <option>Neutre</option>
@@ -323,14 +329,15 @@ function AppelModal({ leads, onClose, onSave }: { leads: CRMLead[]; onClose: () 
         </div>
       </div>
       <div>
-        <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>Résumé</label>
-        <textarea value={summary} onChange={e => setSummary(e.target.value)} rows={3} placeholder="Points clés de la conversation..." style={{ ...iStyle, resize: "vertical", lineHeight: 1.5 }} />
+        <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>{t("ws.actions.summary", "Résumé")}</label>
+        <textarea value={summary} onChange={e => setSummary(e.target.value)} rows={3} placeholder={t("ws.actions.call_placeholder", "Points clés de la conversation...")} style={{ ...iStyle, resize: "vertical", lineHeight: 1.5 }} />
       </div>
     </ModalWrapper>
   );
 }
 
 function EmailModal({ leads, onClose, onSave }: { leads: CRMLead[]; onClose: () => void; onSave: (leadId: string, data: any, andAnother?: boolean) => void }) {
+  const { t } = useLanguage();
   const [leadId, setLeadId] = useState("");
   const [subject, setSubject] = useState("");
   const [summary, setSummary] = useState("");
@@ -341,25 +348,26 @@ function EmailModal({ leads, onClose, onSave }: { leads: CRMLead[]; onClose: () 
 
   return (
     <ModalWrapper
-      title="📧 Logger un email"
+      title={`📧 ${t("ws.actions.log_email", "Logger un email")}`}
       onClose={onClose}
       onSave={() => isValid && onSave(leadId, { subject, summary })}
       onSaveAndAdd={() => { if (!isValid) return; onSave(leadId, { subject, summary }, true); reset(); }}
     >
       <LeadSelect leads={leads} value={leadId} onChange={setLeadId} />
       <div style={{ marginBottom: 14 }}>
-        <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>Objet</label>
-        <input value={subject} onChange={e => setSubject(e.target.value)} placeholder="Objet de l'email" style={iStyle} />
+        <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>{t("ws.actions.subject", "Objet")}</label>
+        <input value={subject} onChange={e => setSubject(e.target.value)} placeholder={t("ws.actions.email_subject_ph", "Objet de l'email")} style={iStyle} />
       </div>
       <div>
-        <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>Résumé</label>
-        <textarea value={summary} onChange={e => setSummary(e.target.value)} rows={3} placeholder="Contenu principal de l'email..." style={{ ...iStyle, resize: "vertical", lineHeight: 1.5 }} />
+        <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>{t("ws.actions.summary", "Résumé")}</label>
+        <textarea value={summary} onChange={e => setSummary(e.target.value)} rows={3} placeholder={t("ws.actions.email_body_ph", "Contenu principal de l'email...")} style={{ ...iStyle, resize: "vertical", lineHeight: 1.5 }} />
       </div>
     </ModalWrapper>
   );
 }
 
 function NoteModal({ leads, onClose, onSave }: { leads: CRMLead[]; onClose: () => void; onSave: (leadId: string, data: any, andAnother?: boolean) => void }) {
+  const { t } = useLanguage();
   const [leadId, setLeadId] = useState("");
   const [note, setNote] = useState("");
 
@@ -369,21 +377,22 @@ function NoteModal({ leads, onClose, onSave }: { leads: CRMLead[]; onClose: () =
 
   return (
     <ModalWrapper
-      title="📝 Nouvelle note"
+      title={`📝 ${t("ws.actions.new_note", "Nouvelle note")}`}
       onClose={onClose}
       onSave={() => isValid && onSave(leadId, { note })}
       onSaveAndAdd={() => { if (!isValid) return; onSave(leadId, { note }, true); reset(); }}
     >
       <LeadSelect leads={leads} value={leadId} onChange={setLeadId} />
       <div>
-        <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>Note</label>
-        <textarea value={note} onChange={e => setNote(e.target.value)} rows={5} placeholder="Votre note..." style={{ ...iStyle, resize: "vertical", lineHeight: 1.5 }} />
+        <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>{t("ws.actions.note_label", "Note")}</label>
+        <textarea value={note} onChange={e => setNote(e.target.value)} rows={5} placeholder={t("ws.actions.note_ph", "Votre note...")} style={{ ...iStyle, resize: "vertical", lineHeight: 1.5 }} />
       </div>
     </ModalWrapper>
   );
 }
 
 function RappelModal({ leads, onClose, onSave }: { leads: CRMLead[]; onClose: () => void; onSave: (leadId: string, data: any, andAnother?: boolean) => void }) {
+  const { t } = useLanguage();
   const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
   const defaultDt = tomorrow.toISOString().slice(0, 16);
   const [leadId, setLeadId] = useState("");
@@ -398,23 +407,23 @@ function RappelModal({ leads, onClose, onSave }: { leads: CRMLead[]; onClose: ()
 
   return (
     <ModalWrapper
-      title="📅 Nouveau rappel"
+      title={`📅 ${t("ws.actions.new_reminder", "Nouveau rappel")}`}
       onClose={onClose}
       onSave={() => isValid && onSave(leadId, { title, datetime, priority, notes })}
       onSaveAndAdd={() => { if (!isValid) return; onSave(leadId, { title, datetime, priority, notes }, true); reset(); }}
     >
       <LeadSelect leads={leads} value={leadId} onChange={setLeadId} />
       <div style={{ marginBottom: 14 }}>
-        <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>Titre</label>
-        <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Ex: Relance offre de prix" style={iStyle} />
+        <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>{t("ws.actions.reminder_title", "Titre")}</label>
+        <input value={title} onChange={e => setTitle(e.target.value)} placeholder={t("ws.actions.reminder_ph", "Ex: Relance offre de prix")} style={iStyle} />
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
         <div>
-          <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>Date / heure</label>
+          <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>{t("ws.actions.datetime", "Date / heure")}</label>
           <input type="datetime-local" value={datetime} onChange={e => setDatetime(e.target.value)} style={iStyle} />
         </div>
         <div>
-          <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>Priorité</label>
+          <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>{t("ws.actions.priority", "Priorité")}</label>
           <select value={priority} onChange={e => setPriority(e.target.value)} style={{ ...iStyle, cursor: "pointer" }}>
             <option>Haute</option>
             <option>Moyenne</option>
@@ -423,8 +432,8 @@ function RappelModal({ leads, onClose, onSave }: { leads: CRMLead[]; onClose: ()
         </div>
       </div>
       <div>
-        <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>Notes</label>
-        <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} placeholder="Contexte optionnel..." style={{ ...iStyle, resize: "vertical", lineHeight: 1.5 }} />
+        <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 5 }}>{t("ws.actions.notes", "Notes")}</label>
+        <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} placeholder={t("ws.actions.context_ph", "Contexte optionnel...")} style={{ ...iStyle, resize: "vertical", lineHeight: 1.5 }} />
       </div>
     </ModalWrapper>
   );

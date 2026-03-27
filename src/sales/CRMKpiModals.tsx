@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { CRMLead, CRMReminder, STAGES, STAGE_COLORS, TEMP_COLORS } from "./crmTypes";
 import { useTeamAgents } from "../hooks/useAgents";
+import { useLanguage } from "../i18n/LanguageContext";
 import { T } from "../theme";
 
 const fmt = (n: number) => new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
@@ -119,6 +120,7 @@ export type KpiModalType =
 export function LeadsActifsModal({ leads, onClose, onSelectLead }: {
   leads: CRMLead[]; onClose: () => void; onSelectLead: (l: CRMLead) => void;
 }) {
+  const { t } = useLanguage();
   const agents = useTeamAgents();
   const activeLeads = leads.filter(l => l.stage !== "Fermé Gagné" && l.stage !== "Fermé Perdu" && !l.archived);
   const totalValue = activeLeads.reduce((s, l) => s + (l.estimated_value || 0), 0);
@@ -147,12 +149,12 @@ export function LeadsActifsModal({ leads, onClose, onSelectLead }: {
     .slice(0, 5);
 
   return (
-    <ModalBase title="Leads actifs — Détail" subtitle={`${activeLeads.length} leads actifs dans le pipeline`} onClose={onClose}>
+    <ModalBase title={t("crm.leads_active_detail", "Leads actifs — Détail")} subtitle={`${activeLeads.length} ${t("crm.leads_active_in_pipeline", "leads actifs dans le pipeline")}`} onClose={onClose}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 4 }}>
         {[
-          { label: "Total actifs", value: activeLeads.length, color: T.main },
-          { label: "Valeur totale", value: fmt(totalValue), color: T.main },
-          { label: "Valeur moyenne", value: fmt(activeLeads.length > 0 ? totalValue / activeLeads.length : 0), color: T.textMid },
+          { label: t("crm.total_active", "Total actifs"), value: activeLeads.length, color: T.main },
+          { label: t("crm.total_value", "Valeur totale"), value: fmt(totalValue), color: T.main },
+          { label: t("crm.avg_value", "Valeur moyenne"), value: fmt(activeLeads.length > 0 ? totalValue / activeLeads.length : 0), color: T.textMid },
         ].map((k, i) => (
           <div key={i} style={{ background: T.bg, borderRadius: 10, padding: "14px 16px" }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>{k.label}</div>
@@ -161,7 +163,7 @@ export function LeadsActifsModal({ leads, onClose, onSelectLead }: {
         ))}
       </div>
 
-      <Section title="Répartition par étape" mt={20}>
+      <Section title={t("crm.repartition_by_stage", "Répartition par étape")} mt={20}>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {byStage.map(({ stage, count, value, pct }) => (
             <div key={stage} style={{ padding: "10px 14px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard }}>
@@ -182,7 +184,7 @@ export function LeadsActifsModal({ leads, onClose, onSelectLead }: {
         </div>
       </Section>
 
-      <Section title="Répartition par agent">
+      <Section title={t("crm.repartition_by_agent", "Répartition par agent")}>
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {byAgent.map(({ agent, count, value }) => (
             <div key={agent.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 0" }}>
@@ -205,7 +207,7 @@ export function LeadsActifsModal({ leads, onClose, onSelectLead }: {
         </div>
       </Section>
 
-      <Section title="Répartition par température">
+      <Section title={t("crm.repartition_by_temperature", "Répartition par température")}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
           {[
             { label: "🔥 Hot", leads: hotLeads, color: TEMP_COLORS.Hot },
@@ -221,9 +223,9 @@ export function LeadsActifsModal({ leads, onClose, onSelectLead }: {
         </div>
       </Section>
 
-      <Section title="Leads les plus anciens dans le pipeline">
+      <Section title={t("crm.oldest_leads", "Leads les plus anciens dans le pipeline")}>
         <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden" }}>
-          <TableHeader cols={["Lead", "Étape", "Valeur", "Agent", "Jours"]} />
+          <TableHeader cols={["Lead", t("crm.stage_detail", "Étape"), t("crm.total_value", "Valeur"), t("agent", "Agent"), t("crm.days_ago", "Jours")]} />
           {oldest.map(lead => {
             const days = daysSince(lead.created_at);
             return (
@@ -256,6 +258,7 @@ export function LeadsActifsModal({ leads, onClose, onSelectLead }: {
 export function ValeurPipelineModal({ leads, onClose, onSelectLead }: {
   leads: CRMLead[]; onClose: () => void; onSelectLead: (l: CRMLead) => void;
 }) {
+  const { t } = useLanguage();
   const agents = useTeamAgents();
   const activeLeads = leads.filter(l => l.stage !== "Fermé Gagné" && l.stage !== "Fermé Perdu" && !l.archived);
   const totalValue = activeLeads.reduce((s, l) => s + (l.estimated_value || 0), 0);
@@ -278,12 +281,12 @@ export function ValeurPipelineModal({ leads, onClose, onSelectLead }: {
   const top10 = [...activeLeads].sort((a, b) => (b.estimated_value || 0) - (a.estimated_value || 0)).slice(0, 10);
 
   return (
-    <ModalBase title="Valeur du pipeline — Détail" subtitle={`${fmt(totalValue)} en opportunités actives`} onClose={onClose} color={T.main}>
+    <ModalBase title={t("crm.pipeline_value_detail", "Valeur du pipeline — Détail")} subtitle={`${fmt(totalValue)} ${t("crm.opportunities_active", "en opportunités actives")}`} onClose={onClose} color={T.main}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
         {[
-          { label: "Valeur totale", value: fmt(totalValue), color: T.main },
-          { label: "Nb opportunités", value: activeLeads.length, color: T.main },
-          { label: "Valeur moyenne", value: fmt(activeLeads.length > 0 ? totalValue / activeLeads.length : 0), color: T.textMid },
+          { label: t("crm.total_value", "Valeur totale"), value: fmt(totalValue), color: T.main },
+          { label: t("crm.nb_opportunities", "Nb opportunités"), value: activeLeads.length, color: T.main },
+          { label: t("crm.avg_value", "Valeur moyenne"), value: fmt(activeLeads.length > 0 ? totalValue / activeLeads.length : 0), color: T.textMid },
         ].map((k, i) => (
           <div key={i} style={{ background: T.bg, borderRadius: 10, padding: "14px 16px" }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>{k.label}</div>
@@ -292,7 +295,7 @@ export function ValeurPipelineModal({ leads, onClose, onSelectLead }: {
         ))}
       </div>
 
-      <Section title="Valeur par étape" mt={20}>
+      <Section title={t("crm.value_by_stage", "Valeur par étape")} mt={20}>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {byStage.map(({ stage, count, value }) => (
             <div key={stage} style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -307,9 +310,9 @@ export function ValeurPipelineModal({ leads, onClose, onSelectLead }: {
         </div>
       </Section>
 
-      <Section title="Valeur par agent">
+      <Section title={t("crm.value_by_agent", "Valeur par agent")}>
         <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden" }}>
-          <TableHeader cols={["Agent", "Valeur pipeline", "Nb leads", "Valeur moy/lead"]} />
+          <TableHeader cols={[t("agent", "Agent"), t("crm.pipeline_value", "Valeur pipeline"), `Nb ${t("crm.leads_label", "leads")}`, t("crm.val_avg_per_lead", "Valeur moy/lead")]} />
           {byAgent.map(({ agent, count, value, avg }, i) => (
             <div key={agent.id} style={{
               display: "grid", gridTemplateColumns: "repeat(4, 1fr)", padding: "10px 6px",
@@ -329,9 +332,9 @@ export function ValeurPipelineModal({ leads, onClose, onSelectLead }: {
         </div>
       </Section>
 
-      <Section title="Top 10 deals par valeur">
+      <Section title={t("crm.top_10_deals", "Top 10 deals par valeur")}>
         <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden" }}>
-          <TableHeader cols={["Lead", "Valeur estimée", "Étape", "Temp.", "Agent"]} />
+          <TableHeader cols={["Lead", t("crm.estimated_value_per_year", "Valeur estimée"), t("crm.stage_detail", "Étape"), "Temp.", t("agent", "Agent")]} />
           {top10.map(lead => (
             <div key={lead.id} className="kpi-lead-row" style={{
               display: "grid", gridTemplateColumns: "repeat(5, 1fr)", padding: "10px 6px",
@@ -362,6 +365,7 @@ export function ValeurPipelineModal({ leads, onClose, onSelectLead }: {
 export function PipelinePondereModal({ leads, onClose, onSelectLead }: {
   leads: CRMLead[]; onClose: () => void; onSelectLead: (l: CRMLead) => void;
 }) {
+  const { t } = useLanguage();
   const activeLeads = leads.filter(l => l.stage !== "Fermé Gagné" && l.stage !== "Fermé Perdu" && !l.archived);
   const totalBrut = activeLeads.reduce((s, l) => s + (l.estimated_value || 0), 0);
   const totalPondere = activeLeads.reduce((s, l) => s + (l.estimated_value || 0) * (l.closing_probability || 0) / 100, 0);
@@ -383,12 +387,12 @@ export function PipelinePondereModal({ leads, onClose, onSelectLead }: {
   const maxProbCount = Math.max(...probRanges.map(r => r.count), 1);
 
   return (
-    <ModalBase title="Pipeline pondéré — Détail" subtitle="Σ (Valeur estimée × Probabilité %) pour chaque lead actif" onClose={onClose} color="#0891b2">
+    <ModalBase title={t("crm.pipeline_pondere_detail", "Pipeline pondéré — Détail")} subtitle={t("crm.weighted_pipeline_formula", "Σ (Valeur estimée × Probabilité %) pour chaque lead actif")} onClose={onClose} color="#0891b2">
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
         {[
-          { label: "Pipeline brut", value: fmt(totalBrut), color: T.main },
-          { label: "Pipeline pondéré", value: fmt(totalPondere), color: "#0891b2" },
-          { label: "Ratio pondéré / brut", value: `${pctPondere.toFixed(1)}%`, color: T.textMid },
+          { label: t("crm.pipeline_brut", "Pipeline brut"), value: fmt(totalBrut), color: T.main },
+          { label: t("crm.pipeline_pondere", "Pipeline pondéré"), value: fmt(totalPondere), color: "#0891b2" },
+          { label: t("crm.ratio_weighted_raw", "Ratio pondéré / brut"), value: `${pctPondere.toFixed(1)}%`, color: T.textMid },
         ].map((k, i) => (
           <div key={i} style={{ background: T.bg, borderRadius: 10, padding: "14px 16px" }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>{k.label}</div>
@@ -397,17 +401,17 @@ export function PipelinePondereModal({ leads, onClose, onSelectLead }: {
         ))}
       </div>
 
-      <Section title="Comparaison — Pipeline brut vs pondéré" mt={20}>
+      <Section title={t("crm.comparison_brut_vs_pondere", "Comparaison — Pipeline brut vs pondéré")} mt={20}>
         <div style={{ background: T.bg, borderRadius: 10, padding: 16 }}>
           <div style={{ display: "flex", gap: 24, marginBottom: 16 }}>
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 11, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Pipeline brut</div>
+              <div style={{ fontSize: 11, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>{t("crm.pipeline_brut", "Pipeline brut")}</div>
               <div style={{ fontSize: 26, fontWeight: 800, color: T.main }}>{fmt(totalBrut)}</div>
               <div style={{ fontSize: 11, color: T.textLight }}>100%</div>
             </div>
             <div style={{ display: "flex", alignItems: "center", color: T.textLight, fontSize: 20 }}>→</div>
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 11, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Pipeline pondéré</div>
+              <div style={{ fontSize: 11, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>{t("crm.pipeline_pondere", "Pipeline pondéré")}</div>
               <div style={{ fontSize: 26, fontWeight: 800, color: "#0891b2" }}>{fmt(totalPondere)}</div>
               <div style={{ fontSize: 11, color: T.textLight }}>{pctPondere.toFixed(1)}% du brut</div>
             </div>
@@ -418,9 +422,9 @@ export function PipelinePondereModal({ leads, onClose, onSelectLead }: {
         </div>
       </Section>
 
-      <Section title="Breakdown détaillé par lead">
+      <Section title={t("crm.breakdown_by_lead", "Breakdown détaillé par lead")}>
         <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden", maxHeight: 300, overflowY: "auto" }}>
-          <TableHeader cols={["Lead", "Valeur estimée", "Probabilité", "Valeur pondérée", "Étape"]} />
+          <TableHeader cols={["Lead", t("crm.estimated_value_per_year", "Valeur estimée"), t("crm.closing_probability", "Probabilité"), t("crm.pipeline_pondere", "Valeur pondérée"), t("crm.stage_detail", "Étape")]} />
           {breakdown.map(({ lead, weighted }) => (
             <div key={lead.id} className="kpi-lead-row" style={{
               display: "grid", gridTemplateColumns: "repeat(5, 1fr)", padding: "9px 6px",
@@ -447,7 +451,7 @@ export function PipelinePondereModal({ leads, onClose, onSelectLead }: {
         </div>
       </Section>
 
-      <Section title="Distribution des probabilités">
+      <Section title={t("crm.distribution_probabilities", "Distribution des probabilités")}>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {probRanges.map(r => (
             <div key={r.label} style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -467,6 +471,7 @@ export function PipelinePondereModal({ leads, onClose, onSelectLead }: {
 export function LeadsHotModal({ leads, onClose, onSelectLead }: {
   leads: CRMLead[]; onClose: () => void; onSelectLead: (l: CRMLead) => void;
 }) {
+  const { t } = useLanguage();
   const agents = useTeamAgents();
   const now = new Date();
   const hotLeads = leads.filter(l => l.temperature === "Hot" && l.stage !== "Fermé Gagné" && l.stage !== "Fermé Perdu" && !l.archived);
@@ -487,13 +492,13 @@ export function LeadsHotModal({ leads, onClose, onSelectLead }: {
   const hotLastWeek = leads.filter(l => l.temperature === "Hot" && new Date(l.updated_at) >= twoWeeksAgo && new Date(l.updated_at) < weekAgo).length;
 
   return (
-    <ModalBase title="Leads Hot 🔥 — Détail" subtitle={`${hotLeads.length} leads Hot · ${fmt(totalHotValue)} en valeur totale`} onClose={onClose} color={T.red}>
+    <ModalBase title={t("crm.leads_hot_detail", "Leads Hot 🔥 — Détail")} subtitle={`${hotLeads.length} leads Hot · ${fmt(totalHotValue)} ${t("crm.total_value", "en valeur totale")}`} onClose={onClose} color={T.red}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
         {[
-          { label: "Total Hot", value: hotLeads.length, color: T.red },
-          { label: "Valeur totale", value: fmt(totalHotValue), color: T.red },
-          { label: "Actifs (3j)", value: active.length, color: T.green },
-          { label: "Sans activité récente", value: inactive.length, color: inactive.length > 0 ? T.orange : T.green },
+          { label: t("crm.total_hot", "Total Hot"), value: hotLeads.length, color: T.red },
+          { label: t("crm.total_value", "Valeur totale"), value: fmt(totalHotValue), color: T.red },
+          { label: t("crm.active_3d", "Actifs (3j)"), value: active.length, color: T.green },
+          { label: t("crm.no_recent_activity", "Sans activité récente"), value: inactive.length, color: inactive.length > 0 ? T.orange : T.green },
         ].map((k, i) => (
           <div key={i} style={{ background: T.bg, borderRadius: 10, padding: "14px 16px" }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>{k.label}</div>
@@ -505,7 +510,7 @@ export function LeadsHotModal({ leads, onClose, onSelectLead }: {
       {inactive.length > 0 && (
         <div style={{ marginTop: 16, background: "rgba(245,158,11,0.08)", border: `1px solid ${T.orange}`, borderRadius: 10, padding: 14 }}>
           <div style={{ fontWeight: 700, color: T.orange, fontSize: 13, marginBottom: 10 }}>
-            ⚠️ Ces leads Hot nécessitent une attention immédiate — pas d'activité depuis 3+ jours
+            ⚠️ {t("crm.waiting_attention", "Ces leads Hot nécessitent une attention immédiate — pas d'activité depuis 3+ jours")}
           </div>
           {inactive.map(lead => (
             <div key={lead.id} className="kpi-lead-row" style={{
@@ -523,9 +528,9 @@ export function LeadsHotModal({ leads, onClose, onSelectLead }: {
         </div>
       )}
 
-      <Section title="Tous les leads Hot" mt={20}>
+      <Section title={t("crm.all_hot_leads", "Tous les leads Hot")} mt={20}>
         <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden" }}>
-          <TableHeader cols={["Lead", "Valeur", "Étape", "Agent", "Dernière activité"]} />
+          <TableHeader cols={["Lead", t("crm.total_value", "Valeur"), t("crm.stage_detail", "Étape"), t("agent", "Agent"), t("crm.last_activity", "Dernière activité")]} />
           {[...hotLeads].sort((a, b) => (b.estimated_value || 0) - (a.estimated_value || 0)).map(lead => (
             <div key={lead.id} className="kpi-lead-row" style={{
               display: "grid", gridTemplateColumns: "repeat(5, 1fr)", padding: "10px 6px",
@@ -541,21 +546,21 @@ export function LeadsHotModal({ leads, onClose, onSelectLead }: {
               </div>
               <div style={{ padding: "0 6px", display: "flex", alignItems: "center", fontSize: 12, color: T.textMid }}>{lead.assigned_agent_name}</div>
               <div style={{ padding: "0 6px", display: "flex", alignItems: "center", fontSize: 11, color: daysSince(lead.last_activity_at) >= 3 ? T.orange : T.green }}>
-                {daysSince(lead.last_activity_at) === 0 ? "Aujourd'hui" : `Il y a ${daysSince(lead.last_activity_at)}j`}
+                {daysSince(lead.last_activity_at) === 0 ? t("crm.today", "Aujourd'hui") : `${t("crm.days_ago", "Il y a")} ${daysSince(lead.last_activity_at)}j`}
               </div>
             </div>
           ))}
         </div>
       </Section>
 
-      <Section title="Leads Hot par agent">
+      <Section title={t("crm.hot_leads_by_agent", "Leads Hot par agent")}>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {byAgent.map(({ agent, count, value, lastFollowUp }) => (
             <div key={agent.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", background: T.bg, borderRadius: 8 }}>
               <div style={{ width: 32, height: 32, borderRadius: "50%", background: agent.color, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{agent.initials}</div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 13, fontWeight: 600 }}>{agent.name}</div>
-                <div style={{ fontSize: 11, color: T.textLight }}>Dernier follow-up: {lastFollowUp ? `il y a ${daysSince(lastFollowUp)}j` : "—"}</div>
+                <div style={{ fontSize: 11, color: T.textLight }}>{t("crm.last_follow_up", "Dernier follow-up")}: {lastFollowUp ? `${t("crm.days_ago", "il y a")} ${daysSince(lastFollowUp)}j` : "—"}</div>
               </div>
               <div style={{ textAlign: "right" }}>
                 <div style={{ fontSize: 15, fontWeight: 800, color: T.red }}>{count} Hot</div>
@@ -566,20 +571,20 @@ export function LeadsHotModal({ leads, onClose, onSelectLead }: {
         </div>
       </Section>
 
-      <Section title="Évolution">
+      <Section title={t("crm.evolution", "Évolution")}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           <div style={{ background: T.bg, borderRadius: 10, padding: 16, textAlign: "center" }}>
-            <div style={{ fontSize: 11, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Cette semaine</div>
+            <div style={{ fontSize: 11, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>{t("crm.this_week", "Cette semaine")}</div>
             <div style={{ fontSize: 28, fontWeight: 800, color: T.red }}>{hotThisWeek}</div>
           </div>
           <div style={{ background: T.bg, borderRadius: 10, padding: 16, textAlign: "center" }}>
-            <div style={{ fontSize: 11, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Semaine dernière</div>
+            <div style={{ fontSize: 11, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>{t("crm.last_week", "Semaine dernière")}</div>
             <div style={{ fontSize: 28, fontWeight: 800, color: T.textMid }}>{hotLastWeek}</div>
             {hotThisWeek > hotLastWeek
-              ? <div style={{ fontSize: 11, color: T.green, fontWeight: 700 }}>↑ +{hotThisWeek - hotLastWeek} vs la semaine dernière</div>
+              ? <div style={{ fontSize: 11, color: T.green, fontWeight: 700 }}>↑ +{hotThisWeek - hotLastWeek} {t("crm.vs_last_week", "vs la semaine dernière")}</div>
               : hotThisWeek < hotLastWeek
-              ? <div style={{ fontSize: 11, color: T.red, fontWeight: 700 }}>↓ -{hotLastWeek - hotThisWeek} vs la semaine dernière</div>
-              : <div style={{ fontSize: 11, color: T.textLight }}>= Stable</div>}
+              ? <div style={{ fontSize: 11, color: T.red, fontWeight: 700 }}>↓ -{hotLastWeek - hotThisWeek} {t("crm.vs_last_week", "vs la semaine dernière")}</div>
+              : <div style={{ fontSize: 11, color: T.textLight }}>= {t("crm.stable", "Stable")}</div>}
           </div>
         </div>
       </Section>
@@ -590,6 +595,7 @@ export function LeadsHotModal({ leads, onClose, onSelectLead }: {
 export function TauxConversionModal({ leads, onClose, onSelectLead }: {
   leads: CRMLead[]; onClose: () => void; onSelectLead: (l: CRMLead) => void;
 }) {
+  const { t } = useLanguage();
   const agents = useTeamAgents();
   const totalLeads = leads.length;
   const wonLeads = leads.filter(l => l.stage === "Fermé Gagné");
@@ -634,13 +640,13 @@ export function TauxConversionModal({ leads, onClose, onSelectLead }: {
   const maxLoss = Math.max(...Object.values(lossReasonCounts), 1);
 
   return (
-    <ModalBase title="Taux de conversion — Détail" subtitle={`${convRate.toFixed(1)}% de taux global · ${wonLeads.length} gagnés / ${totalLeads} total`} onClose={onClose} color={T.green}>
+    <ModalBase title={t("crm.conversion_rate_detail", "Taux de conversion — Détail")} subtitle={`${convRate.toFixed(1)}% ${t("crm.global_rate", "de taux global")} · ${wonLeads.length} ${t("crm.won_total", "gagnés")} / ${totalLeads} total`} onClose={onClose} color={T.green}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
         {[
-          { label: "Total leads", value: totalLeads, color: T.main },
-          { label: "Fermés Gagnés", value: wonLeads.length, color: T.green },
-          { label: "Fermés Perdus", value: lostLeads.length, color: T.red },
-          { label: "Taux conversion", value: `${convRate.toFixed(1)}%`, color: convRate > 30 ? T.green : convRate >= 15 ? T.orange : T.red },
+          { label: t("crm.total_leads", "Total leads"), value: totalLeads, color: T.main },
+          { label: t("crm.closed_won", "Fermés Gagnés"), value: wonLeads.length, color: T.green },
+          { label: t("crm.closed_lost", "Fermés Perdus"), value: lostLeads.length, color: T.red },
+          { label: t("crm.conversion_rate", "Taux conversion"), value: `${convRate.toFixed(1)}%`, color: convRate > 30 ? T.green : convRate >= 15 ? T.orange : T.red },
         ].map((k, i) => (
           <div key={i} style={{ background: T.bg, borderRadius: 10, padding: "14px 16px" }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>{k.label}</div>
@@ -649,7 +655,7 @@ export function TauxConversionModal({ leads, onClose, onSelectLead }: {
         ))}
       </div>
 
-      <Section title="Funnel complet" mt={20}>
+      <Section title={t("crm.full_funnel", "Funnel complet")} mt={20}>
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {funnelStages.map((fs, i) => {
             const prevCount = i > 0 ? funnelStages[i - 1].count : fs.count;
@@ -678,9 +684,9 @@ export function TauxConversionModal({ leads, onClose, onSelectLead }: {
         </div>
       </Section>
 
-      <Section title="Conversion par agent">
+      <Section title={t("crm.conversion_by_agent", "Conversion par agent")}>
         <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden" }}>
-          <TableHeader cols={["Agent", "Total leads", "Gagnés", "Perdus", "Taux %"]} />
+          <TableHeader cols={[t("agent", "Agent"), t("crm.total_leads", "Total leads"), t("crm.won_total", "Gagnés"), t("crm.lost_label", "Perdus"), t("crm.rate_pct", "Taux %")]} />
           {byAgent.map(({ agent, total, won, lost, rate }, i) => (
             <div key={agent.id} style={{
               display: "grid", gridTemplateColumns: "repeat(5, 1fr)", padding: "10px 6px",
@@ -705,9 +711,9 @@ export function TauxConversionModal({ leads, onClose, onSelectLead }: {
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 24 }}>
         <div>
-          <h3 style={{ fontSize: 13, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.8, margin: "0 0 12px" }}>Par source</h3>
+          <h3 style={{ fontSize: 13, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.8, margin: "0 0 12px" }}>{t("crm.by_source", "Par source")}</h3>
           <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden" }}>
-            <TableHeader cols={["Source", "Leads", "Gagnés", "Taux"]} />
+            <TableHeader cols={[t("crm.source", "Source"), "Leads", t("crm.won_total", "Gagnés"), t("crm.rate_label", "Taux")]} />
             {bySource.map(({ source, total, won, rate }) => (
               <div key={source} style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", padding: "8px 6px", borderBottom: `1px solid ${T.border}`, fontSize: 12 }}>
                 <div style={{ padding: "0 6px" }}>{source}</div>
@@ -719,9 +725,9 @@ export function TauxConversionModal({ leads, onClose, onSelectLead }: {
           </div>
         </div>
         <div>
-          <h3 style={{ fontSize: 13, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.8, margin: "0 0 12px" }}>Par type de client</h3>
+          <h3 style={{ fontSize: 13, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.8, margin: "0 0 12px" }}>{t("crm.by_client_type", "Par type de client")}</h3>
           <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden" }}>
-            <TableHeader cols={["Type", "Leads", "Gagnés", "Taux"]} />
+            <TableHeader cols={[t("type", "Type"), "Leads", t("crm.won_total", "Gagnés"), t("crm.rate_label", "Taux")]} />
             {byType.map(({ type, total, won, rate }) => (
               <div key={type} style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", padding: "8px 6px", borderBottom: `1px solid ${T.border}`, fontSize: 12 }}>
                 <div style={{ padding: "0 6px" }}>{type}</div>
@@ -735,7 +741,7 @@ export function TauxConversionModal({ leads, onClose, onSelectLead }: {
       </div>
 
       {sortedLossReasons.length > 0 && (
-        <Section title="Raisons de perte">
+        <Section title={t("crm.loss_reasons", "Raisons de perte")}>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {sortedLossReasons.map(([reason, count]) => (
               <div key={reason} style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -754,6 +760,7 @@ export function TauxConversionModal({ leads, onClose, onSelectLead }: {
 export function TempsClosingModal({ leads, onClose, onSelectLead }: {
   leads: CRMLead[]; onClose: () => void; onSelectLead: (l: CRMLead) => void;
 }) {
+  const { t } = useLanguage();
   const agents = useTeamAgents();
   const now = new Date();
   const sixMonthsAgo = new Date(now.getTime() - 180 * 86400000);
@@ -786,12 +793,12 @@ export function TempsClosingModal({ leads, onClose, onSelectLead }: {
   const maxStageDays = Math.max(...stageAvgDays.map(s => s.avgDays), 1);
 
   return (
-    <ModalBase title="Vélocité du pipeline — Détail" subtitle={`${avgDays > 0 ? avgDays + " jours en moyenne" : "Pas encore de données"} · Basé sur les 6 derniers mois`} onClose={onClose} color={T.textMid}>
+    <ModalBase title={t("crm.velocity_detail", "Vélocité du pipeline — Détail")} subtitle={`${avgDays > 0 ? avgDays + ` ${t("crm.days_avg", "jours en moyenne")}` : t("crm.no_data_yet", "Pas encore de données")} · ${t("crm.based_on_6_months", "Basé sur les 6 derniers mois")}`} onClose={onClose} color={T.textMid}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
         {[
-          { label: "Temps moyen closing", value: avgDays > 0 ? `${avgDays}j` : "—", color: T.main },
-          { label: "Deals analysés", value: recentlyWon.length, color: T.main },
-          { label: "Le plus rapide", value: withDays.length > 0 ? `${withDays[0].days}j` : "—", color: T.green },
+          { label: t("crm.temps_closing_avg", "Temps moyen closing"), value: avgDays > 0 ? `${avgDays}j` : "—", color: T.main },
+          { label: t("crm.deals_analyzed", "Deals analysés"), value: recentlyWon.length, color: T.main },
+          { label: t("crm.fastest", "Le plus rapide"), value: withDays.length > 0 ? `${withDays[0].days}j` : "—", color: T.green },
         ].map((k, i) => (
           <div key={i} style={{ background: T.bg, borderRadius: 10, padding: "14px 16px" }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>{k.label}</div>
@@ -800,7 +807,7 @@ export function TempsClosingModal({ leads, onClose, onSelectLead }: {
         ))}
       </div>
 
-      <Section title="Temps par étape (leads actifs)" mt={20}>
+      <Section title={t("crm.time_per_stage", "Temps par étape (leads actifs)")} mt={20}>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {stageAvgDays.map(({ stage, avgDays: avg, count }) => (
             <div key={stage} style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -814,7 +821,7 @@ export function TempsClosingModal({ leads, onClose, onSelectLead }: {
       </Section>
 
       {byAgent.length > 0 && (
-        <Section title="Temps moyen par agent">
+        <Section title={t("crm.avg_time_by_agent", "Temps moyen par agent")}>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {byAgent.map(({ agent, count, avgDays: avg }, i) => (
               <div key={agent.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 14px", background: i === 0 ? "rgba(34,197,94,0.06)" : T.bg, borderRadius: 8, border: i === 0 ? `1px solid ${T.green}22` : "none" }}>
@@ -823,7 +830,7 @@ export function TempsClosingModal({ leads, onClose, onSelectLead }: {
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
                     <span style={{ fontSize: 13, fontWeight: 600 }}>{agent.name}</span>
                     <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                      {i === 0 && <span style={{ fontSize: 11, color: T.green, fontWeight: 700 }}>⚡ Le plus rapide</span>}
+                      {i === 0 && <span style={{ fontSize: 11, color: T.green, fontWeight: 700 }}>⚡ {t("crm.fastest", "Le plus rapide")}</span>}
                       <span style={{ fontSize: 13, fontWeight: 700, color: agent.color }}>{avg}j</span>
                       <span style={{ fontSize: 11, color: T.textLight }}>{count} deals</span>
                     </div>
@@ -839,7 +846,7 @@ export function TempsClosingModal({ leads, onClose, onSelectLead }: {
       {fastest5.length > 0 && (
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 24 }}>
           <div>
-            <h3 style={{ fontSize: 13, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.8, margin: "0 0 12px" }}>5 Deals les plus rapides ⚡</h3>
+            <h3 style={{ fontSize: 13, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.8, margin: "0 0 12px" }}>{t("crm.5_fastest_deals", "5 Deals les plus rapides")} ⚡</h3>
             {fastest5.map(({ lead, days }) => (
               <div key={lead.id} className="kpi-lead-row" style={{ padding: "8px 10px", borderRadius: 8, background: T.bg, marginBottom: 6, transition: "background 0.15s", display: "flex", justifyContent: "space-between", alignItems: "center" }}
                 onClick={() => { onClose(); onSelectLead(lead); }}>
@@ -852,7 +859,7 @@ export function TempsClosingModal({ leads, onClose, onSelectLead }: {
             ))}
           </div>
           <div>
-            <h3 style={{ fontSize: 13, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.8, margin: "0 0 12px" }}>5 Deals les plus lents 🐢</h3>
+            <h3 style={{ fontSize: 13, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.8, margin: "0 0 12px" }}>{t("crm.5_slowest_deals", "5 Deals les plus lents")} 🐢</h3>
             {slowest5.map(({ lead, days }) => (
               <div key={lead.id} className="kpi-lead-row" style={{ padding: "8px 10px", borderRadius: 8, background: T.bg, marginBottom: 6, transition: "background 0.15s", display: "flex", justifyContent: "space-between", alignItems: "center" }}
                 onClick={() => { onClose(); onSelectLead(lead); }}>
@@ -873,6 +880,7 @@ export function TempsClosingModal({ leads, onClose, onSelectLead }: {
 export function DealsFermesModal({ leads, onClose, onSelectLead }: {
   leads: CRMLead[]; onClose: () => void; onSelectLead: (l: CRMLead) => void;
 }) {
+  const { t } = useLanguage();
   const agents = useTeamAgents();
   const now = new Date();
   const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -904,13 +912,13 @@ export function DealsFermesModal({ leads, onClose, onSelectLead }: {
   const podiumEmojis = ["🥇", "🥈", "🥉"];
 
   return (
-    <ModalBase title="Deals fermés ce mois — Détail" subtitle={`${dealsThisMonth.length} deals · ${fmt(totalValue)} · vs ${dealsLastMonth.length} le mois dernier`} onClose={onClose} color={T.green}>
+    <ModalBase title={t("crm.deals_closed_month_detail", "Deals fermés ce mois — Détail")} subtitle={`${dealsThisMonth.length} deals · ${fmt(totalValue)} · vs ${dealsLastMonth.length} ${t("crm.last_month", "le mois dernier")}`} onClose={onClose} color={T.green}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
         {[
-          { label: "Deals ce mois", value: dealsThisMonth.length, color: T.green },
-          { label: "Valeur totale", value: fmt(totalValue), color: T.green },
-          { label: "Valeur moyenne", value: dealsThisMonth.length > 0 ? fmt(totalValue / dealsThisMonth.length) : "—", color: T.textMid },
-          { label: "vs mois dernier", value: dealsThisMonth.length - dealsLastMonth.length >= 0 ? `+${dealsThisMonth.length - dealsLastMonth.length}` : `${dealsThisMonth.length - dealsLastMonth.length}`, color: dealsThisMonth.length >= dealsLastMonth.length ? T.green : T.red },
+          { label: t("crm.deals_this_month", "Deals ce mois"), value: dealsThisMonth.length, color: T.green },
+          { label: t("crm.total_value", "Valeur totale"), value: fmt(totalValue), color: T.green },
+          { label: t("crm.avg_value", "Valeur moyenne"), value: dealsThisMonth.length > 0 ? fmt(totalValue / dealsThisMonth.length) : "—", color: T.textMid },
+          { label: t("crm.vs_last_month", "vs mois dernier"), value: dealsThisMonth.length - dealsLastMonth.length >= 0 ? `+${dealsThisMonth.length - dealsLastMonth.length}` : `${dealsThisMonth.length - dealsLastMonth.length}`, color: dealsThisMonth.length >= dealsLastMonth.length ? T.green : T.red },
         ].map((k, i) => (
           <div key={i} style={{ background: T.bg, borderRadius: 10, padding: "14px 16px" }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>{k.label}</div>
@@ -919,7 +927,7 @@ export function DealsFermesModal({ leads, onClose, onSelectLead }: {
         ))}
       </div>
 
-      <Section title="Comparaison 6 derniers mois" mt={20}>
+      <Section title={t("crm.comparison_6_months", "Comparaison 6 derniers mois")} mt={20}>
         <div style={{ display: "flex", gap: 8, alignItems: "flex-end", height: 120, padding: "0 4px" }}>
           {months6.map((m, i) => (
             <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
@@ -938,7 +946,7 @@ export function DealsFermesModal({ leads, onClose, onSelectLead }: {
       </Section>
 
       {byAgent.length > 0 && (
-        <Section title="Performance par agent ce mois">
+        <Section title={t("crm.agent_performance_month", "Performance par agent ce mois")}>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {byAgent.map(({ agent, count, value, avg }, i) => (
               <div key={agent.id} style={{
@@ -950,7 +958,7 @@ export function DealsFermesModal({ leads, onClose, onSelectLead }: {
                 <div style={{ width: 32, height: 32, borderRadius: "50%", background: agent.color, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{agent.initials}</div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 14, fontWeight: 700 }}>{agent.name}</div>
-                  <div style={{ fontSize: 11, color: T.textLight }}>Valeur moy: {fmt(avg)}</div>
+                  <div style={{ fontSize: 11, color: T.textLight }}>{t("crm.avg_value_short", "Valeur moy")}: {fmt(avg)}</div>
                 </div>
                 <div style={{ textAlign: "right" }}>
                   <div style={{ fontSize: 18, fontWeight: 800, color: agent.color }}>{count} deals</div>
@@ -963,9 +971,9 @@ export function DealsFermesModal({ leads, onClose, onSelectLead }: {
       )}
 
       {dealsThisMonth.length > 0 && (
-        <Section title="Liste des deals fermés ce mois">
+        <Section title={t("crm.closed_deals_list", "Liste des deals fermés ce mois")}>
           <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden" }}>
-            <TableHeader cols={["Lead", "Valeur", "Agent", "Date closing", "Durée pipeline"]} />
+            <TableHeader cols={["Lead", t("crm.value_label", "Valeur"), t("agent", "Agent"), t("crm.closing_date", "Date closing"), t("crm.pipeline_duration", "Durée pipeline")]} />
             {[...dealsThisMonth].sort((a, b) => (b.estimated_value || 0) - (a.estimated_value || 0)).map(lead => (
               <div key={lead.id} className="kpi-lead-row" style={{
                 display: "grid", gridTemplateColumns: "repeat(5, 1fr)", padding: "10px 6px",
@@ -995,6 +1003,7 @@ export function DealsFermesModal({ leads, onClose, onSelectLead }: {
 export function RemindersRetardModal({ leads, onClose, onSelectLead }: {
   leads: CRMLead[]; onClose: () => void; onSelectLead: (l: CRMLead) => void;
 }) {
+  const { t } = useLanguage();
   const agents = useTeamAgents();
   const now = new Date();
   const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
@@ -1021,12 +1030,12 @@ export function RemindersRetardModal({ leads, onClose, onSelectLead }: {
   const priorityColor: Record<string, string> = { Haute: T.red, Moyenne: T.orange, Basse: T.textMid };
 
   return (
-    <ModalBase title="Reminders en retard — Détail" subtitle={`${overdue.length} reminder${overdue.length !== 1 ? "s" : ""} en retard — Action requise immédiatement`} onClose={onClose} color={T.red}>
+    <ModalBase title={t("crm.reminders_overdue_detail", "Reminders en retard — Détail")} subtitle={`${overdue.length} reminder${overdue.length !== 1 ? "s" : ""} ${t("crm.overdue_label", "en retard")} — ${t("crm.action_required_now", "Action requise immédiatement")}`} onClose={onClose} color={T.red}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
         {[
-          { label: "En retard", value: overdue.length, color: overdue.length > 0 ? T.red : T.green },
-          { label: "Haute priorité en retard", value: overdue.filter(r => r.priority === "Haute").length, color: T.red },
-          { label: "Reminders aujourd'hui", value: todayPending.length, color: T.orange },
+          { label: t("crm.overdue", "En retard"), value: overdue.length, color: overdue.length > 0 ? T.red : T.green },
+          { label: t("crm.high_priority_overdue", "Haute priorité en retard"), value: overdue.filter(r => r.priority === "Haute").length, color: T.red },
+          { label: t("crm.reminders_today", "Reminders aujourd'hui"), value: todayPending.length, color: T.orange },
         ].map((k, i) => (
           <div key={i} style={{ background: T.bg, borderRadius: 10, padding: "14px 16px" }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>{k.label}</div>
@@ -1036,9 +1045,9 @@ export function RemindersRetardModal({ leads, onClose, onSelectLead }: {
       </div>
 
       {overdue.length > 0 ? (
-        <Section title="Tous les reminders en retard (triés par retard décroissant)" mt={20}>
+        <Section title={t("crm.all_overdue_reminders", "Tous les reminders en retard (triés par retard décroissant)")} mt={20}>
           <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden" }}>
-            <TableHeader cols={["Lead", "Rappel", "Date prévue", "Retard", "Agent", "Priorité"]} />
+            <TableHeader cols={["Lead", t("crm.reminder_label", "Rappel"), t("crm.planned_date", "Date prévue"), t("crm.delay_label", "Retard"), t("agent", "Agent"), t("crm.priority_label", "Priorité")]} />
             {overdue.map(r => {
               const daysLate = Math.floor((now.getTime() - new Date(r.reminder_at).getTime()) / 86400000);
               return (
@@ -1070,14 +1079,14 @@ export function RemindersRetardModal({ leads, onClose, onSelectLead }: {
       ) : (
         <div style={{ marginTop: 20, background: "rgba(34,197,94,0.08)", border: `1px solid ${T.green}`, borderRadius: 10, padding: 20, textAlign: "center" }}>
           <div style={{ fontSize: 24, marginBottom: 8 }}>✅</div>
-          <div style={{ fontWeight: 700, color: T.green }}>Tout est à jour ! Aucun reminder en retard.</div>
+          <div style={{ fontWeight: 700, color: T.green }}>{t("crm.all_up_to_date_no_reminders", "Tout est à jour ! Aucun reminder en retard.")}</div>
         </div>
       )}
 
       {byAgent.length > 0 && (
-        <Section title="En retard par agent">
+        <Section title={t("crm.overdue_by_agent", "En retard par agent")}>
           <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden" }}>
-            <TableHeader cols={["Agent", "En retard", "Plus ancien (jours)"]} />
+            <TableHeader cols={[t("agent", "Agent"), t("crm.overdue", "En retard"), t("crm.oldest_days", "Plus ancien (jours)")]} />
             {byAgent.map(({ agent, count, oldest }) => (
               <div key={agent.id} style={{
                 display: "grid", gridTemplateColumns: "repeat(3, 1fr)", padding: "10px 6px",
@@ -1096,7 +1105,7 @@ export function RemindersRetardModal({ leads, onClose, onSelectLead }: {
       )}
 
       {todayPending.length > 0 && (
-        <Section title="Reminders du jour — À faire aujourd'hui">
+        <Section title={t("crm.reminders_today_todo", "Reminders du jour — À faire aujourd'hui")}>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {todayPending.map(r => (
               <div key={r.id} className="kpi-lead-row" style={{
@@ -1124,6 +1133,7 @@ export function RemindersRetardModal({ leads, onClose, onSelectLead }: {
 export function StageDetailModal({ stage, leads, onClose, onSelectLead }: {
   stage: string; leads: CRMLead[]; onClose: () => void; onSelectLead: (l: CRMLead) => void;
 }) {
+  const { t } = useLanguage();
   const stageLeads = leads.filter(l => l.stage === stage);
   const totalValue = stageLeads.reduce((s, l) => s + (l.estimated_value || 0), 0);
   const avgDays = stageLeads.length > 0
@@ -1134,13 +1144,13 @@ export function StageDetailModal({ stage, leads, onClose, onSelectLead }: {
   const sorted = [...stageLeads].sort((a, b) => (b.estimated_value || 0) - (a.estimated_value || 0));
 
   return (
-    <ModalBase title={`${stage} — Détail`} subtitle={`${stageLeads.length} leads · ${fmt(totalValue)} · ${avgDays}j en moyenne dans cette étape`} onClose={onClose} color={stageColor}>
+    <ModalBase title={`${stage} — ${t("crm.detail", "Détail")}`} subtitle={`${stageLeads.length} leads · ${fmt(totalValue)} · ${avgDays}j ${t("crm.avg_in_stage", "en moyenne dans cette étape")}`} onClose={onClose} color={stageColor}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 20 }}>
         {[
-          { label: "Nb leads", value: stageLeads.length, color: stageColor },
-          { label: "Valeur totale", value: fmt(totalValue), color: stageColor },
-          { label: "Valeur moy.", value: stageLeads.length > 0 ? fmt(totalValue / stageLeads.length) : "—", color: T.textMid },
-          { label: "Jours moy. dans étape", value: avgDays > 0 ? `${avgDays}j` : "—", color: T.textMid },
+          { label: t("crm.nb_leads", "Nb leads"), value: stageLeads.length, color: stageColor },
+          { label: t("crm.total_value", "Valeur totale"), value: fmt(totalValue), color: stageColor },
+          { label: t("crm.avg_value", "Valeur moy."), value: stageLeads.length > 0 ? fmt(totalValue / stageLeads.length) : "—", color: T.textMid },
+          { label: t("crm.avg_days_in_stage", "Jours moy. dans étape"), value: avgDays > 0 ? `${avgDays}j` : "—", color: T.textMid },
         ].map((k, i) => (
           <div key={i} style={{ background: T.bg, borderRadius: 10, padding: "14px 16px" }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>{k.label}</div>
@@ -1150,7 +1160,7 @@ export function StageDetailModal({ stage, leads, onClose, onSelectLead }: {
       </div>
 
       <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden" }}>
-        <TableHeader cols={["Lead", "Valeur", "Temp.", "Agent", "Depuis (j)", "Activités"]} />
+        <TableHeader cols={["Lead", t("crm.value_label", "Valeur"), "Temp.", t("agent", "Agent"), t("crm.since_days", "Depuis (j)"), t("crm.activities_label", "Activités")]} />
         {sorted.map(lead => {
           const days = daysSince(lead.created_at);
           const actCount = (lead.activities || []).length;
@@ -1179,7 +1189,7 @@ export function StageDetailModal({ stage, leads, onClose, onSelectLead }: {
           );
         })}
         {stageLeads.length === 0 && (
-          <div style={{ padding: "24px", textAlign: "center", color: T.textLight, fontSize: 13 }}>Aucun lead dans cette étape</div>
+          <div style={{ padding: "24px", textAlign: "center", color: T.textLight, fontSize: 13 }}>{t("crm.no_lead_in_stage", "Aucun lead dans cette étape")}</div>
         )}
       </div>
     </ModalBase>

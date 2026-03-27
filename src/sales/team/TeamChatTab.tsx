@@ -3,6 +3,7 @@ import { supabase } from "../../supabaseClient";
 import { T } from "../../theme";
 import { TeamMessage, TeamMember } from "./teamTypes";
 import { timeAgo } from "./teamUtils";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 const REACTIONS = ["👍", "🎉", "🔥", "❤️"];
 
@@ -34,6 +35,7 @@ interface Props {
 }
 
 export default function TeamChatTab({ teamId, currentMember, members }: Props) {
+  const { t } = useLanguage();
   const [messages, setMessages] = useState<TeamMessage[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -46,7 +48,7 @@ export default function TeamChatTab({ teamId, currentMember, members }: Props) {
       ...msg,
       member: members.find(m => m.id === msg.member_id) ?? {
         id: msg.member_id,
-        agent_name: "Inconnu",
+        agent_name: t("team_chat.unknown", "Inconnu"),
         agent_initials: "?",
         avatar_color: "#9ca3af",
         is_online: false,
@@ -252,7 +254,7 @@ export default function TeamChatTab({ teamId, currentMember, members }: Props) {
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-          placeholder="Écrivez un message... (@nom pour mentionner)"
+          placeholder={t("team_chat.placeholder", "Écrivez un message... (@nom pour mentionner)")}
           style={{
             flex: 1, height: 42, borderRadius: 12, border: `1.5px solid ${T.border}`,
             padding: "0 14px", fontSize: 13, fontFamily: "inherit", outline: "none",

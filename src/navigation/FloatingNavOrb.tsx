@@ -3,6 +3,7 @@ import { useApp } from "../AppContext";
 import { useAuth } from "../contexts/AuthContext";
 import { X, Search, LogOut } from "lucide-react";
 import { T } from "../theme";
+import { useLanguage } from "../i18n/LanguageContext";
 
 type MenuItem = {
   key: string;
@@ -113,6 +114,7 @@ function NavIcon({ item, active, onClick, tooltip }: { item: { key: string; icon
 export default function FloatingNavOrb({ menu, onLogout, pageLabels: _pageLabels }: Props) {
   const { navigate, page } = useApp();
   const { profile } = useAuth();
+  const { t } = useLanguage();
   const initials = profile?.full_name ? profile.full_name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase() : "??";
 
   const [position, setPosition] = useState<Position>(() => {
@@ -312,7 +314,7 @@ export default function FloatingNavOrb({ menu, onLogout, pageLabels: _pageLabels
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Rechercher..."
+                placeholder={t("nav.search_placeholder")}
                 autoFocus
                 style={{ border: "none", background: "transparent", outline: "none", fontSize: 12, width: "100%", fontFamily: "inherit", color: "#111", letterSpacing: "-0.01em" }}
               />
@@ -327,7 +329,7 @@ export default function FloatingNavOrb({ menu, onLogout, pageLabels: _pageLabels
           <div style={{ flex: 1, overflowY: "auto", padding: "4px 12px 12px" }}>
             {searchResults ? (
               searchResults.length === 0 ? (
-                <div style={{ padding: 20, textAlign: "center", color: "#a0a0a0", fontSize: 12 }}>Aucun resultat</div>
+                <div style={{ padding: 20, textAlign: "center", color: "#a0a0a0", fontSize: 12 }}>{t("nav.no_result")}</div>
               ) : (
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 4 }}>
                   {searchResults.map(item => (
@@ -440,7 +442,7 @@ export default function FloatingNavOrb({ menu, onLogout, pageLabels: _pageLabels
               {profile?.avatar_url ? <img src={profile.avatar_url} alt="" style={{ width: 32, height: 32, objectFit: "cover" }} /> : initials}
             </div>
             <div style={{ flex: 1, fontSize: 12, color: "#6b6b6b", fontWeight: 500 }}>
-              {profile?.full_name || "Utilisateur"}
+              {profile?.full_name || t("nav.user_fallback")}
             </div>
             <button
               onClick={() => { setMenuOpen(false); onLogout(); }}

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { BilledDoc, T, fmt, fmtDate, fmtPct } from "./beneficeTypes";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   docs: BilledDoc[];
@@ -10,6 +11,7 @@ export default function ProfitInvoiceLog({ docs, onDocClick }: Props) {
   const [filterClient, setFilterClient] = useState("");
   const [filterType, setFilterType] = useState<"" | "pickup" | "order">("");
   const [sortBy, setSortBy] = useState<"date" | "profit" | "margin">("date");
+  const { t } = useLanguage();
 
   const filtered = docs.filter(d => {
     if (filterClient && !d.client_name.toLowerCase().includes(filterClient.toLowerCase())) return false;
@@ -31,19 +33,19 @@ export default function ProfitInvoiceLog({ docs, onDocClick }: Props) {
   return (
     <div>
       <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginBottom: 16 }}>
-        <input value={filterClient} onChange={e => setFilterClient(e.target.value)} placeholder="Filtrer par client..." style={inputStyle} />
+        <input value={filterClient} onChange={e => setFilterClient(e.target.value)} placeholder={t("benefice.filter_client")} style={inputStyle} />
         <select value={filterType} onChange={e => setFilterType(e.target.value as typeof filterType)} style={inputStyle}>
-          <option value="">Tous les types</option>
-          <option value="pickup">Pickup Tickets</option>
-          <option value="order">Commandes</option>
+          <option value="">{t("benefice.all_types")}</option>
+          <option value="pickup">{t("benefice.pickup_tickets")}</option>
+          <option value="order">{t("benefice.orders")}</option>
         </select>
         <select value={sortBy} onChange={e => setSortBy(e.target.value as typeof sortBy)} style={inputStyle}>
-          <option value="date">Trier par date</option>
-          <option value="profit">Trier par benefice</option>
-          <option value="margin">Trier par marge</option>
+          <option value="date">{t("benefice.sort_date")}</option>
+          <option value="profit">{t("benefice.sort_profit")}</option>
+          <option value="margin">{t("benefice.sort_margin")}</option>
         </select>
         <span style={{ fontSize: 12, color: T.textMid, marginLeft: "auto" }}>
-          {sorted.length} facture{sorted.length !== 1 ? "s" : ""}
+          {sorted.length} {t("benefice.invoice_count")}
         </span>
       </div>
 
@@ -89,12 +91,12 @@ export default function ProfitInvoiceLog({ docs, onDocClick }: Props) {
 
               <div style={{ textAlign: "right", flexShrink: 0, minWidth: 80 }}>
                 <div style={{ fontSize: 11, color: T.textMid }}>{fmtDate(doc.billed_at)}</div>
-                <div style={{ fontSize: 11, color: T.textLight }}>Vente {fmt(doc.selling_price)}</div>
+                <div style={{ fontSize: 11, color: T.textLight }}>{t("benefice.sale")} {fmt(doc.selling_price)}</div>
               </div>
 
               <div style={{ textAlign: "right", flexShrink: 0, minWidth: 100 }}>
                 <div style={{ fontSize: 15, fontWeight: 800, color: profitColor }}>{fmt(doc.profit)}</div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: profitColor }}>{fmtPct(doc.margin_pct)} marge</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: profitColor }}>{fmtPct(doc.margin_pct)} {t("benefice.margin")}</div>
               </div>
             </div>
           );
@@ -102,7 +104,7 @@ export default function ProfitInvoiceLog({ docs, onDocClick }: Props) {
 
         {sorted.length === 0 && (
           <div style={{ background: T.card, borderRadius: 12, border: `1px solid ${T.border}`, padding: 32, textAlign: "center" }}>
-            <div style={{ fontSize: 13, color: T.textMid }}>Aucune facture trouvee pour ces filtres.</div>
+            <div style={{ fontSize: 13, color: T.textMid }}>{t("benefice.no_invoices")}</div>
           </div>
         )}
       </div>

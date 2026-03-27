@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import { MessagingRule, ALL_ROLES, ROLE_LABELS, ROLE_COLORS } from "./messagingTypes";
 import { T } from "../theme";
+import { useLanguage } from "../i18n/LanguageContext";
 
 interface ToggleProps {
   value: boolean;
@@ -28,6 +29,7 @@ function Toggle({ value, onChange, disabled }: ToggleProps) {
 }
 
 export default function AdminMessagingSettings() {
+  const { t } = useLanguage();
   const [rules, setRules] = useState<MessagingRule[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
@@ -64,27 +66,27 @@ export default function AdminMessagingSettings() {
   return (
     <div style={{ padding: 24, maxWidth: 900, margin: "0 auto", fontFamily: "'Outfit', sans-serif" }}>
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: T.text }}>Règles de messagerie</h1>
+        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: T.text }}>{t("msgadmin.title")}</h1>
         <p style={{ margin: "6px 0 0", fontSize: 13, color: T.textMid }}>
-          Définissez qui peut envoyer des messages à qui dans la plateforme. Les règles s'appliquent par rôle.
+          {t("msgadmin.description")}
         </p>
       </div>
 
       <div style={{ background: T.card, borderRadius: 14, border: `1px solid ${T.border}`, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
         <div style={{ padding: "14px 20px", borderBottom: `1px solid ${T.border}`, background: "#f8f9fb", display: "flex", alignItems: "center", gap: 8 }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={T.main} strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span style={{ fontSize: 13, fontWeight: 700, color: T.text }}>Matrice des permissions de messagerie</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: T.text }}>{t("msgadmin.permissions_matrix")}</span>
         </div>
 
         {loading ? (
-          <div style={{ padding: 48, textAlign: "center", color: T.textMid, fontSize: 13 }}>Chargement...</div>
+          <div style={{ padding: 48, textAlign: "center", color: T.textMid, fontSize: 13 }}>{t("loading_dots")}</div>
         ) : (
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr>
                   <th style={{ padding: "12px 20px", textAlign: "left", fontSize: 11, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.5, borderBottom: `1px solid ${T.border}`, background: "#f8f9fb" }}>
-                    Émetteur ↓ · Destinataire →
+                    {t("msgadmin.sender_receiver")}
                   </th>
                   {ALL_ROLES.map(role => {
                     const rc = ROLE_COLORS[role];
@@ -121,7 +123,7 @@ export default function AdminMessagingSettings() {
                                 disabled={saving === key}
                               />
                               <span style={{ fontSize: 10, color: enabled ? T.green : T.textLight, fontWeight: 600 }}>
-                                {saving === key ? "..." : enabled ? "Autorisé" : "Bloqué"}
+                                {saving === key ? "..." : enabled ? t("msgadmin.allowed") : t("msgadmin.blocked")}
                               </span>
                             </div>
                           </td>
@@ -138,18 +140,17 @@ export default function AdminMessagingSettings() {
         <div style={{ padding: "12px 20px", borderTop: `1px solid ${T.border}`, background: "#f8f9fb", display: "flex", gap: 20 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: T.textMid }}>
             <span style={{ width: 20, height: 12, borderRadius: 6, background: T.main, display: "inline-block" }} />
-            Peut envoyer des messages
+            {t("msgadmin.can_send")}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: T.textMid }}>
             <span style={{ width: 20, height: 12, borderRadius: 6, background: "#d1d5db", display: "inline-block" }} />
-            Bloqué
+            {t("msgadmin.blocked")}
           </div>
         </div>
       </div>
 
       <div style={{ marginTop: 16, padding: "12px 16px", background: "#eff6ff", borderRadius: 10, border: "1px solid #bfdbfe", fontSize: 13, color: "#1d4ed8" }}>
-        <strong>Note :</strong> Les modifications sont appliquées immédiatement. Les conversations existantes ne sont pas affectées.
-        Pour les vendeurs, les messages intra-équipe respectent également l'appartenance à une équipe.
+        <strong>Note :</strong> {t("msgadmin.note")}
       </div>
     </div>
   );

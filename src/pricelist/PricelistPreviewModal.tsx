@@ -1,6 +1,7 @@
 import React from "react";
 import { Pricelist, PRICELIST_PRODUCTS } from "./pricelistTypes";
 import { T } from "../theme";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const fmt = (n: number, currency = "CAD") =>
   new Intl.NumberFormat("fr-CA", { style: "currency", currency, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
@@ -16,12 +17,13 @@ interface Props {
 }
 
 export default function PricelistPreviewModal({ pricelist, onClose, onGenerate, generating }: Props) {
+  const { t } = useLanguage();
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, padding: 24 }}>
       <div style={{ background: T.bgCard, borderRadius: 16, width: "100%", maxWidth: 760, maxHeight: "92vh", overflow: "hidden", display: "flex", flexDirection: "column", boxShadow: "0 32px 80px rgba(0,0,0,0.3)" }}>
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 24px", borderBottom: `1px solid ${T.border}` }}>
-          <div style={{ fontWeight: 800, fontSize: 16 }}>Prévisualisation du PDF</div>
+          <div style={{ fontWeight: 800, fontSize: 16 }}>{t("pricelist.preview_title")}</div>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: T.textLight, padding: 4, display: "flex", alignItems: "center" }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
@@ -57,12 +59,12 @@ export default function PricelistPreviewModal({ pricelist, onClose, onGenerate, 
               </div>
 
               <div style={{ borderTop: `1px solid ${T.border}`, paddingTop: 14, marginBottom: 14, textAlign: "center" }}>
-                <div style={{ fontSize: 18, fontWeight: 900, color: T.main, letterSpacing: 2 }}>LISTE DE PRIX</div>
+                <div style={{ fontSize: 18, fontWeight: 900, color: T.main, letterSpacing: 2 }}>{t("pricelist.price_list_title")}</div>
                 <div style={{ fontSize: 10, color: T.textMid, marginTop: 3 }}>
-                  Créée le {fmtDate(pricelist.createdAt)} · Valide jusqu'au {fmtDate(pricelist.validUntil)} · {pricelist.currency}
+                  {t("pricelist.created_on")} {fmtDate(pricelist.createdAt)} · {t("pricelist.valid_until_label")} {fmtDate(pricelist.validUntil)} · {pricelist.currency}
                 </div>
                 <div style={{ fontSize: 9, color: "#adb5bd", marginTop: 4, fontStyle: "italic" }}>
-                  This Pricelist is personal to you. Sharing these informations to a third party company not included in this deal could have legal repercussions.
+                  {t("pricelist.confidential_notice")}
                 </div>
               </div>
 
@@ -82,11 +84,11 @@ export default function PricelistPreviewModal({ pricelist, onClose, onGenerate, 
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 800, fontSize: 12 }}>{line.product}</div>
                       {prod && <div style={{ fontSize: 10, color: T.textLight, marginTop: 2, lineHeight: 1.4 }}>{prod.description}</div>}
-                      <div style={{ fontSize: 10, color: T.textMid, marginTop: 3 }}>Format : {line.format} · Qté min. : {line.minQty}</div>
+                      <div style={{ fontSize: 10, color: T.textMid, marginTop: 3 }}>{t("pricelist.format_label")} : {line.format} · {t("pricelist.min_qty_label")} : {line.minQty}</div>
                     </div>
                     <div style={{ textAlign: "right", flexShrink: 0 }}>
                       <div style={{ fontWeight: 900, fontSize: 13, color: T.main }}>{fmt(line.price, pricelist.currency)}{line.unit}</div>
-                      <div style={{ fontSize: 10, color: T.textMid, marginTop: 3 }}>Total : {fmt(line.minQty * line.price, pricelist.currency)}</div>
+                      <div style={{ fontSize: 10, color: T.textMid, marginTop: 3 }}>{t("pricelist.total_label")} : {fmt(line.minQty * line.price, pricelist.currency)}</div>
                     </div>
                   </div>
                 );
@@ -94,8 +96,8 @@ export default function PricelistPreviewModal({ pricelist, onClose, onGenerate, 
 
 
               <div style={{ borderTop: `1px solid ${T.border}`, marginTop: 20, paddingTop: 10, textAlign: "center", fontSize: 9, color: "#adb5bd" }}>
-                <div style={{ fontStyle: "italic" }}>This Pricelist is personal to you. Sharing these informations to a third party company not included in this deal could have legal repercussions.</div>
-                <div style={{ marginTop: 4 }}>© 2026 Uniflex Distribution Inc. — Boisbriand, QC · Page 1 de 1</div>
+                <div style={{ fontStyle: "italic" }}>{t("pricelist.confidential_notice")}</div>
+                <div style={{ marginTop: 4 }}>© 2026 Uniflex Distribution Inc. — Boisbriand, QC · {t("pricelist.page_of")}</div>
               </div>
             </div>
           </div>
@@ -106,14 +108,14 @@ export default function PricelistPreviewModal({ pricelist, onClose, onGenerate, 
             onClick={onClose}
             style={{ background: "#f4f5f9", color: T.textMid, border: `1px solid ${T.border}`, borderRadius: 8, padding: "10px 20px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
           >
-            Fermer
+            {t("pricelist.close")}
           </button>
           <button
             onClick={onGenerate}
             disabled={generating}
             style={{ background: generating ? "#e5e7eb" : T.main, color: generating ? "#9ca3af" : "#fff", border: "none", borderRadius: 8, padding: "10px 24px", fontSize: 13, fontWeight: 800, cursor: generating ? "not-allowed" : "pointer", fontFamily: "inherit" }}
           >
-            {generating ? "Génération..." : "GÉNÉRER PDF"}
+            {generating ? t("pricelist.generating") : t("pricelist.generate_pdf")}
           </button>
         </div>
       </div>

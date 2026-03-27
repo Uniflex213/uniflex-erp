@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { supabase } from "../../supabaseClient";
 import { InvoiceDoc, PaymentStatus, T, fmt, fmtDate, PICKUP_STATUS_CONFIG, PAYMENT_COLORS, PAYMENT_LABEL } from "./toInvoiceTypes";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   docs: InvoiceDoc[];
@@ -78,6 +79,7 @@ function BilledTable({
   onUpdateStatus: (doc: InvoiceDoc, status: PaymentStatus) => void;
   onRecordPayment: (doc: InvoiceDoc) => void;
 }) {
+  const { t } = useLanguage();
   const thStyle: React.CSSProperties = {
     textAlign: "left", fontSize: 10, fontWeight: 700, color: T.textMid,
     textTransform: "uppercase", letterSpacing: 0.6, padding: "8px 10px 10px",
@@ -136,7 +138,7 @@ function BilledTable({
                         cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap",
                       }}
                     >
-                      $ Paiement
+                      {t("billed.payment_btn")}
                     </button>
                     {d.payment_status !== "En litige" && (
                       <button
@@ -147,7 +149,7 @@ function BilledTable({
                           cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap",
                         }}
                       >
-                        Litige
+                        {t("billed.dispute")}
                       </button>
                     )}
                     {d.payment_status === "En litige" && (
@@ -159,7 +161,7 @@ function BilledTable({
                           cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap",
                         }}
                       >
-                        Retirer litige
+                        {t("billed.remove_dispute")}
                       </button>
                     )}
                   </div>
@@ -174,6 +176,7 @@ function BilledTable({
 }
 
 export default function TabBilled({ docs, onRefresh, onDocClick, onRecordPayment }: Props) {
+  const { t } = useLanguage();
   const [filterClient, setFilterClient] = useState("");
   const [filterPayment, setFilterPayment] = useState<"" | PaymentStatus>("");
 
@@ -222,8 +225,8 @@ export default function TabBilled({ docs, onRefresh, onDocClick, onRecordPayment
   if (activeDocs.length === 0) {
     return (
       <div style={{ background: T.card, borderRadius: 12, border: `1px solid ${T.border}`, padding: 40, textAlign: "center" }}>
-        <div style={{ fontSize: 15, fontWeight: 700, color: T.textMid, marginBottom: 4 }}>Aucune facture en attente de paiement</div>
-        <div style={{ fontSize: 13, color: T.textLight }}>Les factures payees se trouvent dans l'onglet "Paye & Ferme".</div>
+        <div style={{ fontSize: 15, fontWeight: 700, color: T.textMid, marginBottom: 4 }}>{t("billed.no_invoices")}</div>
+        <div style={{ fontSize: 13, color: T.textLight }}>{t("billed.paid_tab_info")}</div>
       </div>
     );
   }
@@ -231,33 +234,33 @@ export default function TabBilled({ docs, onRefresh, onDocClick, onRecordPayment
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-        <input value={filterClient} onChange={e => setFilterClient(e.target.value)} placeholder="Filtrer par client..." style={inputStyle} />
+        <input value={filterClient} onChange={e => setFilterClient(e.target.value)} placeholder={t("billed.filter_client")} style={inputStyle} />
         <select value={filterPayment} onChange={e => setFilterPayment(e.target.value as "" | PaymentStatus)} style={inputStyle}>
-          <option value="">Tous les statuts paiement</option>
+          <option value="">{t("billed.all_payment_statuses")}</option>
           {FILTER_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
         <button onClick={exportCSV} style={{ background: T.cardAlt, color: T.text, border: `1px solid ${T.border}`, borderRadius: 7, padding: "7px 14px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", marginLeft: "auto" }}>
-          Export CSV
+          {t("billed.export_csv")}
         </button>
       </div>
 
       {orderDocs.length > 0 && (
         <div>
-          <SectionHeader label="Commandes" count={orderDocs.length} color={T.green} />
+          <SectionHeader label={t("billed.orders")} count={orderDocs.length} color={T.green} />
           <BilledTable docs={orderDocs} showOrderStatus={true} onDocClick={onDocClick} onUpdateStatus={updatePaymentStatus} onRecordPayment={onRecordPayment} />
         </div>
       )}
 
       {pickupDocs.length > 0 && (
         <div>
-          <SectionHeader label="Pickup Tickets" count={pickupDocs.length} color={T.blue} />
+          <SectionHeader label={t("billed.pickup_tickets")} count={pickupDocs.length} color={T.blue} />
           <BilledTable docs={pickupDocs} showOrderStatus={false} showPickupStatus={true} onDocClick={onDocClick} onUpdateStatus={updatePaymentStatus} onRecordPayment={onRecordPayment} />
         </div>
       )}
 
       {filtered.length === 0 && (
         <div style={{ background: T.card, borderRadius: 12, border: `1px solid ${T.border}`, padding: 32, textAlign: "center" }}>
-          <div style={{ fontSize: 13, color: T.textMid }}>Aucun resultat pour ce filtre.</div>
+          <div style={{ fontSize: 13, color: T.textMid }}>{t("billed.no_results")}</div>
         </div>
       )}
     </div>

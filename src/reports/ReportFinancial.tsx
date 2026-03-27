@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Download, DollarSign, CreditCard, AlertCircle, TrendingUp } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { T, fmt, fmtNum, exportToCsv, exportToPdf } from './reportUtils';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export default function ReportFinancial() {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [revenue, setRevenue] = useState(0);
   const [ticketsBilled, setTicketsBilled] = useState(0);
@@ -74,7 +76,7 @@ export default function ReportFinancial() {
     else exportToPdf('Rapport Financier', headers, rows);
   };
 
-  if (loading) return <div style={{ textAlign: 'center', padding: 40, color: T.textLight }}>Chargement...</div>;
+  if (loading) return <div style={{ textAlign: 'center', padding: 40, color: T.textLight }}>{t("common.loading", "Chargement...")}</div>;
 
   return (
     <div>
@@ -85,10 +87,10 @@ export default function ReportFinancial() {
 
       <div style={{ display: 'flex', gap: 14, marginBottom: 20, flexWrap: 'wrap' }}>
         {[
-          { icon: <DollarSign size={18} />, label: 'Revenu YTD', value: fmt(revenue), color: T.main },
-          { icon: <TrendingUp size={18} />, label: 'Profit estime', value: fmt(profit), color: profit > 0 ? T.green : T.red },
-          { icon: <CreditCard size={18} />, label: 'Paiements recus', value: fmt(paid), color: T.green },
-          { icon: <AlertCircle size={18} />, label: 'En attente', value: fmt(pending), color: T.orange },
+          { icon: <DollarSign size={18} />, label: t("report_financial.revenue_ytd", "Revenu YTD"), value: fmt(revenue), color: T.main },
+          { icon: <TrendingUp size={18} />, label: t("report_financial.estimated_profit", "Profit estimé"), value: fmt(profit), color: profit > 0 ? T.green : T.red },
+          { icon: <CreditCard size={18} />, label: t("report_financial.payments_received", "Paiements reçus"), value: fmt(paid), color: T.green },
+          { icon: <AlertCircle size={18} />, label: t("report_financial.pending", "En attente"), value: fmt(pending), color: T.orange },
         ].map((kpi, i) => (
           <div key={i} style={{ flex: '1 1 200px', background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: '18px 20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
@@ -102,9 +104,9 @@ export default function ReportFinancial() {
 
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 20 }}>
         <div style={{ flex: '2 1 450px', background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: 20 }}>
-          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>Revenu vs Depenses par mois</div>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>{t("report_financial.revenue_vs_expenses", "Revenu vs Dépenses par mois")}</div>
           {monthlyRevenue.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 32, color: T.textLight, fontSize: 13 }}>Aucune donnee</div>
+            <div style={{ textAlign: 'center', padding: 32, color: T.textLight, fontSize: 13 }}>{t("common.no_data", "Aucune donnée")}</div>
           ) : (
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 200, padding: '8px 0' }}>
               {monthlyRevenue.map((m, i) => (
@@ -120,21 +122,21 @@ export default function ReportFinancial() {
           )}
           <div style={{ display: 'flex', gap: 16, marginTop: 12, justifyContent: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: T.textMid }}>
-              <div style={{ width: 10, height: 10, borderRadius: 2, background: T.main }} /> Revenus
+              <div style={{ width: 10, height: 10, borderRadius: 2, background: T.main }} /> {t("report_financial.revenues", "Revenus")}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: T.textMid }}>
-              <div style={{ width: 10, height: 10, borderRadius: 2, background: T.red, opacity: 0.6 }} /> Depenses
+              <div style={{ width: 10, height: 10, borderRadius: 2, background: T.red, opacity: 0.6 }} /> {t("report_financial.expenses", "Dépenses")}
             </div>
           </div>
         </div>
 
         <div style={{ flex: '1 1 280px', background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: 20 }}>
-          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>Resume financier</div>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>{t("report_financial.financial_summary", "Résumé financier")}</div>
           {[
-            ['Revenu brut', revenue, T.text],
-            ['Depenses magasin', -expenses, T.red],
-            ['Factures SCI', -ticketsBilled, T.orange],
-            ['Impaye', outstanding, T.orange],
+            [t("report_financial.gross_revenue", "Revenu brut"), revenue, T.text],
+            [t("report_financial.store_expenses", "Dépenses magasin"), -expenses, T.red],
+            [t("report_financial.sci_invoices", "Factures SCI"), -ticketsBilled, T.orange],
+            [t("report_financial.outstanding", "Impayé"), outstanding, T.orange],
           ].map(([label, value, color], i) => (
             <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: `1px solid ${T.border}`, fontSize: 13 }}>
               <span style={{ color: T.textMid }}>{label as string}</span>
@@ -142,7 +144,7 @@ export default function ReportFinancial() {
             </div>
           ))}
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderTop: `2px solid ${T.border}`, marginTop: 4, fontSize: 14 }}>
-            <span style={{ fontWeight: 800 }}>Profit net estime</span>
+            <span style={{ fontWeight: 800 }}>{t("report_financial.net_profit_estimated", "Profit net estimé")}</span>
             <strong style={{ color: profit > 0 ? T.green : T.red, fontSize: 18 }}>{fmt(profit)}</strong>
           </div>
         </div>

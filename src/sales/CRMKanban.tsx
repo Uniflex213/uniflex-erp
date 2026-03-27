@@ -7,6 +7,7 @@ import {
 import { SampleRequest, SampleStatus, SAMPLE_STATUS_COLORS, SAMPLE_STATUS_BG } from "./sampleTypes";
 import { StageDetailModal } from "./CRMKpiModals";
 import { useTeamAgents } from "../hooks/useAgents";
+import { useLanguage } from "../i18n/LanguageContext";
 import { T } from "../theme";
 const fmt = (n: number) => new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 
@@ -50,6 +51,7 @@ function getLeadSampleStatus(leadId: string, samples: SampleRequest[]): SampleSt
 }
 
 export default function CRMKanban({ leads, samples = [], onLeadClick, onStageChange, onLeadUpdate, onLeadDelete }: Props) {
+  const { t } = useLanguage();
   const agentsList = useTeamAgents();
   const [dragging, setDragging] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState<Stage | null>(null);
@@ -167,7 +169,7 @@ export default function CRMKanban({ leads, samples = [], onLeadClick, onStageCha
               ))}
               {stageLeads.length === 0 && (
                 <div style={{ textAlign: "center", padding: "24px 8px", color: "rgba(255,255,255,0.25)", fontSize: 12 }}>
-                  Glisser un lead ici
+                  {t("crm.drag_lead_here", "Glisser un lead ici")}
                 </div>
               )}
             </div>
@@ -189,21 +191,21 @@ export default function CRMKanban({ leads, samples = [], onLeadClick, onStageCha
         >
           {contextMenu.sub === null && (
             <>
-              <CtxItem label="🌡️ Changer température" onClick={() => setContextMenu(c => c ? { ...c, sub: "temperature" } : null)} hasArrow />
-              <CtxItem label="➜ Déplacer vers" onClick={() => setContextMenu(c => c ? { ...c, sub: "move" } : null)} hasArrow />
-              <CtxItem label="👤 Assigner à" onClick={() => setContextMenu(c => c ? { ...c, sub: "assign" } : null)} hasArrow />
+              <CtxItem label={`🌡️ ${t("crm.change_temperature", "Changer température")}`} onClick={() => setContextMenu(c => c ? { ...c, sub: "temperature" } : null)} hasArrow />
+              <CtxItem label={`➜ ${t("crm.move_to", "Déplacer vers")}`} onClick={() => setContextMenu(c => c ? { ...c, sub: "move" } : null)} hasArrow />
+              <CtxItem label={`👤 ${t("crm.assign_to", "Assigner à")}`} onClick={() => setContextMenu(c => c ? { ...c, sub: "assign" } : null)} hasArrow />
               <div style={{ height: 1, background: "rgba(0,0,0,0.06)", margin: "4px 0" }} />
-              <CtxItem label="🗄️ Archiver le lead" onClick={() => { onLeadUpdate({ ...ctxLead, archived: true }); closeContext(); }} />
-              <CtxItem label="🗑️ Supprimer le lead" color="#ef4444" onClick={() => { setDeleteConfirm(ctxLead.id); closeContext(); }} />
+              <CtxItem label={`🗄️ ${t("crm.archive_lead", "Archiver le lead")}`} onClick={() => { onLeadUpdate({ ...ctxLead, archived: true }); closeContext(); }} />
+              <CtxItem label={`🗑️ ${t("crm.delete_lead", "Supprimer le lead")}`} color="#ef4444" onClick={() => { setDeleteConfirm(ctxLead.id); closeContext(); }} />
             </>
           )}
           {contextMenu.sub === "temperature" && (
             <>
               <CtxBack onClick={() => setContextMenu(c => c ? { ...c, sub: null } : null)} />
-              {(["Hot", "Warm", "Cold"] as const).map(t => (
-                <CtxItem key={t} label={`${TEMP_LABEL[t]}`}
-                  onClick={() => { onLeadUpdate({ ...ctxLead, temperature: t }); closeContext(); }}
-                  active={ctxLead.temperature === t}
+              {(["Hot", "Warm", "Cold"] as const).map(tp => (
+                <CtxItem key={tp} label={`${TEMP_LABEL[tp]}`}
+                  onClick={() => { onLeadUpdate({ ...ctxLead, temperature: tp }); closeContext(); }}
+                  active={ctxLead.temperature === tp}
                 />
               ))}
             </>
@@ -238,11 +240,11 @@ export default function CRMKanban({ leads, samples = [], onLeadClick, onStageCha
       {deleteConfirm && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div style={{ background: T.bgCard, borderRadius: 16, padding: 28, maxWidth: 380, textAlign: "center" }}>
-            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, color: T.text }}>Supprimer ce lead?</div>
-            <div style={{ fontSize: 14, color: T.textMid, marginBottom: 24 }}>Cette action est irréversible.</div>
+            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, color: T.text }}>{t("crm.delete_lead_confirm", "Supprimer ce lead?")}</div>
+            <div style={{ fontSize: 14, color: T.textMid, marginBottom: 24 }}>{t("crm.delete_irreversible", "Cette action est irréversible.")}</div>
             <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
-              <button onClick={() => setDeleteConfirm(null)} style={{ padding: "10px 20px", borderRadius: 8, border: "1px solid #ddd", background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 14 }}>Annuler</button>
-              <button onClick={() => { onLeadDelete(deleteConfirm); setDeleteConfirm(null); }} style={{ padding: "10px 20px", borderRadius: 8, border: "none", background: T.red, color: "#fff", cursor: "pointer", fontFamily: "inherit", fontSize: 14, fontWeight: 700 }}>Supprimer</button>
+              <button onClick={() => setDeleteConfirm(null)} style={{ padding: "10px 20px", borderRadius: 8, border: "1px solid #ddd", background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 14 }}>{t("cancel", "Annuler")}</button>
+              <button onClick={() => { onLeadDelete(deleteConfirm); setDeleteConfirm(null); }} style={{ padding: "10px 20px", borderRadius: 8, border: "none", background: T.red, color: "#fff", cursor: "pointer", fontFamily: "inherit", fontSize: 14, fontWeight: 700 }}>{t("delete", "Supprimer")}</button>
             </div>
           </div>
         </div>
@@ -270,6 +272,7 @@ function LeadCard({ lead, sampleStatus, isDragging, onClick, onDragStart, onDrag
   onContextMenu: (e: React.MouseEvent, id: string) => void;
   onDotsClick: (e: React.MouseEvent, id: string) => void;
 }) {
+  const { t } = useLanguage();
   const days = daysSince(lead.last_activity_at);
   const now = new Date();
   const overdueReminder = lead.reminders?.some(r => !r.completed && new Date(r.reminder_at) < now);
@@ -346,7 +349,7 @@ function LeadCard({ lead, sampleStatus, isDragging, onClick, onDragStart, onDrag
       </div>
 
       <div style={{ fontSize: 13, fontWeight: 700, color: T.main, marginBottom: 8 }}>
-        ~{fmt(lead.estimated_value)} / an
+        ~{fmt(lead.estimated_value)} {t("crm.per_year", "/ an")}
       </div>
 
       <div style={{ display: "flex", gap: 5, marginBottom: 8, flexWrap: "wrap" }}>
@@ -371,8 +374,8 @@ function LeadCard({ lead, sampleStatus, isDragging, onClick, onDragStart, onDrag
 
       <div style={{ fontSize: 11, color: T.textLight, marginBottom: 10, lineHeight: 1.4 }}>
         {lead.reminders?.find(r => !r.completed && new Date(r.reminder_at) > new Date())
-          ? `Prochaine action: ${lead.reminders.find(r => !r.completed && new Date(r.reminder_at) > new Date())!.title}`
-          : <em>Aucune action planifiée</em>
+          ? `${t("crm.next_action", "Prochaine action")}: ${lead.reminders.find(r => !r.completed && new Date(r.reminder_at) > new Date())!.title}`
+          : <em>{t("crm.no_action_planned", "Aucune action planifiée")}</em>
         }
       </div>
 
@@ -383,10 +386,10 @@ function LeadCard({ lead, sampleStatus, isDragging, onClick, onDragStart, onDrag
             color: days > 14 ? T.red : days > 7 ? T.orange : T.textLight,
             fontWeight: days > 7 ? 600 : 400,
           }}>
-            {days > 14 ? "⚠️ " : ""}il y a {days}j
+            {days > 14 ? "⚠️ " : ""}{t("crm.days_ago", `il y a ${days}j`)}
           </span>
           {(lead.activities || []).length > 0 && (
-            <span title={`${(lead.activities || []).length} activités`} style={{
+            <span title={`${(lead.activities || []).length} ${t("crm.view_all_history", "activités")}`} style={{
               fontSize: 10, color: T.textLight, background: "rgba(0,0,0,0.06)",
               borderRadius: 10, padding: "1px 6px", fontWeight: 600,
             }}>
@@ -442,6 +445,7 @@ function CtxItem({ label, onClick, hasArrow, active, color }: {
 }
 
 function CtxBack({ onClick }: { onClick: () => void }) {
+  const { t } = useLanguage();
   return (
     <button
       onClick={onClick}
@@ -452,7 +456,7 @@ function CtxBack({ onClick }: { onClick: () => void }) {
         color: "#8e8e93", fontFamily: "inherit", borderBottom: "1px solid rgba(0,0,0,0.06)",
       }}
     >
-      ‹ Retour
+      ‹ {t("back", "Retour")}
     </button>
   );
 }

@@ -4,6 +4,7 @@ import { T } from "../../theme";
 import { useCurrentAgent } from "../../hooks/useCurrentAgent";
 import { TeamGoal, Team, TeamMember } from "./teamTypes";
 import { fmtCurrency } from "./teamUtils";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 const GOAL_TYPES = ["sales", "deals", "leads", "activities", "other"] as const;
 const GOAL_TYPE_LABELS: Record<string, string> = { sales: "Ventes ($)", deals: "Nombre de deals", leads: "Nombre de leads", activities: "Activités", other: "Autre" };
@@ -29,6 +30,7 @@ function CircleProgress({ pct, size = 80 }: { pct: number; size?: number }) {
 }
 
 function GoalForm({ teamId, onSave, onClose }: { teamId: string; onSave: (g: TeamGoal) => void; onClose: () => void }) {
+  const { t } = useLanguage();
   const agent = useCurrentAgent();
   const today = new Date().toISOString().split("T")[0];
   const nextMonth = new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0];
@@ -56,11 +58,11 @@ function GoalForm({ teamId, onSave, onClose }: { teamId: string; onSave: (g: Tea
     <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={onClose}>
       <div onClick={e => e.stopPropagation()} style={{ background: T.bgCard, borderRadius: 16, width: "100%", maxWidth: 480, boxShadow: "0 24px 80px rgba(0,0,0,0.2)" }}>
         <div style={{ padding: "18px 24px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between" }}>
-          <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: T.text }}>Nouvel objectif</h3>
+          <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: T.text }}>{t("team_goals.new_goal", "Nouvel objectif")}</h3>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 18, color: T.textLight }}>✕</button>
         </div>
         <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 14 }}>
-          {[["Titre", "text", title, setTitle, "Ex: Closer 20 clients ce trimestre"], ["Description", "text", desc, setDesc, "Notes optionnelles"]].map(([label, type, val, setter, ph]) => (
+          {[[t("team_goals.title_label", "Titre"), "text", title, setTitle, t("team_goals.title_placeholder", "Ex: Closer 20 clients ce trimestre")], [t("team_goals.description", "Description"), "text", desc, setDesc, t("team_goals.notes_optional", "Notes optionnelles")]].map(([label, type, val, setter, ph]) => (
             <div key={label as string}>
               <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 4 }}>{label as string}</label>
               <input value={val as string} onChange={e => (setter as (v: string) => void)(e.target.value)} placeholder={ph as string}
@@ -69,30 +71,30 @@ function GoalForm({ teamId, onSave, onClose }: { teamId: string; onSave: (g: Tea
           ))}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <div>
-              <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 4 }}>Type</label>
+              <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 4 }}>{t("team_goals.type", "Type")}</label>
               <select value={type} onChange={e => setType(e.target.value)} style={{ width: "100%", height: 36, borderRadius: 8, border: `1px solid ${T.border}`, padding: "0 10px", fontSize: 13, fontFamily: "inherit", outline: "none" }}>
                 {GOAL_TYPES.map(t => <option key={t} value={t}>{GOAL_TYPE_LABELS[t]}</option>)}
               </select>
             </div>
             <div>
-              <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 4 }}>Valeur cible</label>
+              <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 4 }}>{t("team_goals.target_value", "Valeur cible")}</label>
               <input type="number" value={target} onChange={e => setTarget(e.target.value)} placeholder="Ex: 200000"
                 style={{ width: "100%", height: 36, borderRadius: 8, border: `1px solid ${T.border}`, padding: "0 10px", fontSize: 13, fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
             </div>
             <div>
-              <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 4 }}>Début</label>
+              <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 4 }}>{t("team_goals.start", "Début")}</label>
               <input type="date" value={start} onChange={e => setStart(e.target.value)} style={{ width: "100%", height: 36, borderRadius: 8, border: `1px solid ${T.border}`, padding: "0 10px", fontSize: 13, fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
             </div>
             <div>
-              <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 4 }}>Fin</label>
+              <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 4 }}>{t("team_goals.end", "Fin")}</label>
               <input type="date" value={end} onChange={e => setEnd(e.target.value)} style={{ width: "100%", height: 36, borderRadius: 8, border: `1px solid ${T.border}`, padding: "0 10px", fontSize: 13, fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
             </div>
           </div>
         </div>
         <div style={{ padding: "12px 24px", borderTop: `1px solid ${T.border}`, display: "flex", justifyContent: "flex-end", gap: 8 }}>
-          <button onClick={onClose} style={{ padding: "9px 18px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 13 }}>Annuler</button>
+          <button onClick={onClose} style={{ padding: "9px 18px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 13 }}>{t("common.cancel", "Annuler")}</button>
           <button onClick={handleSave} disabled={!title.trim() || !target || loading} style={{ padding: "9px 22px", borderRadius: 8, border: "none", background: title && target ? T.main : "#e5e7eb", color: title && target ? "#fff" : T.textLight, cursor: title && target ? "pointer" : "not-allowed", fontFamily: "inherit", fontSize: 13, fontWeight: 700 }}>
-            {loading ? "Création..." : "Créer l'objectif"}
+            {loading ? t("common.creating", "Création...") : t("team_goals.create_goal", "Créer l'objectif")}
           </button>
         </div>
       </div>
@@ -103,6 +105,7 @@ function GoalForm({ teamId, onSave, onClose }: { teamId: string; onSave: (g: Tea
 interface Props { team: Team; members: TeamMember[]; isLeader: boolean; }
 
 export default function TeamGoalsTab({ team, members, isLeader }: Props) {
+  const { t } = useLanguage();
   const [goals, setGoals] = useState<TeamGoal[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -122,23 +125,23 @@ export default function TeamGoalsTab({ team, members, isLeader }: Props) {
     <div style={{ padding: "24px 28px", maxWidth: 900 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <div>
-          <h3 style={{ margin: "0 0 2px", fontSize: 16, fontWeight: 800, color: T.text }}>Objectifs d'équipe</h3>
-          {archived.length > 0 && <div style={{ fontSize: 11, color: T.textLight }}>{achieved} objectifs atteints sur {archived.length} au total</div>}
+          <h3 style={{ margin: "0 0 2px", fontSize: 16, fontWeight: 800, color: T.text }}>{t("team_goals.team_goals", "Objectifs d'équipe")}</h3>
+          {archived.length > 0 && <div style={{ fontSize: 11, color: T.textLight }}>{achieved} {t("team_goals.goals_achieved", "objectifs atteints sur")} {archived.length} {t("team_goals.in_total", "au total")}</div>}
         </div>
         {isLeader && (
           <button onClick={() => setShowForm(true)} style={{ padding: "9px 18px", borderRadius: 10, border: "none", background: T.main, color: "#fff", cursor: "pointer", fontFamily: "inherit", fontSize: 13, fontWeight: 700 }}>
-            + Nouvel objectif
+            + {t("team_goals.new_goal", "Nouvel objectif")}
           </button>
         )}
       </div>
 
-      {loading && <div style={{ textAlign: "center", padding: 40, color: T.textLight }}>Chargement...</div>}
+      {loading && <div style={{ textAlign: "center", padding: 40, color: T.textLight }}>{t("common.loading", "Chargement...")}</div>}
 
       {!loading && active.length === 0 && (
         <div style={{ textAlign: "center", padding: 60, color: T.textLight }}>
           <div style={{ fontSize: 40, marginBottom: 12 }}>🎯</div>
-          <div style={{ fontSize: 14, fontWeight: 600 }}>Aucun objectif actif</div>
-          {isLeader && <div style={{ fontSize: 12, marginTop: 4 }}>Créez le premier objectif de votre équipe</div>}
+          <div style={{ fontSize: 14, fontWeight: 600 }}>{t("team_goals.no_active_goals", "Aucun objectif actif")}</div>
+          {isLeader && <div style={{ fontSize: 12, marginTop: 4 }}>{t("team_goals.create_first_goal", "Créez le premier objectif de votre équipe")}</div>}
         </div>
       )}
 
@@ -169,14 +172,14 @@ export default function TeamGoalsTab({ team, members, isLeader }: Props) {
                 <div style={{ flex: 1 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                     <span style={{ fontSize: 14, fontWeight: 800, color: T.text }}>{goal.title}</span>
-                    {achieved && <span style={{ fontSize: 10, fontWeight: 800, background: "#dcfce7", color: T.green, padding: "2px 8px", borderRadius: 99 }}>✅ ATTEINT</span>}
-                    {urgent && <span style={{ fontSize: 10, fontWeight: 800, background: "#fff7ed", color: T.orange, padding: "2px 8px", borderRadius: 99 }}>⚡ Dernière ligne droite</span>}
+                    {achieved && <span style={{ fontSize: 10, fontWeight: 800, background: "#dcfce7", color: T.green, padding: "2px 8px", borderRadius: 99 }}>{t("team_goals.achieved", "ATTEINT")}</span>}
+                    {urgent && <span style={{ fontSize: 10, fontWeight: 800, background: "#fff7ed", color: T.orange, padding: "2px 8px", borderRadius: 99 }}>{t("team_goals.final_stretch", "Dernière ligne droite")}</span>}
                   </div>
                   {goal.description && <p style={{ margin: "0 0 8px", fontSize: 12, color: T.textLight }}>{goal.description}</p>}
                   <div style={{ display: "flex", gap: 20, fontSize: 12, color: T.textLight, flexWrap: "wrap", marginBottom: 8 }}>
-                    <span>Cible : <strong style={{ color: T.text }}>{isMonetary ? fmtCurrency(goal.target_value) : goal.target_value}</strong></span>
-                    <span>Actuel : <strong style={{ color: T.main }}>{isMonetary ? fmtCurrency(goal.current_value) : goal.current_value}</strong></span>
-                    <span>Jours restants : <strong style={{ color: daysLeft <= 7 ? T.orange : T.text }}>{daysLeft}</strong></span>
+                    <span>{t("team_goals.target", "Cible")} : <strong style={{ color: T.text }}>{isMonetary ? fmtCurrency(goal.target_value) : goal.target_value}</strong></span>
+                    <span>{t("team_goals.current", "Actuel")} : <strong style={{ color: T.main }}>{isMonetary ? fmtCurrency(goal.current_value) : goal.current_value}</strong></span>
+                    <span>{t("team_goals.days_left", "Jours restants")} : <strong style={{ color: daysLeft <= 7 ? T.orange : T.text }}>{daysLeft}</strong></span>
                   </div>
                   <div style={{ height: 6, borderRadius: 99, background: "rgba(0,0,0,0.04)", overflow: "hidden", maxWidth: 400 }}>
                     <div style={{ height: "100%", borderRadius: 99, width: `${Math.round(pct * 100)}%`, background: achieved ? T.green : T.main, transition: "width 0.6s ease" }} />

@@ -10,6 +10,7 @@ import {
   Search, ChevronDown, Circle, CheckCircle2, Folder, Inbox
 } from "lucide-react";
 import { T } from "../theme";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const FOLDER_ALIASES: Record<string, { label: string; icon: React.ElementType; order: number }> = {
   "inbox": { label: "Boîte de réception", icon: Inbox, order: 0 },
@@ -37,7 +38,7 @@ function fmtDate(iso: string | null): string {
   const d = new Date(iso);
   const now = new Date();
   const diff = now.getTime() - d.getTime();
-  if (diff < 60000) return "À l'instant";
+  if (diff < 60000) return "\u00C0 l'instant";
   if (diff < 3600000) return `${Math.floor(diff / 60000)} min`;
   if (diff < 86400000) return `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`;
   if (diff < 604800000) return d.toLocaleDateString("fr-CA", { weekday: "short" });
@@ -66,6 +67,7 @@ interface Props {
 
 export default function EmailInboxPage({ userEmail: propEmail }: Props) {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [smtpEmail, setSmtpEmail] = useState<string | undefined>(propEmail);
 
   useEffect(() => {
@@ -131,7 +133,7 @@ export default function EmailInboxPage({ userEmail: propEmail }: Props) {
     setError(null);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { setError("Session expirée."); return; }
+      if (!session) { setError("Session expired."); return; }
       const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fetch-inbox`, {
         method: "POST",
         headers: {
@@ -142,7 +144,7 @@ export default function EmailInboxPage({ userEmail: propEmail }: Props) {
         body: JSON.stringify({ mailbox: folder, force_refresh: force }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? "Erreur"); return; }
+      if (!res.ok) { setError(data.error ?? "Error"); return; }
       const list: EmailMessage[] = data.emails ?? [];
       setEmails(list);
       hasFetchedRef.current[folder] = true;
@@ -281,7 +283,7 @@ export default function EmailInboxPage({ userEmail: propEmail }: Props) {
             onClick={() => { setComposeData({}); setShowCompose(true); }}
             style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "11px 16px", background: T.main, color: "#fff", border: "none", borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
           >
-            <Pencil size={14} /> Nouveau message
+            <Pencil size={14} /> {t("email.new_message")}
           </button>
         </div>
         <div style={{ padding: "0 8px", display: "flex", flexDirection: "column", gap: 2 }}>
@@ -306,7 +308,7 @@ export default function EmailInboxPage({ userEmail: propEmail }: Props) {
         </div>
         {userEmail && (
           <div style={{ marginTop: "auto", padding: "14px 16px", borderTop: `1px solid ${T.border}` }}>
-            <div style={{ fontSize: 10, color: T.textLight, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Connecté</div>
+            <div style={{ fontSize: 10, color: T.textLight, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>{t("email.connected")}</div>
             <div style={{ fontSize: 11, color: T.textMid, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userEmail}</div>
           </div>
         )}
@@ -317,29 +319,29 @@ export default function EmailInboxPage({ userEmail: propEmail }: Props) {
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 15, fontWeight: 800, color: T.text }}>{allFolders.find(f => f.name === activeFolder)?.label ?? activeFolder}</div>
-              <div style={{ fontSize: 11, color: T.textMid }}>{unreadCount > 0 ? `${unreadCount} non lu${unreadCount > 1 ? "s" : ""}` : `${emails.length} message${emails.length !== 1 ? "s" : ""}`}</div>
+              <div style={{ fontSize: 11, color: T.textMid }}>{unreadCount > 0 ? `${unreadCount} ${unreadCount > 1 ? t("email.unread_plural") : t("email.unread")}` : `${emails.length} ${emails.length !== 1 ? t("email.messages_count") : t("email.message_count")}`}</div>
             </div>
             <button onClick={() => fetchEmails(activeFolder, true)} style={{ background: "none", border: "none", cursor: "pointer", color: T.textMid, padding: 5, borderRadius: 6, display: "flex" }}>
               <RefreshCw size={14} style={{ animation: loading ? "spin 1s linear infinite" : "none" }} />
             </button>
             <button onClick={() => setShowUnreadOnly(!showUnreadOnly)} style={{ background: showUnreadOnly ? T.mainBg : "none", border: "none", cursor: "pointer", color: showUnreadOnly ? T.main : T.textMid, padding: "5px 10px", borderRadius: 6, display: "flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 600, fontFamily: "inherit" }}>
-              {showUnreadOnly ? <CheckCircle2 size={13} /> : <Circle size={13} />} Non lus
+              {showUnreadOnly ? <CheckCircle2 size={13} /> : <Circle size={13} />} {t("email.unread_only")}
             </button>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, background: T.bg, borderRadius: 8, padding: "7px 12px" }}>
             <Search size={13} color={T.textLight} />
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher..." style={{ border: "none", background: "transparent", outline: "none", fontSize: 12, fontFamily: "inherit", flex: 1, color: T.text }} />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t("email.search_placeholder")} style={{ border: "none", background: "transparent", outline: "none", fontSize: 12, fontFamily: "inherit", flex: 1, color: T.text }} />
           </div>
         </div>
         <div style={{ flex: 1, overflowY: "auto" }}>
           {loading ? (
-            <div style={{ padding: 40, textAlign: "center", color: T.textLight, fontSize: 13 }}>Chargement...</div>
+            <div style={{ padding: 40, textAlign: "center", color: T.textLight, fontSize: 13 }}>{t("email.loading")}</div>
           ) : error ? (
             <div style={{ margin: 12, background: T.redBg, borderRadius: 8, padding: "12px 14px", fontSize: 12, color: T.red }}>{error}</div>
           ) : filteredEmails.length === 0 ? (
             <div style={{ padding: 40, textAlign: "center", color: T.textLight, fontSize: 13 }}>
               <Mail size={36} style={{ opacity: 0.2, marginBottom: 10, display: "block", margin: "0 auto 10px" }} />
-              Aucun message
+              {t("email.no_message")}
             </div>
           ) : filteredEmails.map(email => {
             const isSelected = selectedEmail?.uid === email.uid;
@@ -360,12 +362,12 @@ export default function EmailInboxPage({ userEmail: propEmail }: Props) {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
                       <span style={{ fontSize: 12, fontWeight: email.is_read ? 500 : 700, color: T.text, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {email.from_name || email.from_address || "Inconnu"}
+                        {email.from_name || email.from_address || t("email.unknown")}
                       </span>
                       <span style={{ fontSize: 10, color: T.textLight, flexShrink: 0 }}>{fmtDate(email.received_at)}</span>
                     </div>
                     <div style={{ fontSize: 12, fontWeight: email.is_read ? 500 : 700, color: T.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: 2 }}>
-                      {email.subject || "(Sans objet)"}
+                      {email.subject || t("email.no_subject")}
                     </div>
                   </div>
                 </div>
@@ -387,8 +389,8 @@ export default function EmailInboxPage({ userEmail: propEmail }: Props) {
         {!selectedEmail ? (
           <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: T.textLight }}>
             <Mail size={56} style={{ opacity: 0.12, marginBottom: 16 }} />
-            <div style={{ fontSize: 16, fontWeight: 700, opacity: 0.4 }}>Sélectionnez un message</div>
-            <div style={{ fontSize: 13, opacity: 0.3, marginTop: 6 }}>Cliquez sur un email dans la liste</div>
+            <div style={{ fontSize: 16, fontWeight: 700, opacity: 0.4 }}>{t("email.select_message")}</div>
+            <div style={{ fontSize: 13, opacity: 0.3, marginTop: 6 }}>{t("email.click_email")}</div>
           </div>
         ) : (
           <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -405,10 +407,10 @@ export default function EmailInboxPage({ userEmail: propEmail }: Props) {
                 onClick={() => replyToEmail(selectedEmail)}
                 style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", border: `1px solid ${T.border}`, borderRadius: 8, background: T.bgCard, color: T.text, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
               >
-                <Reply size={14} /> Répondre
+                <Reply size={14} /> {t("email.reply")}
               </button>
-              <button onClick={() => deleteEmail(selectedEmail)} title={isTrashFolder ? "Supprimer définitivement" : "Déplacer vers la corbeille"} style={{ background: isTrashFolder ? T.redBg : "none", border: `1px solid ${isTrashFolder ? "#fca5a5" : T.border}`, borderRadius: 8, cursor: "pointer", color: isTrashFolder ? T.red : T.textLight, padding: "8px 10px", display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, fontFamily: "inherit" }}>
-                <Trash2 size={14} />{isTrashFolder ? " Supprimer" : ""}
+              <button onClick={() => deleteEmail(selectedEmail)} title={isTrashFolder ? t("email.delete_permanent") : t("email.move_trash")} style={{ background: isTrashFolder ? T.redBg : "none", border: `1px solid ${isTrashFolder ? "#fca5a5" : T.border}`, borderRadius: 8, cursor: "pointer", color: isTrashFolder ? T.red : T.textLight, padding: "8px 10px", display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, fontFamily: "inherit" }}>
+                <Trash2 size={14} />{isTrashFolder ? ` ${t("email.delete_btn")}` : ""}
               </button>
             </div>
 
@@ -434,7 +436,7 @@ export default function EmailInboxPage({ userEmail: propEmail }: Props) {
               {loadingBody ? (
                 <div style={{ textAlign: "center", padding: 60, color: T.textLight }}>
                   <div style={{ width: 28, height: 28, border: `3px solid ${T.border}`, borderTopColor: T.main, borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 12px" }} />
-                  Chargement du message...
+                  {t("email.loading_message")}
                 </div>
               ) : selectedEmail.body_html ? (
                 <div
@@ -446,7 +448,7 @@ export default function EmailInboxPage({ userEmail: propEmail }: Props) {
                   {selectedEmail.body_text}
                 </pre>
               ) : (
-                <div style={{ textAlign: "center", padding: 60, color: T.textLight, fontSize: 14 }}>Message vide</div>
+                <div style={{ textAlign: "center", padding: 60, color: T.textLight, fontSize: 14 }}>{t("email.empty_message")}</div>
               )}
             </div>
 
@@ -455,7 +457,7 @@ export default function EmailInboxPage({ userEmail: propEmail }: Props) {
                 onClick={() => replyToEmail(selectedEmail)}
                 style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", border: `1px solid ${T.border}`, borderRadius: 9, background: T.bgCard, color: T.text, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
               >
-                <CornerUpLeft size={15} /> Répondre
+                <CornerUpLeft size={15} /> {t("email.reply")}
               </button>
               <button
                 onClick={() => {
@@ -467,7 +469,7 @@ export default function EmailInboxPage({ userEmail: propEmail }: Props) {
                 }}
                 style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", border: `1px solid ${T.border}`, borderRadius: 9, background: T.bgCard, color: T.text, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
               >
-                <Archive size={15} /> Transférer
+                <Archive size={15} /> {t("email.forward")}
               </button>
             </div>
           </div>

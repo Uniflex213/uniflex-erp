@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { SampleRequest } from "../sampleTypes";
 import { T, fmt } from "./workstationTypes";
 import { useCurrentAgent } from "../../hooks/useCurrentAgent";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 const fmtDate = (iso?: string) => iso
   ? new Date(iso).toLocaleDateString("fr-CA", { month: "short", day: "numeric" })
@@ -31,6 +32,7 @@ interface Props {
 }
 
 export default function PersonalSamplesModal({ mySamples, allSamples, onClose, onFollowUp }: Props) {
+  const { t } = useLanguage();
   const agent = useCurrentAgent();
   const [period, setPeriod] = useState<Period>("month");
   const now = new Date();
@@ -88,7 +90,7 @@ export default function PersonalSamplesModal({ mySamples, allSamples, onClose, o
 
   const recentFU = myFUCompleted.sort((a, b) => new Date(b.follow_up_completed_at!).getTime() - new Date(a.follow_up_completed_at!).getTime()).slice(0, 10);
 
-  const periodLabels: Record<Period, string> = { month: "Ce mois", quarter: "Ce trimestre", year: "Cette année" };
+  const periodLabels: Record<Period, string> = { month: t("ws.psm.this_month", "Ce mois"), quarter: t("ws.psm.this_quarter", "Ce trimestre"), year: t("ws.psm.this_year", "Cette année") };
 
   const Cmp = ({ my, team, label, higherIsBetter = true }: { my: number; team: number; label: string; higherIsBetter?: boolean }) => {
     const better = higherIsBetter ? my >= team : my <= team;
@@ -96,9 +98,9 @@ export default function PersonalSamplesModal({ mySamples, allSamples, onClose, o
     return (
       <div style={{ fontSize: 11, marginTop: 3 }}>
         <span style={{ color: better ? "#15803d" : "#ef4444", fontWeight: 700 }}>
-          {better ? "✓" : "↓"} Vous : {label === "h" ? `${my}h` : `${my}%`}
+          {better ? "✓" : "↓"} {t("ws.psm.you", "Vous")} : {label === "h" ? `${my}h` : `${my}%`}
         </span>
-        <span style={{ color: T.textLight }}> — Équipe : {label === "h" ? `${team}h` : `${team}%`}</span>
+        <span style={{ color: T.textLight }}> — {t("ws.psm.team", "Équipe")} : {label === "h" ? `${team}h` : `${team}%`}</span>
       </div>
     );
   };
@@ -108,7 +110,7 @@ export default function PersonalSamplesModal({ mySamples, allSamples, onClose, o
       <div style={{ background: T.bgCard, borderRadius: 16, width: "100%", maxWidth: 820, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 24px 80px rgba(0,0,0,0.3)" }}>
         <div style={{ padding: "16px 24px", borderBottom: `1px solid rgba(0,0,0,0.07)`, display: "flex", justifyContent: "space-between", alignItems: "center", background: "linear-gradient(135deg, #fffbea 0%, #fff 100%)", borderRadius: "16px 16px 0 0" }}>
           <div>
-            <h2 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: T.text }}>📦 Mes Analytics Samples</h2>
+            <h2 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: T.text }}>📦 {t("ws.psm.title", "Mes Analytics Samples")}</h2>
             <div style={{ fontSize: 11, color: T.textLight, marginTop: 2 }}>{agent.name}</div>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -124,12 +126,12 @@ export default function PersonalSamplesModal({ mySamples, allSamples, onClose, o
         <div style={{ padding: "18px 24px", display: "flex", flexDirection: "column", gap: 20, maxHeight: "calc(90vh - 80px)", overflowY: "auto" }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
             {[
-              { label: "Samples demandés", value: myFiltered.length, color: "#6366f1" },
-              { label: "Approuvés", value: myApproved.length, color: "#0891b2" },
-              { label: "Livrés", value: myDelivered.length, color: "#22c55e" },
-              { label: "Follow-ups complétés", value: myFUCompleted.length, color: "#d4a017" },
-              { label: "Taux de conversion", value: `${myConvRate}%`, color: myConvRate >= teamConvRate ? "#15803d" : "#ef4444", sub: <Cmp my={myConvRate} team={teamConvRate} label="%" /> },
-              { label: "Temps moy. follow-up", value: myAvgFUTime > 0 ? `${myAvgFUTime}h` : "—", color: (myAvgFUTime > 0 && teamAvgFUTime > 0 && myAvgFUTime <= teamAvgFUTime) ? "#15803d" : "#636366", sub: <Cmp my={myAvgFUTime} team={teamAvgFUTime} label="h" higherIsBetter={false} /> },
+              { label: t("ws.psm.requested", "Samples demandés"), value: myFiltered.length, color: "#6366f1" },
+              { label: t("ws.psm.approved", "Approuvés"), value: myApproved.length, color: "#0891b2" },
+              { label: t("ws.psm.delivered", "Livrés"), value: myDelivered.length, color: "#22c55e" },
+              { label: t("ws.psm.fu_completed", "Follow-ups complétés"), value: myFUCompleted.length, color: "#d4a017" },
+              { label: t("ws.psm.conv_rate", "Taux de conversion"), value: `${myConvRate}%`, color: myConvRate >= teamConvRate ? "#15803d" : "#ef4444", sub: <Cmp my={myConvRate} team={teamConvRate} label="%" /> },
+              { label: t("ws.psm.avg_fu_time", "Temps moy. follow-up"), value: myAvgFUTime > 0 ? `${myAvgFUTime}h` : "—", color: (myAvgFUTime > 0 && teamAvgFUTime > 0 && myAvgFUTime <= teamAvgFUTime) ? "#15803d" : "#636366", sub: <Cmp my={myAvgFUTime} team={teamAvgFUTime} label="h" higherIsBetter={false} /> },
             ].map((kpi, i) => (
               <div key={i} style={{ background: "#f6f7fb", borderRadius: 10, padding: "12px 14px", border: `1px solid ${T.border}` }}>
                 <div style={{ fontSize: 9, fontWeight: 600, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>{kpi.label}</div>
@@ -141,12 +143,12 @@ export default function PersonalSamplesModal({ mySamples, allSamples, onClose, o
 
           {myTotalFU > 0 && (
             <div>
-              <SectionTitle>Mes résultats</SectionTitle>
+              <SectionTitle>{t("ws.psm.my_results", "Mes résultats")}</SectionTitle>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
                 {[
-                  { label: "Positifs", count: myPositifs.length, color: "#15803d", bg: "#f0fdf4", border: "#bbf7d0", icon: "✅" },
-                  { label: "Neutres", count: myNeutres.length, color: "#92400e", bg: "#fffbeb", border: "#fde68a", icon: "➖" },
-                  { label: "Négatifs", count: myNegatifs.length, color: "#991b1b", bg: "#fef2f2", border: "#fecaca", icon: "❌" },
+                  { label: t("ws.psm.positive", "Positifs"), count: myPositifs.length, color: "#15803d", bg: "#f0fdf4", border: "#bbf7d0", icon: "✅" },
+                  { label: t("ws.psm.neutral", "Neutres"), count: myNeutres.length, color: "#92400e", bg: "#fffbeb", border: "#fde68a", icon: "➖" },
+                  { label: t("ws.psm.negative", "Négatifs"), count: myNegatifs.length, color: "#991b1b", bg: "#fef2f2", border: "#fecaca", icon: "❌" },
                 ].map(({ label, count, color, bg, border, icon }) => (
                   <div key={label} style={{ background: bg, border: `1px solid ${border}`, borderRadius: 10, padding: "12px 14px", textAlign: "center" }}>
                     <div style={{ fontSize: 22 }}>{icon}</div>
@@ -161,17 +163,17 @@ export default function PersonalSamplesModal({ mySamples, allSamples, onClose, o
           )}
 
           <div>
-            <SectionTitle>Mes samples actifs</SectionTitle>
+            <SectionTitle>{t("ws.psm.active_samples", "Mes samples actifs")}</SectionTitle>
             {activeSamples.length === 0 ? (
               <div style={{ background: "#f6f7fb", borderRadius: 10, padding: "16px 20px", color: T.textLight, fontSize: 13, textAlign: "center" }}>
-                Aucun sample actif
+                {t("ws.psm.none_active", "Aucun sample actif")}
               </div>
             ) : (
               <div style={{ background: T.bgCard, borderRadius: 10, border: `1px solid ${T.border}`, overflow: "hidden" }}>
                 <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
                   <thead>
                     <tr style={{ background: "#f6f7fb", borderBottom: "2px solid rgba(0,0,0,0.07)" }}>
-                      {["Lead", "Produit", "Statut", "ETA", "Timer 72h", "Action"].map(h => (
+                      {[t("ws.psm.lead", "Lead"), t("ws.psm.product", "Produit"), t("ws.psm.status", "Statut"), "ETA", t("ws.psm.timer", "Timer 72h"), "Action"].map(h => (
                         <th key={h} style={{ textAlign: h === "Action" ? "center" : "left", padding: "8px 12px", fontWeight: 700, color: T.textLight, fontSize: 11 }}>{h}</th>
                       ))}
                     </tr>
@@ -195,7 +197,7 @@ export default function PersonalSamplesModal({ mySamples, allSamples, onClose, o
                           <td style={{ padding: "9px 12px", color: T.textMid }}>{s.eta_delivery ? fmtDate(s.eta_delivery) : "—"}</td>
                           <td style={{ padding: "9px 12px" }}>
                             {isExpired ? (
-                              <span style={{ color: "#ef4444", fontWeight: 700, fontSize: 11, animation: "pulse 1.5s infinite" }}>EXPIRÉ</span>
+                              <span style={{ color: "#ef4444", fontWeight: 700, fontSize: 11, animation: "pulse 1.5s infinite" }}>{t("ws.psm.expired", "EXPIRÉ")}</span>
                             ) : timeLeft ? (
                               <span style={{ color: T.textMid, fontSize: 11 }}>{timeLeft}</span>
                             ) : "—"}
@@ -206,7 +208,7 @@ export default function PersonalSamplesModal({ mySamples, allSamples, onClose, o
                                 onClick={() => onFollowUp(s)}
                                 style={{ padding: "4px 10px", borderRadius: 6, border: "none", background: "#d4a017", color: "#000", cursor: "pointer", fontSize: 11, fontWeight: 700, fontFamily: "inherit", animation: "pulse 1.5s infinite" }}
                               >
-                                Follow-up
+                                {t("ws.psm.follow_up_btn", "Follow-up")}
                               </button>
                             )}
                           </td>
@@ -221,7 +223,7 @@ export default function PersonalSamplesModal({ mySamples, allSamples, onClose, o
 
           {topProducts.length > 0 && (
             <div>
-              <SectionTitle>Mes samples par produit</SectionTitle>
+              <SectionTitle>{t("ws.psm.by_product", "Mes samples par produit")}</SectionTitle>
               <div style={{ background: T.bgCard, borderRadius: 10, border: `1px solid ${T.border}`, padding: 16 }}>
                 {topProducts.map(([name, stats], i) => (
                   <div key={i} style={{ marginBottom: 10 }}>
@@ -244,7 +246,7 @@ export default function PersonalSamplesModal({ mySamples, allSamples, onClose, o
 
           {recentFU.length > 0 && (
             <div>
-              <SectionTitle>Mon historique de follow-ups</SectionTitle>
+              <SectionTitle>{t("ws.psm.fu_history", "Mon historique de follow-ups")}</SectionTitle>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {recentFU.map((s, i) => {
                   const cfgMap: Record<string, { color: string; bg: string; border: string; icon: string }> = {

@@ -3,6 +3,7 @@ import { CRMLead, REGIONS, LeadType, Temperature, LeadSource } from "./crmTypes"
 import { useProducts } from "./useProducts";
 import { useTeamAgents } from "../hooks/useAgents";
 import { useCurrentAgent } from "../hooks/useCurrentAgent";
+import { useLanguage } from "../i18n/LanguageContext";
 import { T } from "../theme";
 
 interface Props {
@@ -31,6 +32,7 @@ function Field({ label, required, children, col2 }: { label: string; required?: 
 }
 
 export default function CRMNewLeadModal({ onSave, onClose, isAdmin = true }: Props) {
+  const { t } = useLanguage();
   const agents = useTeamAgents();
   const currentAgent = useCurrentAgent();
   const { products, loading: productsLoading } = useProducts();
@@ -58,9 +60,9 @@ export default function CRMNewLeadModal({ onSave, onClose, isAdmin = true }: Pro
 
   const validate = () => {
     const errs: Record<string, string> = {};
-    if (!companyName.trim()) errs.companyName = "Champ requis";
-    if (!firstName.trim()) errs.firstName = "Champ requis";
-    if (!lastName.trim()) errs.lastName = "Champ requis";
+    if (!companyName.trim()) errs.companyName = t("crm.field_required", "Champ requis");
+    if (!firstName.trim()) errs.firstName = t("crm.field_required", "Champ requis");
+    if (!lastName.trim()) errs.lastName = t("crm.field_required", "Champ requis");
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -111,112 +113,112 @@ export default function CRMNewLeadModal({ onSave, onClose, isAdmin = true }: Pro
     <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", overflow: "auto", padding: "16px" }}>
       <div style={{ background: T.bgCard, borderRadius: 16, width: "100%", maxWidth: 720, boxShadow: "0 24px 80px rgba(0,0,0,0.25)" }}>
         <div style={{ padding: "20px 28px", borderBottom: "1px solid rgba(0,0,0,0.07)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h2 style={{ margin: 0, fontSize: 19, fontWeight: 800, color: T.text }}>Nouveau Lead</h2>
+          <h2 style={{ margin: 0, fontSize: 19, fontWeight: 800, color: T.text }}>{t("crm.new_lead", "Nouveau Lead")}</h2>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 22, color: "#8e8e93" }}>✕</button>
         </div>
 
         <div style={{ padding: "24px 28px", display: "flex", flexDirection: "column", gap: 24, maxHeight: "calc(90vh - 130px)", overflowY: "auto" }}>
-          <Section title="Informations de la compagnie">
+          <Section title={t("crm.company_info", "Informations de la compagnie")}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-              <Field label="Nom de la compagnie" required col2>
+              <Field label={t("crm.company", "Nom de la compagnie")} required col2>
                 <input value={companyName} onChange={e => setCompanyName(e.target.value)} style={{ ...inpStyle, borderColor: errors.companyName ? "#ef4444" : T.border }} />
                 {errors.companyName && <div style={{ fontSize: 11, color: "#ef4444", marginTop: 3 }}>{errors.companyName}</div>}
               </Field>
-              <Field label="Prénom" required>
+              <Field label={t("crm.first_name", "Prénom")} required>
                 <input value={firstName} onChange={e => setFirstName(e.target.value)} style={{ ...inpStyle, borderColor: errors.firstName ? "#ef4444" : T.border }} />
                 {errors.firstName && <div style={{ fontSize: 11, color: "#ef4444", marginTop: 3 }}>{errors.firstName}</div>}
               </Field>
-              <Field label="Nom" required>
+              <Field label={t("crm.last_name", "Nom")} required>
                 <input value={lastName} onChange={e => setLastName(e.target.value)} style={{ ...inpStyle, borderColor: errors.lastName ? "#ef4444" : T.border }} />
                 {errors.lastName && <div style={{ fontSize: 11, color: "#ef4444", marginTop: 3 }}>{errors.lastName}</div>}
               </Field>
-              <Field label="Poste / Titre">
+              <Field label={t("crm.position_title", "Poste / Titre")}>
                 <input value={contactTitle} onChange={e => setContactTitle(e.target.value)} style={inpStyle} />
               </Field>
-              <Field label="Téléphone">
+              <Field label={t("phone", "Téléphone")}>
                 <input value={phone} onChange={e => setPhone(e.target.value)} style={inpStyle} type="tel" />
               </Field>
-              <Field label="Email">
+              <Field label={t("email", "Email")}>
                 <input value={email} onChange={e => setEmail(e.target.value)} style={inpStyle} type="email" />
               </Field>
-              <Field label="Site web">
+              <Field label={t("crm.website", "Site web")}>
                 <input value={website} onChange={e => setWebsite(e.target.value)} style={inpStyle} />
               </Field>
-              <Field label="Région">
+              <Field label={t("crm.region", "Région")}>
                 <select value={region} onChange={e => setRegion(e.target.value)} style={selStyle}>
-                  <option value="">Sélectionner...</option>
+                  <option value="">{t("crm.select_placeholder", "Sélectionner...")}</option>
                   {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
               </Field>
-              <Field label="Adresse" col2>
+              <Field label={t("address", "Adresse")} col2>
                 <input value={address} onChange={e => setAddress(e.target.value)} style={inpStyle} />
               </Field>
-              <Field label="Code postal">
+              <Field label={t("crm.postal_code", "Code postal")}>
                 <input value={postalCode} onChange={e => setPostalCode(e.target.value)} style={inpStyle} />
               </Field>
             </div>
           </Section>
 
-          <Section title="Profil du lead">
+          <Section title={t("crm.lead_profile", "Profil du lead")}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-              <Field label="Type" required col2>
+              <Field label={t("type", "Type")} required col2>
                 <div style={{ display: "flex", gap: 10 }}>
-                  {(["Installateur", "Distributeur", "Large Scale"] as LeadType[]).map(t => (
-                    <label key={t} style={{ display: "flex", alignItems: "center", gap: 7, cursor: "pointer", padding: "8px 14px", borderRadius: 8, border: `2px solid ${type === t ? T.main : "rgba(0,0,0,0.12)"}`, background: type === t ? "rgba(99,102,241,0.06)" : "#fff", fontSize: 13 }}>
-                      <input type="radio" checked={type === t} onChange={() => setType(t)} style={{ display: "none" }} />
-                      <span style={{ color: type === t ? T.main : T.textMid, fontWeight: type === t ? 700 : 400 }}>{t}</span>
+                  {(["Installateur", "Distributeur", "Large Scale"] as LeadType[]).map(tp => (
+                    <label key={tp} style={{ display: "flex", alignItems: "center", gap: 7, cursor: "pointer", padding: "8px 14px", borderRadius: 8, border: `2px solid ${type === tp ? T.main : "rgba(0,0,0,0.12)"}`, background: type === tp ? "rgba(99,102,241,0.06)" : "#fff", fontSize: 13 }}>
+                      <input type="radio" checked={type === tp} onChange={() => setType(tp)} style={{ display: "none" }} />
+                      <span style={{ color: type === tp ? T.main : T.textMid, fontWeight: type === tp ? 700 : 400 }}>{tp}</span>
                     </label>
                   ))}
                 </div>
               </Field>
 
-              <Field label="Source">
+              <Field label={t("crm.source", "Source")}>
                 <select value={source} onChange={e => setSource(e.target.value as LeadSource)} style={selStyle}>
                   {sources.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
               </Field>
 
-              <Field label="Température initiale">
+              <Field label={t("crm.initial_temperature", "Température initiale")}>
                 <div style={{ display: "flex", gap: 8 }}>
-                  {(["Hot", "Warm", "Cold"] as Temperature[]).map(t => (
-                    <label key={t} style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", padding: "7px 12px", borderRadius: 8, border: `2px solid ${temperature === t ? tempColors[t] : "rgba(0,0,0,0.12)"}`, background: temperature === t ? `${tempColors[t]}12` : "#fff", fontSize: 13 }}>
-                      <input type="radio" checked={temperature === t} onChange={() => setTemperature(t)} style={{ display: "none" }} />
-                      <span style={{ color: temperature === t ? tempColors[t] : T.textMid, fontWeight: temperature === t ? 700 : 400 }}>{tempLabels[t]}</span>
+                  {(["Hot", "Warm", "Cold"] as Temperature[]).map(tp => (
+                    <label key={tp} style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", padding: "7px 12px", borderRadius: 8, border: `2px solid ${temperature === tp ? tempColors[tp] : "rgba(0,0,0,0.12)"}`, background: temperature === tp ? `${tempColors[tp]}12` : "#fff", fontSize: 13 }}>
+                      <input type="radio" checked={temperature === tp} onChange={() => setTemperature(tp)} style={{ display: "none" }} />
+                      <span style={{ color: temperature === tp ? tempColors[tp] : T.textMid, fontWeight: temperature === tp ? 700 : 400 }}>{tempLabels[tp]}</span>
                     </label>
                   ))}
                 </div>
               </Field>
 
-              <Field label="Valeur estimée annuelle ($)">
+              <Field label={t("crm.estimated_value_annual", "Valeur estimée annuelle ($)")}>
                 <input type="number" value={estimatedValue} onChange={e => setEstimatedValue(e.target.value)} placeholder="0" style={inpStyle} />
               </Field>
-              <Field label="Volume mensuel estimé">
+              <Field label={t("crm.monthly_volume", "Volume mensuel estimé")}>
                 <input type="number" value={monthlyVolume} onChange={e => setMonthlyVolume(e.target.value)} placeholder="gallons" style={inpStyle} />
               </Field>
 
-              <Field label={`Probabilité de closing: ${closingProbability}%`} col2>
+              <Field label={`${t("crm.closing_probability", "Probabilité de closing")}: ${closingProbability}%`} col2>
                 <input type="range" min={0} max={100} value={closingProbability} onChange={e => setClosingProbability(parseInt(e.target.value))}
                   style={{ width: "100%", accentColor: T.main }} />
               </Field>
 
-              <Field label="Date cible de closing">
+              <Field label={t("crm.target_closing_date", "Date cible de closing")}>
                 <input type="date" value={targetClosingDate} onChange={e => setTargetClosingDate(e.target.value)} style={inpStyle} />
               </Field>
 
               {isAdmin && (
-                <Field label="Assigner à">
+                <Field label={t("crm.assign_to", "Assigner à")}>
                   <select value={assignedAgentId} onChange={e => setAssignedAgentId(e.target.value)} style={selStyle}>
                     {agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
                   </select>
                 </Field>
               )}
 
-              <Field label="Produits d'intérêt" col2>
+              <Field label={t("crm.products_of_interest", "Produits d'intérêt")} col2>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                   {productsLoading ? (
-                    <span style={{ fontSize: 12, color: "#8e8e93" }}>Chargement des produits...</span>
+                    <span style={{ fontSize: 12, color: "#8e8e93" }}>{t("crm.loading_products", "Chargement des produits...")}</span>
                   ) : products.length === 0 ? (
-                    <span style={{ fontSize: 12, color: "#8e8e93" }}>Aucun produit disponible</span>
+                    <span style={{ fontSize: 12, color: "#8e8e93" }}>{t("crm.no_product_available", "Aucun produit disponible")}</span>
                   ) : products.map(p => (
                     <button key={p.id} onClick={() => toggleProduct(p.name)} type="button"
                       style={{
@@ -234,7 +236,7 @@ export default function CRMNewLeadModal({ onSave, onClose, isAdmin = true }: Pro
                 </div>
               </Field>
 
-              <Field label="Notes initiales" col2>
+              <Field label={t("crm.initial_notes", "Notes initiales")} col2>
                 <textarea value={notes} onChange={e => setNotes(e.target.value)}
                   style={{ ...inpStyle, height: 80, paddingTop: 10, resize: "vertical" }} />
               </Field>
@@ -244,10 +246,10 @@ export default function CRMNewLeadModal({ onSave, onClose, isAdmin = true }: Pro
 
         <div style={{ padding: "16px 28px", borderTop: "1px solid rgba(0,0,0,0.07)", display: "flex", gap: 12, justifyContent: "flex-end" }}>
           <button onClick={onClose} style={{ padding: "11px 22px", borderRadius: 8, border: "1px solid #ddd", background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 14 }}>
-            Annuler
+            {t("cancel", "Annuler")}
           </button>
           <button onClick={handleSave} style={{ padding: "11px 22px", borderRadius: 8, border: "none", background: T.main, color: "#fff", cursor: "pointer", fontFamily: "inherit", fontSize: 14, fontWeight: 700 }}>
-            Créer le lead
+            {t("crm.create_lead", "Créer le lead")}
           </button>
         </div>
       </div>

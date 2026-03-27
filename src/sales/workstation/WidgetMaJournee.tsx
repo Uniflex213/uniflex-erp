@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { CRMLead, CRMReminder } from "../crmTypes";
 import { T, daysSince, isToday, isPast, fmt, mkId } from "./workstationTypes";
 import { useCurrentAgent } from "../../hooks/useCurrentAgent";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   leads: CRMLead[];
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export default function WidgetMaJournee({ leads, onOpenLead }: Props) {
+  const { t, lang } = useLanguage();
   const agent = useCurrentAgent();
   const myLeads = useMemo(() => leads.filter(l => l.assigned_agent_id === agent.id), [leads, agent.id]);
 
@@ -84,25 +86,25 @@ export default function WidgetMaJournee({ leads, onOpenLead }: Props) {
   const totalActivitiesToday = callsToday + emailsToday + meetingsToday;
   const goalPct = Math.min((totalActivitiesToday / dailyGoal) * 100, 100);
 
-  const dateLabel = new Date().toLocaleDateString("fr-CA", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const dateLabel = new Date().toLocaleDateString(lang === "en" ? "en-CA" : "fr-CA", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
 
   const priorityColor: Record<string, string> = { Haute: T.red, Moyenne: T.orange, Basse: T.textLight };
 
   const followUpLabel: Record<string, { label: string; color: string; bg: string }> = {
-    overdue14: { label: "Inactif +14j", color: T.red, bg: "#fee2e2" },
-    overdue7: { label: "Inactif +7j", color: T.orange, bg: "#fef3c7" },
-    negociation: { label: "Négo sans activité", color: T.orange, bg: "#fef3c7" },
-    proposition: { label: "Prop. sans réponse", color: T.blue, bg: "#eff6ff" },
+    overdue14: { label: t("ws.day.inactive_14", "Inactif +14j"), color: T.red, bg: "#fee2e2" },
+    overdue7: { label: t("ws.day.inactive_7", "Inactif +7j"), color: T.orange, bg: "#fef3c7" },
+    negociation: { label: t("ws.day.nego_inactive", "Négo sans activité"), color: T.orange, bg: "#fef3c7" },
+    proposition: { label: t("ws.day.prop_no_reply", "Prop. sans réponse"), color: T.blue, bg: "#eff6ff" },
   };
 
   return (
     <div style={{ background: `rgba(99,102,241,0.04)`, border: `1.5px solid rgba(99,102,241,0.15)`, borderRadius: 16, padding: 24 }}>
       <div style={{ marginBottom: 20 }}>
         <div style={{ fontSize: 18, fontWeight: 900, color: T.main }}>
-          Bonjour {agent.firstName} — voici votre journée du {dateLabel}
+          {t("ws.day.hello", "Bonjour")} {agent.firstName} — {t("ws.day.your_day", "voici votre journée du")} {dateLabel}
         </div>
         <div style={{ fontSize: 13, color: T.textMid, marginTop: 4 }}>
-          {todayTasks.length} tâche{todayTasks.length !== 1 ? "s" : ""} • {followUpItems.length} suivi{followUpItems.length !== 1 ? "s" : ""} recommandé{followUpItems.length !== 1 ? "s" : ""} • {totalActivitiesToday}/{dailyGoal} activités aujourd'hui
+          {todayTasks.length} {t("ws.day.tasks", "tâche(s)")} • {followUpItems.length} {t("ws.day.recommended_followups", "suivi(s) recommandé(s)")} • {totalActivitiesToday}/{dailyGoal} {t("ws.day.activities_today", "activités aujourd'hui")}
         </div>
       </div>
 
@@ -110,7 +112,7 @@ export default function WidgetMaJournee({ leads, onOpenLead }: Props) {
         {/* Col 1: Tâches */}
         <div>
           <div style={{ fontSize: 11, fontWeight: 800, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 12 }}>
-            Tâches du jour
+            {t("ws.day.today_tasks", "Tâches du jour")}
           </div>
 
           {overdueTasks.length > 0 && (
@@ -136,7 +138,7 @@ export default function WidgetMaJournee({ leads, onOpenLead }: Props) {
 
           {todayOnly.length === 0 && overdueTasks.length === 0 && localTasks.length === 0 && (
             <div style={{ color: T.textLight, fontSize: 13, fontStyle: "italic", marginBottom: 12 }}>
-              Aucune tâche prévue aujourd'hui
+              {t("ws.day.no_tasks", "Aucune tâche prévue aujourd'hui")}
             </div>
           )}
 
@@ -169,7 +171,7 @@ export default function WidgetMaJournee({ leads, onOpenLead }: Props) {
 
           <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
             <input
-              placeholder="+ Ajouter une tâche rapide"
+              placeholder={t("ws.day.add_task", "+ Ajouter une tâche rapide")}
               value={newTaskText}
               onChange={e => setNewTaskText(e.target.value)}
               onKeyDown={e => e.key === "Enter" && addLocalTask()}
@@ -188,7 +190,7 @@ export default function WidgetMaJournee({ leads, onOpenLead }: Props) {
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
             <div style={{ fontSize: 11, fontWeight: 800, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.6 }}>
-              Suivis recommandés
+              {t("ws.day.recommended", "Suivis recommandés")}
             </div>
             {followUpItems.length > 0 && (
               <span style={{ background: T.orange, color: "#fff", borderRadius: 20, fontSize: 10, fontWeight: 800, padding: "2px 7px" }}>
@@ -199,7 +201,7 @@ export default function WidgetMaJournee({ leads, onOpenLead }: Props) {
 
           {followUpItems.length === 0 && (
             <div style={{ color: T.textLight, fontSize: 13, fontStyle: "italic" }}>
-              Tous vos leads sont à jour
+              {t("ws.day.leads_uptodate", "Tous vos leads sont à jour")}
             </div>
           )}
 
@@ -228,7 +230,7 @@ export default function WidgetMaJournee({ leads, onOpenLead }: Props) {
                     </span>
                   </div>
                   <div style={{ fontSize: 11, color: T.textMid, marginTop: 2 }}>
-                    {lead.stage} · Inactif depuis {days} jour{days !== 1 ? "s" : ""}
+                    {lead.stage} · {t("ws.day.inactive_since", "Inactif depuis")} {days} {t("ws.day.days", "jour(s)")}
                   </div>
                 </div>
               );
@@ -239,15 +241,15 @@ export default function WidgetMaJournee({ leads, onOpenLead }: Props) {
         {/* Col 3: Résumé */}
         <div>
           <div style={{ fontSize: 11, fontWeight: 800, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 12 }}>
-            Résumé du jour
+            {t("ws.day.summary", "Résumé du jour")}
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
             {[
-              { label: "Appels", value: callsToday, icon: "📞" },
-              { label: "Emails", value: emailsToday, icon: "📧" },
-              { label: "Rencontres", value: meetingsToday, icon: "🤝" },
-              { label: "Propositions/sem.", value: fmt(weekProposals), icon: "💰" },
+              { label: t("ws.day.calls", "Appels"), value: callsToday, icon: "📞" },
+              { label: t("ws.day.emails", "Emails"), value: emailsToday, icon: "📧" },
+              { label: t("ws.day.meetings", "Rencontres"), value: meetingsToday, icon: "🤝" },
+              { label: t("ws.day.proposals_week", "Propositions/sem."), value: fmt(weekProposals), icon: "💰" },
             ].map(({ label, value, icon }) => (
               <div key={label} style={{ background: T.card, borderRadius: 10, padding: "10px 12px", border: `1px solid ${T.border}` }}>
                 <div style={{ fontSize: 16 }}>{icon}</div>
@@ -259,9 +261,9 @@ export default function WidgetMaJournee({ leads, onOpenLead }: Props) {
 
           <div style={{ background: T.card, borderRadius: 10, padding: "12px 14px", border: `1px solid ${T.border}` }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, alignItems: "center" }}>
-              <div style={{ fontSize: 12, fontWeight: 700 }}>Objectif quotidien</div>
+              <div style={{ fontSize: 12, fontWeight: 700 }}>{t("ws.day.daily_goal", "Objectif quotidien")}</div>
               <div style={{ fontSize: 12, color: goalPct >= 100 ? T.green : T.textMid, fontWeight: 700 }}>
-                {totalActivitiesToday}/{dailyGoal} activités
+                {totalActivitiesToday}/{dailyGoal} {t("ws.day.activities", "activités")}
               </div>
             </div>
             <div style={{ background: "rgba(0,0,0,0.04)", borderRadius: 6, height: 8, overflow: "hidden" }}>
@@ -271,7 +273,7 @@ export default function WidgetMaJournee({ leads, onOpenLead }: Props) {
               }} />
             </div>
             <div style={{ fontSize: 11, color: T.textLight, marginTop: 6 }}>
-              {goalPct >= 100 ? "Objectif atteint !" : `${dailyGoal - totalActivitiesToday} activité${dailyGoal - totalActivitiesToday !== 1 ? "s" : ""} restante${dailyGoal - totalActivitiesToday !== 1 ? "s" : ""}`}
+              {goalPct >= 100 ? t("ws.day.goal_reached", "Objectif atteint !") : `${dailyGoal - totalActivitiesToday} ${t("ws.day.remaining", "activité(s) restante(s)")}`}
             </div>
           </div>
         </div>
@@ -288,6 +290,7 @@ function TaskItem({
   onToggle: (id: string) => void; onOpenLead: (id: string) => void;
   priorityColor: Record<string, string>;
 }) {
+  const { t } = useLanguage();
   return (
     <div style={{
       display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 8,
@@ -304,7 +307,7 @@ function TaskItem({
       <div style={{ flex: 1, minWidth: 0 }}>
         {isOverdue && (
           <span style={{ fontSize: 9, fontWeight: 800, color: "#991b1b", background: "#fee2e2", padding: "1px 5px", borderRadius: 3, marginRight: 4 }}>
-            EN RETARD
+            {t("ws.day.overdue", "EN RETARD")}
           </span>
         )}
         <div style={{ fontSize: 12, fontWeight: 600, textDecoration: completed ? "line-through" : "none", color: T.text }}>

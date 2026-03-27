@@ -5,6 +5,7 @@ import {
   DAYS_FR, MONTHS_FR, addDays, addMonths, getMonthGrid,
   isSameDay, isToday, startOfMonth,
 } from "./calendarUtils";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   currentDate: Date;
@@ -82,6 +83,7 @@ export default function CalendarSidebar({
   filters, onFiltersChange,
   googleConnected, customLabels, collapsed, onToggleCollapse,
 }: Props) {
+  const { t } = useLanguage();
   const allLabels = [...DEFAULT_LABELS, ...customLabels];
   const activeFilterCount = Object.values(filters.labels).filter(Boolean).length;
 
@@ -93,7 +95,7 @@ export default function CalendarSidebar({
       }}>
         <button
           onClick={onToggleCollapse}
-          title="Ouvrir le panneau"
+          title={t("cal.sidebar.open", "Ouvrir le panneau")}
           style={{
             background: "none", border: "none", cursor: "pointer", fontSize: 16,
             color: T.textLight, padding: 4, borderRadius: 6,
@@ -120,7 +122,7 @@ export default function CalendarSidebar({
       display: "flex", flexDirection: "column", overflowY: "auto",
     }}>
       <div style={{ padding: "12px 14px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ fontSize: 11, fontWeight: 700, color: T.text }}>Navigation</span>
+        <span style={{ fontSize: 11, fontWeight: 700, color: T.text }}>{t("cal.sidebar.navigation", "Navigation")}</span>
         <button
           onClick={onToggleCollapse}
           style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: T.textLight, padding: "2px 4px" }}
@@ -139,12 +141,12 @@ export default function CalendarSidebar({
 
       <div style={{ padding: "12px 14px", borderBottom: `1px solid ${T.border}` }}>
         <div style={{ fontSize: 10, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>
-          Calendriers
+          {t("cal.sidebar.calendars", "Calendriers")}
         </div>
         {[
-          { key: "showUniflexCal", label: "Mon calendrier", color: T.main, always: true },
-          { key: "showGoogle", label: "Google Calendar", color: "#ea4335", disabled: !googleConnected },
-          { key: "showCRM", label: "Rappels CRM", color: "#2563eb", always: false },
+          { key: "showUniflexCal", label: t("cal.sidebar.my_cal", "Mon calendrier"), color: T.main, always: true },
+          { key: "showGoogle", label: t("cal.sidebar.google_cal", "Google Calendar"), color: "#ea4335", disabled: !googleConnected },
+          { key: "showCRM", label: t("cal.sidebar.crm_reminders", "Rappels CRM"), color: "#2563eb", always: false },
         ].map(({ key, label, color, disabled, always }) => (
           <label
             key={key}
@@ -170,7 +172,7 @@ export default function CalendarSidebar({
               )}
             </div>
             <span style={{ fontSize: 11, color: T.text }}>{label}</span>
-            {disabled && <span style={{ fontSize: 9, color: T.textLight }}>(non connecté)</span>}
+            {disabled && <span style={{ fontSize: 9, color: T.textLight }}>{t("cal.sidebar.not_connected", "(non connecté)")}</span>}
           </label>
         ))}
       </div>
@@ -185,7 +187,7 @@ export default function CalendarSidebar({
               onClick={() => onFiltersChange({ ...filters, labels: {} })}
               style={{ fontSize: 9, color: T.main, background: "none", border: "none", cursor: "pointer" }}
             >
-              Tout afficher
+              {t("cal.sidebar.show_all", "Tout afficher")}
             </button>
           )}
         </div>

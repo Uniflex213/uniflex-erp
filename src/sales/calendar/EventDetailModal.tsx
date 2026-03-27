@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { T } from "../../theme";
 import { CalendarEvent, DEFAULT_LABELS, EventLabel, REMINDER_OPTIONS } from "./calendarTypes";
 import { MONTHS_FR, DAYS_FR, getLabelColor } from "./calendarUtils";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 function formatEventDate(event: CalendarEvent): string {
   const start = new Date(event.start_at);
@@ -34,6 +35,7 @@ interface Props {
 }
 
 export default function EventDetailModal({ event, customLabels = [], onEdit, onDuplicate, onDelete, onClose }: Props) {
+  const { t } = useLanguage();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const allLabels = [...DEFAULT_LABELS, ...customLabels];
   const color = getLabelColor(event.label, event.label_color);
@@ -67,7 +69,7 @@ export default function EventDetailModal({ event, customLabels = [], onEdit, onD
                 </div>
                 {event.importance === "Haute" && (
                   <div style={{ fontSize: 9, fontWeight: 800, background: T.red, color: "#fff", borderRadius: 4, padding: "2px 8px" }}>
-                    ▲ URGENT
+                    ▲ {t("cal.detail.urgent", "URGENT")}
                   </div>
                 )}
                 {isGoogle && (
@@ -98,8 +100,8 @@ export default function EventDetailModal({ event, customLabels = [], onEdit, onD
               <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{formatEventDate(event)}</div>
               {event.recurrence !== "Aucune" && (
                 <div style={{ fontSize: 11, color: T.textLight, marginTop: 2 }}>
-                  Récurrence : {event.recurrence}
-                  {event.recurrence_end ? ` jusqu'au ${new Date(event.recurrence_end).toLocaleDateString("fr-FR")}` : " (sans fin)"}
+                  {t("cal.detail.recurrence", "Récurrence")} : {event.recurrence}
+                  {event.recurrence_end ? ` ${t("cal.detail.until", "jusqu'au")} ${new Date(event.recurrence_end).toLocaleDateString("fr-FR")}` : ` (${t("cal.detail.no_end", "sans fin")})`}
                 </div>
               )}
             </div>
@@ -117,7 +119,7 @@ export default function EventDetailModal({ event, customLabels = [], onEdit, onD
                 >
                   {event.location}
                 </a>
-                <div style={{ fontSize: 10, color: T.textLight }}>Ouvrir dans Google Maps</div>
+                <div style={{ fontSize: 10, color: T.textLight }}>{t("cal.detail.open_maps", "Ouvrir dans Google Maps")}</div>
               </div>
             </div>
           )}
@@ -135,7 +137,7 @@ export default function EventDetailModal({ event, customLabels = [], onEdit, onD
                   display: "inline-block",
                 }}
               >
-                Ouvrir le lien
+                {t("cal.detail.open_link", "Ouvrir le lien")}
               </a>
             </div>
           )}
@@ -153,7 +155,7 @@ export default function EventDetailModal({ event, customLabels = [], onEdit, onD
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: 15 }}>👤</span>
               <div style={{ fontSize: 13, color: T.main, fontWeight: 600 }}>
-                Lead : {event.lead_name}
+                {t("cal.detail.lead", "Lead")} : {event.lead_name}
               </div>
             </div>
           )}
@@ -162,7 +164,7 @@ export default function EventDetailModal({ event, customLabels = [], onEdit, onD
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: 15 }}>🏢</span>
               <div style={{ fontSize: 13, color: T.main, fontWeight: 600 }}>
-                Client : {event.client_name}
+                {t("cal.detail.client", "Client")} : {event.client_name}
               </div>
             </div>
           )}
@@ -171,7 +173,7 @@ export default function EventDetailModal({ event, customLabels = [], onEdit, onD
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: 15 }}>🔔</span>
               <div style={{ fontSize: 13, color: T.textMid }}>
-                Rappel : {getReminderLabel(event.reminder_minutes)}
+                {t("cal.detail.reminder", "Rappel")} : {getReminderLabel(event.reminder_minutes)}
               </div>
             </div>
           )}
@@ -179,7 +181,7 @@ export default function EventDetailModal({ event, customLabels = [], onEdit, onD
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <span style={{ fontSize: 15 }}>👁</span>
             <div style={{ fontSize: 13, color: T.textMid }}>
-              {event.visibility === "public" ? "Visible par tous" : "Privé"}
+              {event.visibility === "public" ? t("cal.detail.public", "Visible par tous") : t("cal.detail.private", "Privé")}
             </div>
           </div>
         </div>
@@ -187,18 +189,18 @@ export default function EventDetailModal({ event, customLabels = [], onEdit, onD
         <div style={{ padding: "12px 20px", borderTop: `1px solid ${T.border}`, background: "#fafafa", borderRadius: "0 0 16px 16px" }}>
           {confirmDelete ? (
             <div style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "flex-end" }}>
-              <span style={{ fontSize: 12, color: T.red, fontWeight: 600 }}>Supprimer cet événement ?</span>
+              <span style={{ fontSize: 12, color: T.red, fontWeight: 600 }}>{t("cal.detail.confirm_delete", "Supprimer cet événement ?")}</span>
               <button
                 onClick={onDelete}
                 style={{ padding: "8px 16px", borderRadius: 8, border: "none", background: T.red, color: "#fff", cursor: "pointer", fontFamily: "inherit", fontSize: 12, fontWeight: 700 }}
               >
-                Confirmer
+                {t("cal.detail.confirm", "Confirmer")}
               </button>
               <button
                 onClick={() => setConfirmDelete(false)}
                 style={{ padding: "8px 14px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 12 }}
               >
-                Annuler
+                {t("common.cancel", "Annuler")}
               </button>
             </div>
           ) : (
@@ -208,7 +210,7 @@ export default function EventDetailModal({ event, customLabels = [], onEdit, onD
                   onClick={() => setConfirmDelete(true)}
                   style={{ padding: "8px 14px", borderRadius: 8, border: `1px solid ${T.red}40`, background: T.bgCard, color: T.red, cursor: "pointer", fontFamily: "inherit", fontSize: 12, fontWeight: 600 }}
                 >
-                  Supprimer
+                  {t("cal.detail.delete", "Supprimer")}
                 </button>
               )}
               {!isGoogle && (
@@ -216,7 +218,7 @@ export default function EventDetailModal({ event, customLabels = [], onEdit, onD
                   onClick={onDuplicate}
                   style={{ padding: "8px 14px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 12 }}
                 >
-                  Dupliquer
+                  {t("cal.detail.duplicate", "Dupliquer")}
                 </button>
               )}
               {!isGoogle && !isCRM && (
@@ -224,12 +226,12 @@ export default function EventDetailModal({ event, customLabels = [], onEdit, onD
                   onClick={onEdit}
                   style={{ padding: "8px 18px", borderRadius: 8, border: "none", background: T.main, color: "#fff", cursor: "pointer", fontFamily: "inherit", fontSize: 12, fontWeight: 700 }}
                 >
-                  Modifier
+                  {t("cal.detail.edit", "Modifier")}
                 </button>
               )}
               {isGoogle && (
                 <div style={{ fontSize: 11, color: T.textLight, padding: "8px 0" }}>
-                  Événement Google Calendar — lecture seule
+                  {t("cal.detail.google_readonly", "Événement Google Calendar — lecture seule")}
                 </div>
               )}
             </div>

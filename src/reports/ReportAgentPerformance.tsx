@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Download, Users, TrendingUp, Target, Info } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { T, fmt, fmtNum, getDateRanges, exportToCsv, exportToPdf } from './reportUtils';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface AgentData {
   id: string;
@@ -14,6 +15,7 @@ interface AgentData {
 }
 
 export default function ReportAgentPerformance() {
+  const { t } = useLanguage();
   const ranges = getDateRanges();
   const [rangeKey, setRangeKey] = useState('this_month');
   const [loading, setLoading] = useState(true);
@@ -88,7 +90,7 @@ export default function ReportAgentPerformance() {
     else exportToPdf('Rapport Performance Agents', headers, rows);
   };
 
-  if (loading) return <div style={{ textAlign: 'center', padding: 40, color: T.textLight }}>Chargement...</div>;
+  if (loading) return <div style={{ textAlign: 'center', padding: 40, color: T.textLight }}>{t("common.loading", "Chargement...")}</div>;
 
   return (
     <div>
@@ -107,12 +109,12 @@ export default function ReportAgentPerformance() {
 
       <div style={{ background: `${T.blue}08`, borderRadius: 10, padding: '14px 20px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
         <Info size={16} color={T.blue} />
-        <span style={{ fontSize: 13, color: T.textMid }}>Systeme de calcul des commissions a venir -- les commissions seront calculees selon les regles de votre equipe.</span>
+        <span style={{ fontSize: 13, color: T.textMid }}>{t("report_agents.commission_info", "Système de calcul des commissions à venir — les commissions seront calculées selon les règles de votre équipe.")}</span>
       </div>
 
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
         <div style={{ flex: '2 1 500px', background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: 20 }}>
-          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>Classement des agents</div>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>{t("report_agents.agent_ranking", "Classement des agents")}</div>
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <thead>
@@ -148,7 +150,7 @@ export default function ReportAgentPerformance() {
         </div>
 
         <div style={{ flex: '1 1 280px', background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: 20 }}>
-          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>Comparaison des ventes</div>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>{t("report_agents.sales_comparison", "Comparaison des ventes")}</div>
           {agents.slice(0, 8).map((a, i) => (
             <div key={a.id} style={{ marginBottom: 10 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
@@ -165,7 +167,7 @@ export default function ReportAgentPerformance() {
 
       {detail && (
         <div style={{ background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: 20, marginTop: 16 }}>
-          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>Detail: {detail.name}</div>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>{t("report_agents.detail", "Détail")} : {detail.name}</div>
           <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
             {[
               { icon: <TrendingUp size={16} />, label: 'Ventes', value: fmt(detail.totalSales), color: T.main },

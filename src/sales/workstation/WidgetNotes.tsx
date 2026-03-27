@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { T } from "./workstationTypes";
 import { useUserPreferences } from "../../hooks/useUserPreferences";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 export default function WidgetNotes() {
+  const { t } = useLanguage();
   const { prefs, loaded, updatePref } = useUserPreferences();
   const [content, setContent] = useState("");
   const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "unsaved">("saved");
@@ -61,13 +63,13 @@ export default function WidgetNotes() {
   return (
     <div style={{ background: T.card, borderRadius: 16, border: `1px solid ${T.border}`, padding: 24, boxShadow: "0 2px 12px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", height: "100%" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-        <div style={{ fontWeight: 800, fontSize: 15, color: T.text }}>Mes notes & idées</div>
+        <div style={{ fontWeight: 800, fontSize: 15, color: T.text }}>{t("ws.notes.title", "Mes notes & idées")}</div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ display: "flex", gap: 4 }}>
             {[
-              { label: "B", action: () => insertFormat("**"), title: "Gras" },
-              { label: "I", action: () => insertFormat("_"), title: "Italique" },
-              { label: "•", action: () => insertFormat("\n• "), title: "Liste" },
+              { label: "B", action: () => insertFormat("**"), title: t("ws.notes.bold", "Gras") },
+              { label: "I", action: () => insertFormat("_"), title: t("ws.notes.italic", "Italique") },
+              { label: "•", action: () => insertFormat("\n• "), title: t("ws.notes.list", "Liste") },
             ].map(({ label, action, title }) => (
               <button
                 key={label}
@@ -88,13 +90,13 @@ export default function WidgetNotes() {
             fontSize: 11, fontWeight: 700,
             color: saveStatus === "saved" ? T.green : saveStatus === "saving" ? T.orange : T.textLight,
           }}>
-            {saveStatus === "saved" ? "✓ Sauvegardé" : saveStatus === "saving" ? "Sauvegarde..." : "Non sauvegardé"}
+            {saveStatus === "saved" ? `✓ ${t("ws.notes.saved", "Sauvegardé")}` : saveStatus === "saving" ? t("ws.notes.saving", "Sauvegarde...") : t("ws.notes.unsaved", "Non sauvegardé")}
           </div>
         </div>
       </div>
 
       <div style={{ fontSize: 10, color: T.textLight, marginBottom: 8, fontStyle: "italic" }}>
-        Espace privé — visible uniquement par vous
+        {t("ws.notes.private", "Espace privé — visible uniquement par vous")}
       </div>
 
       <textarea
@@ -102,7 +104,7 @@ export default function WidgetNotes() {
         value={content}
         onChange={e => setContent(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Vos notes, idées, numéros à rappeler, stratégies... Tout ce que vous voulez."
+        placeholder={t("ws.notes.placeholder", "Vos notes, idées, numéros à rappeler, stratégies... Tout ce que vous voulez.")}
         style={{
           flex: 1,
           minHeight: 220,

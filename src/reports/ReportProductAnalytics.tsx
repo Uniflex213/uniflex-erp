@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Download, Package, AlertTriangle, CheckCircle } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { T, fmt, fmtNum, exportToCsv, exportToPdf } from './reportUtils';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export default function ReportProductAnalytics() {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<any[]>([]);
   const [stockStats, setStockStats] = useState({ inStock: 0, lowStock: 0, outOfStock: 0 });
@@ -59,7 +61,7 @@ export default function ReportProductAnalytics() {
     else exportToPdf('Rapport Produits', headers, rows);
   };
 
-  if (loading) return <div style={{ textAlign: 'center', padding: 40, color: T.textLight }}>Chargement...</div>;
+  if (loading) return <div style={{ textAlign: 'center', padding: 40, color: T.textLight }}>{t("common.loading", "Chargement...")}</div>;
 
   return (
     <div>
@@ -74,9 +76,9 @@ export default function ReportProductAnalytics() {
 
       <div style={{ display: 'flex', gap: 14, marginBottom: 20, flexWrap: 'wrap' }}>
         {[
-          { icon: <CheckCircle size={18} />, label: 'En stock', value: stockStats.inStock, color: T.green, bg: T.greenBg },
-          { icon: <AlertTriangle size={18} />, label: 'Stock bas', value: stockStats.lowStock, color: T.orange, bg: T.orangeBg },
-          { icon: <Package size={18} />, label: 'Rupture', value: stockStats.outOfStock, color: T.red, bg: T.redBg },
+          { icon: <CheckCircle size={18} />, label: t("report_products.in_stock", "En stock"), value: stockStats.inStock, color: T.green, bg: T.greenBg },
+          { icon: <AlertTriangle size={18} />, label: t("report_products.low_stock", "Stock bas"), value: stockStats.lowStock, color: T.orange, bg: T.orangeBg },
+          { icon: <Package size={18} />, label: t("report_products.out_of_stock", "Rupture"), value: stockStats.outOfStock, color: T.red, bg: T.redBg },
         ].map((s, i) => (
           <div key={i} style={{ flex: '1 1 180px', background: s.bg, borderRadius: 10, padding: '18px 20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
@@ -90,9 +92,9 @@ export default function ReportProductAnalytics() {
 
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
         <div style={{ flex: '1 1 400px', background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: 20 }}>
-          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>Revenu par produit</div>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>{t("report_products.revenue_by_product", "Revenu par produit")}</div>
           {productSales.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 32, color: T.textLight, fontSize: 13 }}>Aucune donnee de vente</div>
+            <div style={{ textAlign: 'center', padding: 32, color: T.textLight, fontSize: 13 }}>{t("report_products.no_sales_data", "Aucune donnée de vente")}</div>
           ) : (
             productSales.slice(0, 10).map(p => (
               <div key={p.name} style={{ marginBottom: 12 }}>
@@ -109,9 +111,9 @@ export default function ReportProductAnalytics() {
         </div>
 
         <div style={{ flex: '1 1 300px', background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: 20 }}>
-          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>Quantites vendues</div>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>{t("report_products.quantities_sold", "Quantités vendues")}</div>
           {productSales.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 32, color: T.textLight, fontSize: 13 }}>Aucune donnee</div>
+            <div style={{ textAlign: 'center', padding: 32, color: T.textLight, fontSize: 13 }}>{t("common.no_data", "Aucune donnée")}</div>
           ) : (
             <div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 100px', gap: 4, marginBottom: 8 }}>

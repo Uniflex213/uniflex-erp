@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { CRMLead, STAGE_COLORS, TEMP_COLORS, TEMP_LABEL } from "./crmTypes";
+import { useLanguage } from "../i18n/LanguageContext";
 import { T } from "../theme";
 const fmt = (n: number) => new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 
@@ -13,6 +14,7 @@ interface Props {
 const PAGE_SIZE = 25;
 
 export default function CRMListView({ leads, onLeadClick }: Props) {
+  const { t } = useLanguage();
   const [sortKey, setSortKey] = useState<SortKey>("last_activity_at");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [page, setPage] = useState(1);
@@ -53,17 +55,17 @@ export default function CRMListView({ leads, onLeadClick }: Props) {
           <thead>
             <tr style={{ background: T.bg }}>
               {([
-                ["company_name", "Compagnie"],
-                ["contact", "Contact"],
-                ["phone", "Téléphone"],
-                ["email", "Email"],
-                ["stage", "Étape"],
+                ["company_name", t("crm.company", "Compagnie")],
+                ["contact", t("crm.contact", "Contact")],
+                ["phone", t("phone", "Téléphone")],
+                ["email", t("email", "Email")],
+                ["stage", t("crm.stage_detail", "Étape")],
                 ["temperature", "Temp."],
-                ["estimated_value", "Valeur estimée"],
-                ["last_activity_at", "Dernière activité"],
-                ["next_action", "Prochaine action"],
-                ["assigned_agent_name", "Agent"],
-                ["region", "Région"],
+                ["estimated_value", t("crm.estimated_value_per_year", "Valeur estimée")],
+                ["last_activity_at", t("crm.last_activity", "Dernière activité")],
+                ["next_action", t("crm.next_action", "Prochaine action")],
+                ["assigned_agent_name", t("agent", "Agent")],
+                ["region", t("crm.region", "Région")],
               ] as [SortKey | string, string][]).map(([key, label]) => (
                 <th
                   key={key}
@@ -129,7 +131,7 @@ export default function CRMListView({ leads, onLeadClick }: Props) {
                     {daysAgo > 14 ? "⚠️ " : ""}{daysAgo}j
                   </td>
                   <td style={{ padding: "11px 14px", fontSize: 12, color: T.textLight, maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {nextReminder ? nextReminder.title : <em>Aucune</em>}
+                    {nextReminder ? nextReminder.title : <em>{t("crm.no_action_planned", "Aucune")}</em>}
                   </td>
                   <td style={{ padding: "11px 14px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
@@ -158,7 +160,7 @@ export default function CRMListView({ leads, onLeadClick }: Props) {
       {totalPages > 1 && (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderTop: `1px solid ${T.border}` }}>
           <span style={{ fontSize: 12, color: T.textLight }}>
-            {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, sorted.length)} sur {sorted.length} leads
+            {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, sorted.length)} sur {sorted.length} {t("crm.leads_label", "leads")}
           </span>
           <div style={{ display: "flex", gap: 6 }}>
             <PageBtn label="‹" disabled={page === 1} onClick={() => setPage(p => p - 1)} />

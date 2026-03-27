@@ -10,6 +10,7 @@ import {
   Inbox, Archive, Folder
 } from "lucide-react";
 import { T } from "../theme";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const PANEL_W = 860;
 
@@ -71,6 +72,7 @@ interface Props {
 }
 
 export default function EmailInboxPanel({ isOpen, onClose, onOpenFullPage, userEmail, onUnreadChange }: Props) {
+  const { t } = useLanguage();
   const [folders, setFolders] = useState<Array<{ name: string; label: string; icon: React.ElementType }>>(DEFAULT_FOLDERS);
   const [customFolders, setCustomFolders] = useState<string[]>([]);
   const [activeFolder, setActiveFolder] = useState("INBOX");
@@ -129,7 +131,7 @@ export default function EmailInboxPanel({ isOpen, onClose, onOpenFullPage, userE
     setError(null);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { setError("Session expirée."); return; }
+      if (!session) { setError("Session expired."); return; }
 
       const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fetch-inbox`, {
         method: "POST",
@@ -141,7 +143,7 @@ export default function EmailInboxPanel({ isOpen, onClose, onOpenFullPage, userE
         body: JSON.stringify({ mailbox: folder, force_refresh: force }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? "Erreur de chargement"); return; }
+      if (!res.ok) { setError(data.error ?? "Loading error"); return; }
       const list: EmailMessage[] = data.emails ?? [];
       setEmails(list);
       hasFetchedRef.current[folder] = true;
@@ -206,7 +208,7 @@ export default function EmailInboxPanel({ isOpen, onClose, onOpenFullPage, userE
         setShowNewFolder(false);
         await fetchFolders();
       } else {
-        setError(data.error || "Erreur lors de la creation du dossier");
+        setError(data.error || t("email.folder_create_error"));
       }
     } catch (e: unknown) {
       setError((e as Error).message);
@@ -324,16 +326,16 @@ export default function EmailInboxPanel({ isOpen, onClose, onOpenFullPage, userE
             <Mail size={15} color={T.main} />
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 15, fontWeight: 800, color: T.text }}>Boîte de réception</div>
-            <div style={{ fontSize: 11, color: T.textMid }}>{unreadCount > 0 ? `${unreadCount} non lu${unreadCount > 1 ? "s" : ""}` : "Tout lu"}</div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: T.text }}>{t("email.inbox_title")}</div>
+            <div style={{ fontSize: 11, color: T.textMid }}>{unreadCount > 0 ? `${unreadCount} ${t("email.unread")}` : t("email.all_read")}</div>
           </div>
           <button onClick={() => setShowCompose(true)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 14px", background: T.main, color: "#fff", border: "none", borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
-            <Pencil size={13} /> Composer
+            <Pencil size={13} /> {t("email.compose")}
           </button>
-          <button onClick={() => fetchEmails(activeFolder, true)} style={{ background: "none", border: "none", cursor: "pointer", color: T.textMid, padding: 6, borderRadius: 6, display: "flex", alignItems: "center" }} title="Actualiser">
+          <button onClick={() => fetchEmails(activeFolder, true)} style={{ background: "none", border: "none", cursor: "pointer", color: T.textMid, padding: 6, borderRadius: 6, display: "flex", alignItems: "center" }} title={t("email.refresh")}>
             <RefreshCw size={15} style={{ animation: loading ? "spin 1s linear infinite" : "none" }} />
           </button>
-          <button onClick={onOpenFullPage} style={{ background: "none", border: "none", cursor: "pointer", color: T.textMid, padding: 6, borderRadius: 6, display: "flex", alignItems: "center" }} title="Plein écran">
+          <button onClick={onOpenFullPage} style={{ background: "none", border: "none", cursor: "pointer", color: T.textMid, padding: 6, borderRadius: 6, display: "flex", alignItems: "center" }} title={t("email.fullscreen")}>
             <Maximize2 size={15} />
           </button>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: T.textMid, padding: 6, borderRadius: 6, display: "flex", alignItems: "center" }}>
@@ -365,7 +367,7 @@ export default function EmailInboxPanel({ isOpen, onClose, onOpenFullPage, userE
                 style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderRadius: 8, border: `1px dashed ${T.border}`, background: "transparent", color: T.textLight, cursor: "pointer", fontFamily: "inherit", width: "100%", textAlign: "left", marginTop: 4 }}
               >
                 <FolderPlus size={15} />
-                <span style={{ fontSize: 12 }}>Nouveau dossier</span>
+                <span style={{ fontSize: 12 }}>{t("email.new_folder")}</span>
               </button>
             </div>
 
@@ -376,7 +378,7 @@ export default function EmailInboxPanel({ isOpen, onClose, onOpenFullPage, userE
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && searchEmails()}
-                  placeholder="Rechercher..."
+                  placeholder={t("email.search_placeholder")}
                   style={{ border: "none", background: "transparent", outline: "none", fontSize: 12, fontFamily: "inherit", flex: 1, color: T.text }}
                 />
                 {searching && <RefreshCw size={12} style={{ animation: "spin 1s linear infinite" }} color={T.textLight} />}
@@ -385,11 +387,11 @@ export default function EmailInboxPanel({ isOpen, onClose, onOpenFullPage, userE
 
             <div style={{ flex: 1, overflowY: "auto", borderTop: `1px solid ${T.border}`, paddingTop: 4 }}>
               {loading ? (
-                <div style={{ padding: 24, textAlign: "center", color: T.textLight, fontSize: 12 }}>Chargement...</div>
+                <div style={{ padding: 24, textAlign: "center", color: T.textLight, fontSize: 12 }}>{t("email.loading")}</div>
               ) : error ? (
                 <div style={{ padding: "12px 14px", color: T.red, fontSize: 12, background: T.redBg, margin: 8, borderRadius: 8 }}>{error}</div>
               ) : emails.length === 0 ? (
-                <div style={{ padding: 24, textAlign: "center", color: T.textLight, fontSize: 12 }}>Aucun message</div>
+                <div style={{ padding: 24, textAlign: "center", color: T.textLight, fontSize: 12 }}>{t("email.no_messages")}</div>
               ) : (
                 emails.map(email => {
                   const isSelected = selectedEmail?.uid === email.uid;
@@ -406,13 +408,13 @@ export default function EmailInboxPanel({ isOpen, onClose, onOpenFullPage, userE
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontSize: 12, fontWeight: email.is_read ? 500 : 700, color: T.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                            {email.from_name || email.from_address || "Expéditeur inconnu"}
+                            {email.from_name || email.from_address || t("email.unknown_sender")}
                           </div>
                         </div>
                         <div style={{ fontSize: 10, color: T.textLight, flexShrink: 0 }}>{fmtDate(email.received_at)}</div>
                       </div>
                       <div style={{ fontSize: 11, fontWeight: email.is_read ? 500 : 700, color: T.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", paddingLeft: 36 }}>
-                        {email.subject || "(Sans objet)"}
+                        {email.subject || t("email.no_subject")}
                       </div>
                       {!email.is_read && <div style={{ position: "absolute", left: 4, top: "50%", transform: "translateY(-50%)", width: 6, height: 6, borderRadius: "50%", background: T.main }} />}
                     </div>
@@ -426,7 +428,7 @@ export default function EmailInboxPanel({ isOpen, onClose, onOpenFullPage, userE
             {!selectedEmail ? (
               <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: T.textLight }}>
                 <Mail size={40} style={{ opacity: 0.2, marginBottom: 12 }} />
-                <div style={{ fontSize: 14, fontWeight: 600, opacity: 0.5 }}>Sélectionnez un message</div>
+                <div style={{ fontSize: 14, fontWeight: 600, opacity: 0.5 }}>{t("email.select_message")}</div>
               </div>
             ) : (
               <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -446,10 +448,10 @@ export default function EmailInboxPanel({ isOpen, onClose, onOpenFullPage, userE
                     onClick={() => { setComposeData({ to: selectedEmail.from_address, subject: `Re: ${selectedEmail.subject}`, body: `\n\n---\nDe : ${selectedEmail.from_name || selectedEmail.from_address}\nDate : ${fmtDateFull(selectedEmail.received_at)}\n\n${selectedEmail.body_text ?? ""}` }); setShowCompose(true); }}
                     style={{ display: "flex", alignItems: "center", gap: 5, padding: "6px 12px", border: `1px solid ${T.border}`, borderRadius: 7, background: T.bgCard, color: T.text, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
                   >
-                    <Reply size={13} /> Répondre
+                    <Reply size={13} /> {t("email.reply")}
                   </button>
-                  <button onClick={() => deleteEmail(selectedEmail)} title={isTrashFolder ? "Supprimer définitivement" : "Déplacer vers la corbeille"} style={{ background: isTrashFolder ? T.redBg : "none", border: isTrashFolder ? "1px solid #fca5a5" : "none", cursor: "pointer", color: isTrashFolder ? T.red : T.textLight, padding: 5, borderRadius: 6, display: "flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 600, fontFamily: "inherit" }}>
-                    <Trash2 size={15} />{isTrashFolder ? " Supprimer" : ""}
+                  <button onClick={() => deleteEmail(selectedEmail)} title={isTrashFolder ? t("email.delete_permanently") : t("email.move_to_trash")} style={{ background: isTrashFolder ? T.redBg : "none", border: isTrashFolder ? "1px solid #fca5a5" : "none", cursor: "pointer", color: isTrashFolder ? T.red : T.textLight, padding: 5, borderRadius: 6, display: "flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 600, fontFamily: "inherit" }}>
+                    <Trash2 size={15} />{isTrashFolder ? ` ${t("email.delete")}` : ""}
                   </button>
                 </div>
 
@@ -471,7 +473,7 @@ export default function EmailInboxPanel({ isOpen, onClose, onOpenFullPage, userE
 
                 <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px" }}>
                   {loadingBody ? (
-                    <div style={{ textAlign: "center", padding: 40, color: T.textLight, fontSize: 13 }}>Chargement du message...</div>
+                    <div style={{ textAlign: "center", padding: 40, color: T.textLight, fontSize: 13 }}>{t("email.loading_message")}</div>
                   ) : selectedEmail.body_html ? (
                     <div
                       dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(selectedEmail.body_html) }}
@@ -482,7 +484,7 @@ export default function EmailInboxPanel({ isOpen, onClose, onOpenFullPage, userE
                       {selectedEmail.body_text}
                     </pre>
                   ) : (
-                    <div style={{ textAlign: "center", padding: 40, color: T.textLight, fontSize: 13 }}>Message vide</div>
+                    <div style={{ textAlign: "center", padding: 40, color: T.textLight, fontSize: 13 }}>{t("email.empty_message")}</div>
                   )}
                 </div>
 
@@ -491,7 +493,7 @@ export default function EmailInboxPanel({ isOpen, onClose, onOpenFullPage, userE
                     onClick={() => { setComposeData({ to: selectedEmail.from_address, subject: `Re: ${selectedEmail.subject}`, body: `\n\n---\nDe : ${selectedEmail.from_name || selectedEmail.from_address}\nDate : ${fmtDateFull(selectedEmail.received_at)}\n\n${selectedEmail.body_text ?? ""}` }); setShowCompose(true); }}
                     style={{ display: "flex", alignItems: "center", gap: 8, padding: "9px 18px", border: `1px solid ${T.border}`, borderRadius: 8, background: T.bgCard, color: T.text, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
                   >
-                    <CornerUpLeft size={14} /> Répondre à {selectedEmail.from_name || selectedEmail.from_address}
+                    <CornerUpLeft size={14} /> {t("email.reply_to")} {selectedEmail.from_name || selectedEmail.from_address}
                   </button>
                 </div>
               </div>
@@ -503,18 +505,18 @@ export default function EmailInboxPanel({ isOpen, onClose, onOpenFullPage, userE
       {showNewFolder && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 10000, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setShowNewFolder(false)}>
           <div style={{ background: T.bgCard, borderRadius: 12, padding: 24, width: 340, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 16, color: T.text }}>Nouveau dossier</div>
+            <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 16, color: T.text }}>{t("email.new_folder")}</div>
             <input
               value={newFolderName}
               onChange={e => setNewFolderName(e.target.value)}
-              placeholder="Nom du dossier"
+              placeholder={t("email.folder_name")}
               style={{ width: "100%", padding: "10px 12px", border: `1px solid ${T.border}`, borderRadius: 8, fontSize: 13, fontFamily: "inherit", marginBottom: 16, boxSizing: "border-box" }}
               autoFocus
             />
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-              <button onClick={() => setShowNewFolder(false)} style={{ padding: "8px 16px", border: `1px solid ${T.border}`, borderRadius: 8, background: T.bgCard, color: T.text, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>Annuler</button>
+              <button onClick={() => setShowNewFolder(false)} style={{ padding: "8px 16px", border: `1px solid ${T.border}`, borderRadius: 8, background: T.bgCard, color: T.text, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>{t("email.cancel")}</button>
               <button onClick={createFolder} disabled={creatingFolder || !newFolderName.trim()} style={{ padding: "8px 16px", border: "none", borderRadius: 8, background: T.main, color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", opacity: creatingFolder || !newFolderName.trim() ? 0.6 : 1 }}>
-                {creatingFolder ? "Création..." : "Créer"}
+                {creatingFolder ? t("email.creating") : t("email.create")}
               </button>
             </div>
           </div>

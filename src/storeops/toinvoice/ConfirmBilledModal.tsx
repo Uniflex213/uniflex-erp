@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { supabase } from "../../supabaseClient";
 import { InvoiceDoc, T, fmt } from "./toInvoiceTypes";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   doc: InvoiceDoc;
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export default function ConfirmBilledModal({ doc, onClose, onConfirmed }: Props) {
+  const { t } = useLanguage();
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [billedDate, setBilledDate] = useState(new Date().toISOString().split("T")[0]);
   const [billedAmount, setBilledAmount] = useState(String(doc.value));
@@ -19,7 +21,7 @@ export default function ConfirmBilledModal({ doc, onClose, onConfirmed }: Props)
   const ecart = billedAmountNum - doc.value;
 
   const handleConfirm = async () => {
-    if (!invoiceNumber.trim()) return alert("Veuillez entrer le numéro de facture SCI.");
+    if (!invoiceNumber.trim()) return alert(t("confirm_billed.missing_invoice"));
     setSaving(true);
     try {
       const table = doc.document_type === "pickup" ? "pickup_tickets" : "orders";
@@ -37,7 +39,7 @@ export default function ConfirmBilledModal({ doc, onClose, onConfirmed }: Props)
       onClose();
     } catch (e) {
       console.error(e);
-      alert("Erreur lors de la confirmation.");
+      alert(t("confirm_billed.error"));
     } finally {
       setSaving(false);
     }
@@ -54,7 +56,7 @@ export default function ConfirmBilledModal({ doc, onClose, onConfirmed }: Props)
       <div style={{ background: T.card, borderRadius: 16, width: "100%", maxWidth: 500, margin: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", fontFamily: "'Outfit', sans-serif" }}>
         <div style={{ padding: "20px 24px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
-            <h2 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: T.text }}>Confirmer — Facturé par SCI</h2>
+            <h2 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: T.text }}>{t("confirm_billed.title")}</h2>
             <p style={{ margin: "3px 0 0", fontSize: 12, color: T.textMid }}>{doc.document_number} — {doc.client_name}</p>
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 20, color: T.textMid, lineHeight: 1 }}>×</button>
@@ -62,22 +64,22 @@ export default function ConfirmBilledModal({ doc, onClose, onConfirmed }: Props)
 
         <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 14 }}>
           <div style={{ background: T.cardAlt, borderRadius: 10, padding: "12px 16px", border: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between" }}>
-            <span style={{ fontSize: 13, color: T.textMid }}>Valeur du document</span>
+            <span style={{ fontSize: 13, color: T.textMid }}>{t("confirm_billed.doc_value")}</span>
             <strong style={{ fontSize: 13, color: T.text }}>{fmt(doc.value)}</strong>
           </div>
 
           <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, letterSpacing: 0.6, textTransform: "uppercase", display: "block", marginBottom: 5 }}>Numéro de facture SCI *</label>
+            <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, letterSpacing: 0.6, textTransform: "uppercase", display: "block", marginBottom: 5 }}>{t("confirm_billed.invoice_number")}</label>
             <input value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} placeholder="ex: INV-SCI-2026-0042" style={inputStyle} />
           </div>
 
           <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, letterSpacing: 0.6, textTransform: "uppercase", display: "block", marginBottom: 5 }}>Date de facturation</label>
+            <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, letterSpacing: 0.6, textTransform: "uppercase", display: "block", marginBottom: 5 }}>{t("confirm_billed.billing_date")}</label>
             <input type="date" value={billedDate} onChange={e => setBilledDate(e.target.value)} style={inputStyle} />
           </div>
 
           <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, letterSpacing: 0.6, textTransform: "uppercase", display: "block", marginBottom: 5 }}>Montant facturé ($)</label>
+            <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, letterSpacing: 0.6, textTransform: "uppercase", display: "block", marginBottom: 5 }}>{t("confirm_billed.billed_amount")}</label>
             <input type="number" value={billedAmount} onChange={e => setBilledAmount(e.target.value)} min="0" step="0.01" style={inputStyle} />
           </div>
 
@@ -88,23 +90,23 @@ export default function ConfirmBilledModal({ doc, onClose, onConfirmed }: Props)
                 <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
               </svg>
               <div style={{ fontSize: 12, color: T.orange }}>
-                <strong>Écart de {fmt(Math.abs(ecart))}</strong> entre le montant du document ({fmt(doc.value)}) et le montant facturé par SCI ({fmt(billedAmountNum)}). Veuillez vérifier.
+                <strong>{t("analytics.ecart")} {fmt(Math.abs(ecart))}</strong> {t("confirm_billed.ecart_warning")} ({fmt(doc.value)}) {t("confirm_billed.ecart_and_billed")} ({fmt(billedAmountNum)}). {t("confirm_billed.ecart_check")}
               </div>
             </div>
           )}
 
           <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, letterSpacing: 0.6, textTransform: "uppercase", display: "block", marginBottom: 5 }}>Notes</label>
-            <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3} placeholder="Observations, commentaires..." style={{ ...inputStyle, resize: "vertical" }} />
+            <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, letterSpacing: 0.6, textTransform: "uppercase", display: "block", marginBottom: 5 }}>{t("confirm_billed.notes")}</label>
+            <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3} placeholder={t("confirm_billed.notes_placeholder")} style={{ ...inputStyle, resize: "vertical" }} />
           </div>
         </div>
 
         <div style={{ padding: "16px 24px", borderTop: `1px solid ${T.border}`, display: "flex", justifyContent: "flex-end", gap: 10 }}>
           <button onClick={onClose} style={{ background: T.cardAlt, color: T.textMid, border: `1px solid ${T.border}`, borderRadius: 8, padding: "10px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-            Annuler
+            {t("cancel", "Annuler")}
           </button>
           <button onClick={handleConfirm} disabled={saving} style={{ background: T.green, color: "#fff", border: "none", borderRadius: 8, padding: "10px 22px", fontSize: 13, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer", fontFamily: "inherit", opacity: saving ? 0.7 : 1 }}>
-            {saving ? "Confirmation..." : "Confirmer facturé"}
+            {saving ? t("confirm_billed.confirming") : t("confirm_billed.confirm")}
           </button>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import React from "react";
 import { REGIONS, Stage, Temperature, LeadType } from "./crmTypes";
 import { useTeamAgents } from "../hooks/useAgents";
+import { useLanguage } from "../i18n/LanguageContext";
 import { T } from "../theme";
 
 export interface CRMFilters {
@@ -46,20 +47,21 @@ const types: LeadType[] = ["Installateur", "Distributeur", "Large Scale"];
 const tempLabels: Record<Temperature, string> = { Hot: "🔥 Hot", Warm: "⚡ Warm", Cold: "❄️ Cold" };
 
 export default function CRMFilterBar({ filters, onChange, view, onViewChange, totalCount, filteredCount }: Props) {
+  const { t } = useLanguage();
   const agents = useTeamAgents();
   const set = (key: keyof CRMFilters, val: string) => onChange({ ...filters, [key]: val });
 
   const FILTER_LABELS: Partial<Record<keyof CRMFilters, (val: string) => string>> = {
-    stage: v => `Étape: ${v}`,
+    stage: v => `${t("crm.stage_detail", "Étape")}: ${v}`,
     temperature: v => `Temp: ${tempLabels[v as Temperature] || v}`,
-    agent: v => `Agent: ${agents.find(a => a.id === v)?.name || v}`,
-    region: v => `Région: ${v}`,
-    type: v => `Type: ${v}`,
-    dateFrom: v => `Depuis: ${v}`,
-    dateTo: v => `Jusqu'à: ${v}`,
+    agent: v => `${t("agent", "Agent")}: ${agents.find(a => a.id === v)?.name || v}`,
+    region: v => `${t("crm.region", "Région")}: ${v}`,
+    type: v => `${t("type", "Type")}: ${v}`,
+    dateFrom: v => `${t("crm.creation_from", "Depuis")}: ${v}`,
+    dateTo: v => `${t("crm.creation_until", "Jusqu'à")}: ${v}`,
     valueMin: v => `Val. min: ${v}$`,
     valueMax: v => `Val. max: ${v}$`,
-    search: v => `Recherche: "${v}"`,
+    search: v => `${t("crm.search_filter", "Recherche")}: "${v}"`,
   };
 
   const activeChips = Object.entries(filters)
@@ -80,54 +82,54 @@ export default function CRMFilterBar({ filters, onChange, view, onViewChange, to
           <input
             value={filters.search}
             onChange={e => set("search", e.target.value)}
-            placeholder="Compagnie ou contact..."
+            placeholder={t("crm.company_or_contact", "Compagnie ou contact...")}
             style={{ ...inputStyle, width: 200 }}
           />
         </div>
 
         <select value={filters.stage} onChange={e => set("stage", e.target.value)} style={selectStyle}>
-          <option value="">Étape: Toutes</option>
+          <option value="">{t("crm.stage_all", "Étape: Toutes")}</option>
           {stages.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
 
         <select value={filters.temperature} onChange={e => set("temperature", e.target.value)} style={selectStyle}>
-          <option value="">Température: Toutes</option>
-          {temps.map(t => <option key={t} value={t}>{tempLabels[t]}</option>)}
+          <option value="">{t("crm.temperature_all", "Température: Toutes")}</option>
+          {temps.map(tp => <option key={tp} value={tp}>{tempLabels[tp]}</option>)}
         </select>
 
         <select value={filters.agent} onChange={e => set("agent", e.target.value)} style={selectStyle}>
-          <option value="">Agent: Tous</option>
+          <option value="">{t("crm.agent_all", "Agent: Tous")}</option>
           {agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
         </select>
 
         <select value={filters.region} onChange={e => set("region", e.target.value)} style={selectStyle}>
-          <option value="">Région: Toutes</option>
+          <option value="">{t("crm.region_all", "Région: Toutes")}</option>
           {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
         </select>
 
         <select value={filters.type} onChange={e => set("type", e.target.value)} style={selectStyle}>
-          <option value="">Type: Tous</option>
-          {types.map(t => <option key={t} value={t}>{t}</option>)}
+          <option value="">{t("crm.type_all", "Type: Tous")}</option>
+          {types.map(tp => <option key={tp} value={tp}>{tp}</option>)}
         </select>
 
         <input
           type="date" value={filters.dateFrom} onChange={e => set("dateFrom", e.target.value)}
-          title="Création: Depuis"
+          title={t("crm.creation_from", "Création: Depuis")}
           style={{ ...selectStyle, padding: "0 8px", fontSize: 12 }}
         />
         <input
           type="date" value={filters.dateTo} onChange={e => set("dateTo", e.target.value)}
-          title="Création: Jusqu'à"
+          title={t("crm.creation_until", "Création: Jusqu'à")}
           style={{ ...selectStyle, padding: "0 8px", fontSize: 12 }}
         />
 
         <input
-          type="number" placeholder="Val. min $" value={filters.valueMin}
+          type="number" placeholder={t("crm.val_min", "Val. min $")} value={filters.valueMin}
           onChange={e => set("valueMin", e.target.value)}
           style={{ ...inputStyle, width: 90, padding: "0 8px" }}
         />
         <input
-          type="number" placeholder="Val. max $" value={filters.valueMax}
+          type="number" placeholder={t("crm.val_max", "Val. max $")} value={filters.valueMax}
           onChange={e => set("valueMax", e.target.value)}
           style={{ ...inputStyle, width: 90, padding: "0 8px" }}
         />
@@ -142,7 +144,7 @@ export default function CRMFilterBar({ filters, onChange, view, onViewChange, to
               display: "flex", alignItems: "center", gap: 6,
             }}
           >
-            ✕ Réinitialiser
+            ✕ {t("crm.reset_filters", "Réinitialiser")}
             <span style={{ background: T.red, color: "#fff", borderRadius: 10, padding: "0 6px", fontSize: 11, fontWeight: 700 }}>
               {activeChips.length}
             </span>
@@ -154,7 +156,7 @@ export default function CRMFilterBar({ filters, onChange, view, onViewChange, to
             <button
               key={v}
               onClick={() => onViewChange(v)}
-              title={v === "board" ? "Vue Kanban" : "Vue Liste"}
+              title={v === "board" ? t("crm.kanban_view", "Vue Kanban") : t("crm.list_view", "Vue Liste")}
               style={{
                 height: 30, width: 36, borderRadius: 6, border: "none", cursor: "pointer",
                 background: view === v ? T.main : "transparent",
@@ -176,7 +178,7 @@ export default function CRMFilterBar({ filters, onChange, view, onViewChange, to
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
           {showingFiltered && (
             <span style={{ fontSize: 12, color: T.textLight, fontWeight: 500 }}>
-              Résultats : <strong style={{ color: T.main }}>{filteredCount}</strong> lead{filteredCount !== 1 ? "s" : ""} sur {totalCount}
+              {t("crm.results_count", "Résultats")} : <strong style={{ color: T.main }}>{filteredCount}</strong> lead{filteredCount !== 1 ? "s" : ""} sur {totalCount}
             </span>
           )}
           {activeChips.map(({ key, label }) => (
@@ -197,7 +199,7 @@ export default function CRMFilterBar({ filters, onChange, view, onViewChange, to
                   padding: 0, fontSize: 14, lineHeight: 1, display: "flex", alignItems: "center",
                   opacity: 0.6,
                 }}
-                title={`Retirer ${label}`}
+                title={`${t("crm.remove_filter", "Retirer")} ${label}`}
               >×</button>
             </span>
           ))}

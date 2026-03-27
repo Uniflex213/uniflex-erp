@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Contest, ContestParticipant, ContestPointEvent, ContestPrize, CONTEST_STATUSES, SCORING_RULES } from './contestTypes';
 import ContestLeaderboard from './ContestLeaderboard';
 import { T } from '../theme';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface Props {
   contest: Contest;
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export default function ContestDetailPanel({ contest, onBack, onUpdate }: Props) {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const [participants, setParticipants] = useState<ContestParticipant[]>([]);
   const [events, setEvents] = useState<ContestPointEvent[]>([]);
@@ -111,7 +113,7 @@ export default function ContestDetailPanel({ contest, onBack, onUpdate }: Props)
   return (
     <div>
       <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: T.main, fontSize: 13, fontWeight: 600, fontFamily: 'inherit', marginBottom: 16, padding: 0 }}>
-        <ArrowLeft size={16} /> Retour aux concours
+        <ArrowLeft size={16} /> {t("contest_detail.back_to_contests", "Retour aux concours")}
       </button>
 
       <div style={{ background: 'linear-gradient(135deg, #111, #222)', borderRadius: 14, padding: 24, color: '#fff', marginBottom: 20 }}>
@@ -127,16 +129,16 @@ export default function ContestDetailPanel({ contest, onBack, onUpdate }: Props)
           <div style={{ display: 'flex', gap: 8 }}>
             {contest.status === 'draft' && (
               <button onClick={() => handleStatusChange('active')} style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: T.green, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
-                Activer
+                {t("contest_detail.activate", "Activer")}
               </button>
             )}
             {contest.status === 'active' && (
               <>
                 <button onClick={() => handleStatusChange('completed')} style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: '#007aff', color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
-                  Terminer
+                  {t("contest_detail.finish", "Terminer")}
                 </button>
                 <button onClick={() => handleStatusChange('cancelled')} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
-                  Annuler
+                  {t("common.cancel", "Annuler")}
                 </button>
               </>
             )}
@@ -146,11 +148,11 @@ export default function ContestDetailPanel({ contest, onBack, onUpdate }: Props)
         <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginTop: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>
             <Clock size={14} />
-            {isActive ? `${daysLeft} jours restants` : `${new Date(contest.start_date).toLocaleDateString('fr-CA')} - ${new Date(contest.end_date).toLocaleDateString('fr-CA')}`}
+            {isActive ? `${daysLeft} ${t("contest_detail.days_remaining", "jours restants")}` : `${new Date(contest.start_date).toLocaleDateString('fr-CA')} - ${new Date(contest.end_date).toLocaleDateString('fr-CA')}`}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>
             <Users size={14} />
-            {participants.length} participants
+            {participants.length} {t("contest_detail.participants", "participants")}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>
             <Target size={14} />
@@ -167,9 +169,9 @@ export default function ContestDetailPanel({ contest, onBack, onUpdate }: Props)
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', gap: 2, background: '#f3f4f6', borderRadius: 8, padding: 3 }}>
-          {(['leaderboard', 'activity', 'prizes', 'participants'] as const).map(t => (
-            <button key={t} onClick={() => setTab(t)} style={tabBtnStyle(tab === t)}>
-              {t === 'leaderboard' ? 'Classement' : t === 'activity' ? 'Activite' : t === 'prizes' ? 'Prix' : 'Participants'}
+          {(['leaderboard', 'activity', 'prizes', 'participants'] as const).map(tk => (
+            <button key={tk} onClick={() => setTab(tk)} style={tabBtnStyle(tab === tk)}>
+              {tk === 'leaderboard' ? t("contest_detail.tab_leaderboard", "Classement") : tk === 'activity' ? t("contest_detail.tab_activity", "Activité") : tk === 'prizes' ? t("contest_detail.tab_prizes", "Prix") : t("contest_detail.tab_participants", "Participants")}
             </button>
           ))}
         </div>
@@ -177,10 +179,10 @@ export default function ContestDetailPanel({ contest, onBack, onUpdate }: Props)
         {(tab === 'leaderboard' || tab === 'participants') && (
           <>
             <button onClick={() => setShowAddPoints(true)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '8px 14px', borderRadius: 8, border: `1px solid ${T.main}`, background: 'transparent', color: T.main, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
-              <Plus size={14} /> Points
+              <Plus size={14} /> {t("contest_detail.points", "Points")}
             </button>
             <button onClick={() => setShowAddParticipant(true)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '8px 14px', borderRadius: 8, border: 'none', background: T.main, color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
-              <Plus size={14} /> Participant
+              <Plus size={14} /> {t("contest_detail.participant", "Participant")}
             </button>
           </>
         )}
@@ -197,12 +199,12 @@ export default function ContestDetailPanel({ contest, onBack, onUpdate }: Props)
           {events.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 32, color: T.textLight, fontSize: 13 }}>
               <AlertCircle size={24} style={{ marginBottom: 8, opacity: 0.5 }} />
-              <div>Aucune activite enregistree</div>
+              <div>{t("contest_detail.no_activity", "Aucune activité enregistrée")}</div>
             </div>
           ) : (
             <div>
               {events.map(ev => {
-                const pName = participants.find(p => p.user_id === ev.user_id)?.profile?.full_name || 'Inconnu';
+                const pName = participants.find(p => p.user_id === ev.user_id)?.profile?.full_name || t("common.unknown", "Inconnu");
                 return (
                   <div key={ev.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: `1px solid ${T.border}` }}>
                     <div style={{ width: 8, height: 8, borderRadius: '50%', background: ev.points > 0 ? T.green : T.red, flexShrink: 0 }} />
@@ -224,7 +226,7 @@ export default function ContestDetailPanel({ contest, onBack, onUpdate }: Props)
       {tab === 'prizes' && (
         <div style={{ background: T.card, borderRadius: 12, border: `1px solid ${T.border}`, padding: 20 }}>
           {prizes.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 32, color: T.textLight, fontSize: 13 }}>Aucun prix configure</div>
+            <div style={{ textAlign: 'center', padding: 32, color: T.textLight, fontSize: 13 }}>{t("contest_detail.no_prizes", "Aucun prix configuré")}</div>
           ) : (
             prizes.map((pr, i) => (
               <div key={pr.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: i < prizes.length - 1 ? `1px solid ${T.border}` : 'none' }}>
@@ -233,7 +235,7 @@ export default function ContestDetailPanel({ contest, onBack, onUpdate }: Props)
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>
-                    {pr.rank_from === pr.rank_to ? `Rang ${pr.rank_from}` : `Rang ${pr.rank_from} - ${pr.rank_to}`}
+                    {pr.rank_from === pr.rank_to ? `${t("contest_detail.rank", "Rang")} ${pr.rank_from}` : `${t("contest_detail.rank", "Rang")} ${pr.rank_from} - ${pr.rank_to}`}
                   </div>
                   <div style={{ fontSize: 12, color: T.textLight }}>{pr.prize_description}</div>
                 </div>
@@ -249,17 +251,17 @@ export default function ContestDetailPanel({ contest, onBack, onUpdate }: Props)
       {tab === 'participants' && (
         <div style={{ background: T.card, borderRadius: 12, border: `1px solid ${T.border}`, padding: 20 }}>
           {participants.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 32, color: T.textLight, fontSize: 13 }}>Aucun participant</div>
+            <div style={{ textAlign: 'center', padding: 32, color: T.textLight, fontSize: 13 }}>{t("contest_detail.no_participants", "Aucun participant")}</div>
           ) : (
             participants.map((p, i) => {
-              const name = p.profile?.full_name || 'Utilisateur';
+              const name = p.profile?.full_name || t("common.user", "Utilisateur");
               const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
               return (
                 <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: i < participants.length - 1 ? `1px solid ${T.border}` : 'none' }}>
                   <div style={{ width: 34, height: 34, borderRadius: '50%', background: `${T.main}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: T.main }}>{initials}</div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{name}</div>
-                    <div style={{ fontSize: 11, color: T.textLight }}>Inscrit le {new Date(p.opted_in_at).toLocaleDateString('fr-CA')}</div>
+                    <div style={{ fontSize: 11, color: T.textLight }}>{t("contest_detail.registered_on", "Inscrit le")} {new Date(p.opted_in_at).toLocaleDateString('fr-CA')}</div>
                   </div>
                   <div style={{ fontSize: 14, fontWeight: 700, color: T.main }}>{p.total_points.toLocaleString('fr-CA')} pts</div>
                 </div>
@@ -273,27 +275,27 @@ export default function ContestDetailPanel({ contest, onBack, onUpdate }: Props)
         <div style={{ position: 'fixed', inset: 0, zIndex: 10001, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(230,228,224,0.35)' }}>
           <div style={{ background: T.card, borderRadius: 14, padding: 24, width: 400, maxWidth: '90vw' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
-              <div style={{ fontWeight: 800, fontSize: 16 }}>Ajouter des points</div>
+              <div style={{ fontWeight: 800, fontSize: 16 }}>{t("contest_detail.add_points", "Ajouter des points")}</div>
               <button onClick={() => setShowAddPoints(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T.textMid }}><X size={18} /></button>
             </div>
             <div style={{ marginBottom: 12 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: 'block', marginBottom: 6 }}>Participant *</label>
+              <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: 'block', marginBottom: 6 }}>{t("contest_detail.participant", "Participant")} *</label>
               <select style={inputStyle} value={pointsForm.user_id} onChange={e => setPointsForm({ ...pointsForm, user_id: e.target.value })}>
-                <option value="">Choisir...</option>
+                <option value="">{t("contest_detail.choose", "Choisir...")}</option>
                 {participants.map(p => <option key={p.id} value={p.user_id}>{p.profile?.full_name || p.user_id}</option>)}
               </select>
             </div>
             <div style={{ marginBottom: 12 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: 'block', marginBottom: 6 }}>Points *</label>
+              <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: 'block', marginBottom: 6 }}>{t("contest_detail.points", "Points")} *</label>
               <input type="number" style={inputStyle} value={pointsForm.points} onChange={e => setPointsForm({ ...pointsForm, points: Number(e.target.value) })} />
             </div>
             <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: 'block', marginBottom: 6 }}>Raison</label>
+              <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: 'block', marginBottom: 6 }}>{t("contest_detail.reason", "Raison")}</label>
               <input style={inputStyle} value={pointsForm.description} onChange={e => setPointsForm({ ...pointsForm, description: e.target.value })} placeholder="ex: Bonus de performance" />
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => setShowAddPoints(false)} style={{ padding: '8px 16px', borderRadius: 8, border: `1px solid ${T.border}`, background: '#fff', color: T.textMid, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Annuler</button>
-              <button onClick={handleAddPoints} disabled={saving} style={{ padding: '8px 20px', borderRadius: 8, border: 'none', background: T.main, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Ajouter</button>
+              <button onClick={() => setShowAddPoints(false)} style={{ padding: '8px 16px', borderRadius: 8, border: `1px solid ${T.border}`, background: '#fff', color: T.textMid, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>{t("common.cancel", "Annuler")}</button>
+              <button onClick={handleAddPoints} disabled={saving} style={{ padding: '8px 20px', borderRadius: 8, border: 'none', background: T.main, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>{t("contest_detail.add", "Ajouter")}</button>
             </div>
           </div>
         </div>
@@ -303,21 +305,21 @@ export default function ContestDetailPanel({ contest, onBack, onUpdate }: Props)
         <div style={{ position: 'fixed', inset: 0, zIndex: 10001, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(230,228,224,0.35)' }}>
           <div style={{ background: T.card, borderRadius: 14, padding: 24, width: 400, maxWidth: '90vw' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
-              <div style={{ fontWeight: 800, fontSize: 16 }}>Ajouter un participant</div>
+              <div style={{ fontWeight: 800, fontSize: 16 }}>{t("contest_detail.add_participant", "Ajouter un participant")}</div>
               <button onClick={() => setShowAddParticipant(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T.textMid }}><X size={18} /></button>
             </div>
             <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: 'block', marginBottom: 6 }}>Utilisateur *</label>
+              <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: 'block', marginBottom: 6 }}>{t("common.user", "Utilisateur")} *</label>
               <select style={inputStyle} value={participantForm} onChange={e => setParticipantForm(e.target.value)}>
-                <option value="">Choisir...</option>
+                <option value="">{t("contest_detail.choose", "Choisir...")}</option>
                 {profiles.filter(pr => !participants.some(p => p.user_id === pr.id)).map(pr => (
                   <option key={pr.id} value={pr.id}>{pr.full_name}</option>
                 ))}
               </select>
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => setShowAddParticipant(false)} style={{ padding: '8px 16px', borderRadius: 8, border: `1px solid ${T.border}`, background: '#fff', color: T.textMid, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Annuler</button>
-              <button onClick={handleAddParticipant} disabled={saving} style={{ padding: '8px 20px', borderRadius: 8, border: 'none', background: T.main, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Inscrire</button>
+              <button onClick={() => setShowAddParticipant(false)} style={{ padding: '8px 16px', borderRadius: 8, border: `1px solid ${T.border}`, background: '#fff', color: T.textMid, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>{t("common.cancel", "Annuler")}</button>
+              <button onClick={handleAddParticipant} disabled={saving} style={{ padding: '8px 20px', borderRadius: 8, border: 'none', background: T.main, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>{t("contest_detail.register", "Inscrire")}</button>
             </div>
           </div>
         </div>

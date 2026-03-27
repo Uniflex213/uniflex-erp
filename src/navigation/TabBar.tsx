@@ -3,6 +3,7 @@ import { useApp } from "../AppContext";
 import { useAuth } from "../contexts/AuthContext";
 import { X, Plus, AlertTriangle, FilePlus } from "lucide-react";
 import { T } from "../theme";
+import { useLanguage } from "../i18n/LanguageContext";
 
 interface TabBarProps {
   pageLabels: Record<string, string>;
@@ -19,6 +20,7 @@ const DEFAULT_PAGE_BY_ROLE: Record<string, [string, string]> = {
 export default function TabBar({ pageLabels }: TabBarProps) {
   const { tabs, activeTabIndex, switchTab, closeTab, page, pinCurrentPage, canPinCurrentPage, openTab } = useApp();
   const { profile } = useAuth();
+  const { t } = useLanguage();
   const [confirmClose, setConfirmClose] = useState<number | null>(null);
 
   const currentLabel = pageLabels[page] || page;
@@ -159,7 +161,7 @@ export default function TabBar({ pageLabels }: TabBarProps) {
             <>
               <button
                 onClick={handleNewTab}
-                title="Nouvel onglet"
+                title={t("nav.new_tab")}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -207,7 +209,7 @@ export default function TabBar({ pageLabels }: TabBarProps) {
                 onMouseOut={e => (e.currentTarget.style.background = "#111")}
               >
                 <Plus size={13} />
-                Epingler
+                {t("nav.pin")}
               </button>
             </>
           )}
@@ -260,9 +262,9 @@ export default function TabBar({ pageLabels }: TabBarProps) {
                 <AlertTriangle size={24} color={T.orange} />
               </div>
               <div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: "#111" }}>Modifications non sauvegardees</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: "#111" }}>{t("nav.unsaved_changes")}</div>
                 <div style={{ fontSize: 13, color: T.textMid, marginTop: 4 }}>
-                  Cet onglet contient des modifications non sauvegardees.
+                  {t("nav.unsaved_changes_desc")}
                 </div>
               </div>
             </div>
@@ -280,7 +282,7 @@ export default function TabBar({ pageLabels }: TabBarProps) {
                   color: "#111",
                 }}
               >
-                Annuler
+                {t("nav.cancel")}
               </button>
               <button
                 onClick={handleConfirmClose}
@@ -295,7 +297,7 @@ export default function TabBar({ pageLabels }: TabBarProps) {
                   color: "#fff",
                 }}
               >
-                Fermer quand meme
+                {t("nav.close_anyway")}
               </button>
             </div>
           </div>

@@ -81,7 +81,7 @@ export default function CRMPipelineTeamPage() {
       .eq("archived", false)
       .order("created_at", { ascending: false });
     if (!data) return;
-    const headers = ["Entreprise", "Prénom", "Nom", "Téléphone", "Email", "Région", "Type", "Étape", "Source", "Valeur estimée", "Date création"];
+    const headers = [t("crm.company", "Entreprise"), t("crm.first_name", "Prénom"), t("crm.last_name", "Nom"), t("phone", "Téléphone"), t("email", "Email"), t("crm.region", "Région"), t("type", "Type"), t("crm.stage_detail", "Étape"), t("crm.source", "Source"), t("crm.estimated_value_per_year", "Valeur estimée"), t("crm.created_at", "Date création")];
     const rows = data.map((r: any) => [
       r.company_name, r.contact_first_name, r.contact_last_name,
       r.phone, r.email, r.region, r.type, r.stage, r.source,
@@ -115,8 +115,8 @@ export default function CRMPipelineTeamPage() {
     await persistActivity({
       lead_id: leadId,
       type: "Changement d'étape",
-      title: `Déplacé vers ${newStage}`,
-      description: `Lead déplacé de "${oldStage}" vers "${newStage}".`,
+      title: `${t("crm.moved_to", "Déplacé vers")} ${newStage}`,
+      description: `${t("crm.lead_moved_from", "Lead déplacé de")} "${oldStage}" ${t("crm.to", "vers")} "${newStage}".`,
       stage_from: oldStage,
       stage_to: newStage,
       logged_by_name: agentName,

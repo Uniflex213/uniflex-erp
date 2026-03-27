@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { supabase } from "../../supabaseClient";
 import { useAuth } from "../../contexts/AuthContext";
 import { T } from "../../theme";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   onSuccess: () => Promise<void>;
@@ -12,6 +13,7 @@ export default function StoreCodeEntry({ onSuccess }: Props) {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { t } = useLanguage();
 
   const handleSubmit = async () => {
     if (!code.trim() || !profile) return;
@@ -26,7 +28,7 @@ export default function StoreCodeEntry({ onSuccess }: Props) {
       .maybeSingle();
 
     if (!store) {
-      setError("Code magasin invalide. Vérifiez avec votre administrateur.");
+      setError(t("storecode.invalid"));
       setLoading(false);
       return;
     }
@@ -41,7 +43,7 @@ export default function StoreCodeEntry({ onSuccess }: Props) {
       .eq("id", profile.id);
 
     if (updateError) {
-      setError("Erreur lors de la mise à jour du profil.");
+      setError(t("storecode.update_error"));
       setLoading(false);
       return;
     }
@@ -76,10 +78,10 @@ export default function StoreCodeEntry({ onSuccess }: Props) {
           </svg>
         </div>
         <h2 style={{ color: T.text, fontSize: 18, fontWeight: 800, marginBottom: 6, letterSpacing: "0.05em" }}>
-          ACCÈS MAGASIN
+          {t("storecode.title")}
         </h2>
         <p style={{ color: T.textMid, fontSize: 12, marginBottom: 28, lineHeight: 1.5 }}>
-          Entrez votre code magasin pour accéder aux données de votre point de vente.
+          {t("storecode.description")}
         </p>
 
         <input
@@ -130,12 +132,12 @@ export default function StoreCodeEntry({ onSuccess }: Props) {
             marginBottom: 20,
           }}
         >
-          {loading ? "Vérification..." : "ACCÉDER AU MAGASIN"}
+          {loading ? t("storecode.verifying") : t("storecode.access")}
         </button>
 
         <p style={{ color: T.textLight, fontSize: 11, lineHeight: 1.5 }}>
-          Vous n'avez pas de code ?<br />
-          Contactez votre administrateur.
+          {t("storecode.no_code")}<br />
+          {t("storecode.contact_admin")}
         </p>
       </div>
     </div>

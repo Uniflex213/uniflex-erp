@@ -3,6 +3,7 @@ import { supabase } from "../../supabaseClient";
 import { T } from "../../theme";
 import { useCurrentAgent } from "../../hooks/useCurrentAgent";
 import { TeamProject, TeamTask, TeamMember } from "./teamTypes";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 const PRIORITY_STYLE: Record<string, { bg: string; color: string }> = {
   Haute: { bg: "#fef2f2", color: T.red },
@@ -19,6 +20,7 @@ function ProjectCard({ project, members, isLeader, onUpdate }: {
   project: TeamProject; members: TeamMember[]; isLeader: boolean;
   onUpdate: (p: TeamProject) => void;
 }) {
+  const { t } = useLanguage();
   const [expanded, setExpanded] = useState(false);
   const [tasks, setTasks] = useState<TeamTask[]>(project.tasks ?? []);
   const [newTask, setNewTask] = useState("");
@@ -72,7 +74,7 @@ function ProjectCard({ project, members, isLeader, onUpdate }: {
             <div style={{ height: 5, borderRadius: 99, background: "rgba(0,0,0,0.04)", overflow: "hidden", width: 120 }}>
               <div style={{ height: "100%", borderRadius: 99, width: `${Math.round(pct * 100)}%`, background: pct === 1 ? T.green : T.main, transition: "width 0.5s" }} />
             </div>
-            <span style={{ fontSize: 10, color: T.textLight }}>{completedTasks}/{totalTasks} tâches</span>
+            <span style={{ fontSize: 10, color: T.textLight }}>{completedTasks}/{totalTasks} {t("team_projects.tasks", "tâches")}</span>
             <div style={{ display: "flex", gap: -4 }}>
               {project.assigned_member_ids.slice(0, 4).map(mid => {
                 const m = members.find(mm => mm.id === mid);
@@ -92,7 +94,7 @@ function ProjectCard({ project, members, isLeader, onUpdate }: {
       {expanded && (
         <div style={{ borderTop: `1px solid ${T.border}` }}>
           <div style={{ padding: "16px 20px", borderBottom: `1px solid ${T.border}` }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>Tâches</div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>{t("team_projects.tasks", "Tâches")}</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 12 }}>
               {tasks.map(task => {
                 const assignee = members.find(m => m.id === task.assigned_member_id);
@@ -113,25 +115,25 @@ function ProjectCard({ project, members, isLeader, onUpdate }: {
               })}
             </div>
             <div style={{ display: "flex", gap: 8 }}>
-              <input value={newTask} onChange={e => setNewTask(e.target.value)} onKeyDown={e => e.key === "Enter" && addTask()} placeholder="+ Ajouter une tâche..."
+              <input value={newTask} onChange={e => setNewTask(e.target.value)} onKeyDown={e => e.key === "Enter" && addTask()} placeholder={t("team_projects.add_task_placeholder", "+ Ajouter une tâche...")}
                 style={{ flex: 1, height: 32, borderRadius: 8, border: `1px solid ${T.border}`, padding: "0 10px", fontSize: 12, fontFamily: "inherit", outline: "none" }} />
               <select value={newTaskAssignee} onChange={e => setNewTaskAssignee(e.target.value)}
                 style={{ height: 32, borderRadius: 8, border: `1px solid ${T.border}`, padding: "0 8px", fontSize: 11, fontFamily: "inherit", outline: "none" }}>
                 {members.map(m => <option key={m.id} value={m.id}>{m.agent_name.split(" ")[0]}</option>)}
               </select>
               <button onClick={addTask} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: "none", background: T.main, color: "#fff", cursor: "pointer", fontFamily: "inherit", fontSize: 12, fontWeight: 700 }}>
-                Ajouter
+                {t("team_projects.add", "Ajouter")}
               </button>
             </div>
           </div>
 
           <div style={{ padding: "16px 20px" }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>Notes du projet</div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>{t("team_projects.project_notes", "Notes du projet")}</div>
             <textarea
               value={notes}
               onChange={e => setNotes(e.target.value)}
               onBlur={saveNotes}
-              placeholder="Notes partagées entre tous les membres assignés..."
+              placeholder={t("team_projects.notes_placeholder", "Notes partagées entre tous les membres assignés...")}
               style={{ width: "100%", height: 80, padding: 10, borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, fontFamily: "inherit", resize: "none", outline: "none", boxSizing: "border-box" }}
             />
           </div>
@@ -142,6 +144,7 @@ function ProjectCard({ project, members, isLeader, onUpdate }: {
 }
 
 function ProjectForm({ teamId, members, onSave, onClose }: { teamId: string; members: TeamMember[]; onSave: (p: TeamProject) => void; onClose: () => void }) {
+  const { t } = useLanguage();
   const agent = useCurrentAgent();
   const today = new Date().toISOString().split("T")[0];
   const [name, setName] = useState("");
@@ -167,38 +170,38 @@ function ProjectForm({ teamId, members, onSave, onClose }: { teamId: string; mem
     <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={onClose}>
       <div onClick={e => e.stopPropagation()} style={{ background: T.bgCard, borderRadius: 16, width: "100%", maxWidth: 480, boxShadow: "0 24px 80px rgba(0,0,0,0.2)" }}>
         <div style={{ padding: "18px 24px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between" }}>
-          <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: T.text }}>Nouveau projet</h3>
+          <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: T.text }}>{t("team_projects.new_project", "Nouveau projet")}</h3>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 18, color: T.textLight }}>✕</button>
         </div>
         <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 14 }}>
           <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 4 }}>Nom du projet <span style={{ color: T.red }}>*</span></label>
-            <input value={name} onChange={e => setName(e.target.value)} placeholder="Ex: Blitz prospection Rive-Sud"
+            <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 4 }}>{t("team_projects.project_name", "Nom du projet")} <span style={{ color: T.red }}>*</span></label>
+            <input value={name} onChange={e => setName(e.target.value)} placeholder={t("team_projects.project_name_placeholder", "Ex: Blitz prospection Rive-Sud")}
               style={{ width: "100%", height: 36, borderRadius: 8, border: `1px solid ${T.border}`, padding: "0 10px", fontSize: 13, fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
           </div>
           <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 4 }}>Description</label>
-            <textarea value={desc} onChange={e => setDesc(e.target.value)} placeholder="Décrivez l'objectif du projet..."
+            <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 4 }}>{t("team_projects.description", "Description")}</label>
+            <textarea value={desc} onChange={e => setDesc(e.target.value)} placeholder={t("team_projects.description_placeholder", "Décrivez l'objectif du projet...")}
               style={{ width: "100%", height: 70, padding: 10, borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, fontFamily: "inherit", resize: "none", outline: "none", boxSizing: "border-box" }} />
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
             <div>
-              <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 4 }}>Priorité</label>
+              <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 4 }}>{t("team_projects.priority", "Priorité")}</label>
               <select value={priority} onChange={e => setPriority(e.target.value)} style={{ width: "100%", height: 36, borderRadius: 8, border: `1px solid ${T.border}`, padding: "0 8px", fontSize: 12, fontFamily: "inherit", outline: "none" }}>
                 {["Haute", "Moyenne", "Basse"].map(p => <option key={p}>{p}</option>)}
               </select>
             </div>
             <div>
-              <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 4 }}>Début</label>
+              <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 4 }}>{t("team_projects.start", "Début")}</label>
               <input type="date" value={start} onChange={e => setStart(e.target.value)} style={{ width: "100%", height: 36, borderRadius: 8, border: `1px solid ${T.border}`, padding: "0 8px", fontSize: 12, fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
             </div>
             <div>
-              <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 4 }}>Fin</label>
+              <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 4 }}>{t("team_projects.end", "Fin")}</label>
               <input type="date" value={end} onChange={e => setEnd(e.target.value)} style={{ width: "100%", height: 36, borderRadius: 8, border: `1px solid ${T.border}`, padding: "0 8px", fontSize: 12, fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
             </div>
           </div>
           <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 6 }}>Membres assignés</label>
+            <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 6 }}>{t("team_projects.assigned_members", "Membres assignés")}</label>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {members.map(m => {
                 const selected = assignees.includes(m.id);
@@ -216,9 +219,9 @@ function ProjectForm({ teamId, members, onSave, onClose }: { teamId: string; mem
           </div>
         </div>
         <div style={{ padding: "12px 24px", borderTop: `1px solid ${T.border}`, display: "flex", justifyContent: "flex-end", gap: 8 }}>
-          <button onClick={onClose} style={{ padding: "9px 18px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 13 }}>Annuler</button>
+          <button onClick={onClose} style={{ padding: "9px 18px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 13 }}>{t("common.cancel", "Annuler")}</button>
           <button onClick={handleSave} disabled={!name.trim() || loading} style={{ padding: "9px 22px", borderRadius: 8, border: "none", background: name ? T.main : "#e5e7eb", color: name ? "#fff" : T.textLight, cursor: name ? "pointer" : "not-allowed", fontFamily: "inherit", fontSize: 13, fontWeight: 700 }}>
-            {loading ? "Création..." : "Créer le projet"}
+            {loading ? t("common.creating", "Création...") : t("team_projects.create_project", "Créer le projet")}
           </button>
         </div>
       </div>
@@ -229,6 +232,7 @@ function ProjectForm({ teamId, members, onSave, onClose }: { teamId: string; mem
 interface Props { team: { id: string }; members: TeamMember[]; isLeader: boolean; }
 
 export default function TeamProjectsTab({ team, members, isLeader }: Props) {
+  const { t } = useLanguage();
   const [projects, setProjects] = useState<TeamProject[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -252,20 +256,20 @@ export default function TeamProjectsTab({ team, members, isLeader }: Props) {
   return (
     <div style={{ padding: "24px 28px", maxWidth: 900 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: T.text }}>Projets d'équipe</h3>
+        <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: T.text }}>{t("team_projects.team_projects", "Projets d'équipe")}</h3>
         {isLeader && (
           <button onClick={() => setShowForm(true)} style={{ padding: "9px 18px", borderRadius: 10, border: "none", background: T.main, color: "#fff", cursor: "pointer", fontFamily: "inherit", fontSize: 13, fontWeight: 700 }}>
-            + Nouveau projet
+            + {t("team_projects.new_project", "Nouveau projet")}
           </button>
         )}
       </div>
 
-      {loading && <div style={{ textAlign: "center", padding: 40, color: T.textLight }}>Chargement...</div>}
+      {loading && <div style={{ textAlign: "center", padding: 40, color: T.textLight }}>{t("common.loading", "Chargement...")}</div>}
       {!loading && projects.length === 0 && (
         <div style={{ textAlign: "center", padding: 60, color: T.textLight }}>
           <div style={{ fontSize: 40, marginBottom: 12 }}>🚀</div>
-          <div style={{ fontSize: 14, fontWeight: 600 }}>Aucun projet actif</div>
-          {isLeader && <div style={{ fontSize: 12, marginTop: 4 }}>Créez le premier projet de votre équipe</div>}
+          <div style={{ fontSize: 14, fontWeight: 600 }}>{t("team_projects.no_active_projects", "Aucun projet actif")}</div>
+          {isLeader && <div style={{ fontSize: 12, marginTop: 4 }}>{t("team_projects.create_first_project", "Créez le premier projet de votre équipe")}</div>}
         </div>
       )}
 

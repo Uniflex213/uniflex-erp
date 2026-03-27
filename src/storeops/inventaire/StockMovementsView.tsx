@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { StockMovement, MOVEMENT_TYPE_CONFIG } from "./inventaireTypes";
 import { T } from "../../theme";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 const fmtDate = (s: string) => new Date(s).toLocaleDateString("fr-CA", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function StockMovementsView({ movements, productFilter, onClose }: Props) {
+  const { t } = useLanguage();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
@@ -39,7 +41,7 @@ export default function StockMovementsView({ movements, productFilter, onClose }
   }, [movements, productFilter, search, typeFilter, dateFrom, dateTo]);
 
   function exportCsv() {
-    const headers = ['Date', 'Type', 'Référence', 'Produit', 'Quantité', 'Stock après', 'Agent'];
+    const headers = [t("stock.date"), t("stock.type"), t("stock.csv_reference"), t("stock.product"), t("stock.quantity"), t("stock.stock_after"), t("stock.agent")];
     const rows = filtered.map(m => [
       fmtDate(m.created_at),
       MOVEMENT_TYPE_CONFIG[m.movement_type]?.label || m.movement_type,
@@ -58,7 +60,7 @@ export default function StockMovementsView({ movements, productFilter, onClose }
     <div style={{ background: T.card, borderRadius: 14, border: `1px solid ${T.border}`, overflow: "hidden" }}>
       {onClose && (
         <div style={{ padding: "16px 20px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800 }}>Historique des mouvements</h3>
+          <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800 }}>{t("stock.movements_title")}</h3>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 18, color: T.textMid }}>×</button>
         </div>
       )}
@@ -67,23 +69,23 @@ export default function StockMovementsView({ movements, productFilter, onClose }
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="Rechercher…"
+          placeholder={t("nav.search_placeholder")}
           style={{ padding: "7px 11px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, fontFamily: "inherit", outline: "none", width: 200 }}
         />
         <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)}
           style={{ padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, fontFamily: "inherit", outline: "none" }}>
-          <option value="all">Tous les types</option>
-          {allTypes.map(t => <option key={t} value={t}>{MOVEMENT_TYPE_CONFIG[t]?.label || t}</option>)}
+          <option value="all">{t("stock.all_types")}</option>
+          {allTypes.map(tp => <option key={tp} value={tp}>{MOVEMENT_TYPE_CONFIG[tp]?.label || tp}</option>)}
         </select>
         <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
           style={{ padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, fontFamily: "inherit", outline: "none" }} />
         <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
           style={{ padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 12, fontFamily: "inherit", outline: "none" }} />
         <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }}>
-          <span style={{ fontSize: 12, color: T.textLight }}>{filtered.length} mouvement(s)</span>
+          <span style={{ fontSize: 12, color: T.textLight }}>{filtered.length} {t("stock.movement_count")}</span>
           <button onClick={exportCsv}
             style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.cardAlt, color: T.textMid, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-            Export CSV
+            {t("stock.export_csv")}
           </button>
         </div>
       </div>
@@ -92,14 +94,14 @@ export default function StockMovementsView({ movements, productFilter, onClose }
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ background: T.cardAlt }}>
-              {["Date", "Type", "# Référence", "Produit", "Quantité", "Stock après", "Agent", "Source"].map(h => (
+              {[t("stock.date"), t("stock.type"), t("stock.reference"), t("stock.product"), t("stock.quantity"), t("stock.stock_after"), t("stock.agent"), t("stock.source")].map(h => (
                 <th key={h} style={{ padding: "9px 12px", textAlign: "left", fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.7, borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap" }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
-              <tr><td colSpan={8} style={{ textAlign: "center", padding: "32px 0", color: T.textLight, fontSize: 13 }}>Aucun mouvement.</td></tr>
+              <tr><td colSpan={8} style={{ textAlign: "center", padding: "32px 0", color: T.textLight, fontSize: 13 }}>{t("stock.no_movements")}</td></tr>
             ) : (
               filtered.map(m => {
                 const tc = MOVEMENT_TYPE_CONFIG[m.movement_type] || { label: m.movement_type, color: T.textMid, bg: T.cardAlt, sign: '' };

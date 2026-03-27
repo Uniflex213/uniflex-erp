@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { supabase } from "../../supabaseClient";
 import { useAuth } from "../../contexts/AuthContext";
 import { T, EXPENSE_TYPES, fmt } from "./beneficeTypes";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   onClose: () => void;
@@ -17,6 +18,7 @@ export default function AddExpenseModal({ onClose, onSaved }: Props) {
   const [description, setDescription] = useState("");
   const [docRef, setDocRef] = useState("");
   const [saving, setSaving] = useState(false);
+  const { t } = useLanguage();
 
   const handleSave = async () => {
     const amt = parseFloat(amount);
@@ -54,13 +56,13 @@ export default function AddExpenseModal({ onClose, onSaved }: Props) {
     <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9000, display: "flex", justifyContent: "center", overflowY: "auto", padding: 20 }}>
       <div style={{ background: T.card, borderRadius: 16, width: "100%", maxWidth: 460, margin: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
         <div style={{ padding: "20px 24px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h2 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: T.text }}>Ajouter une depense</h2>
+          <h2 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: T.text }}>{t("expense.add_title")}</h2>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 20, color: T.textMid, lineHeight: 1 }}>x</button>
         </div>
 
         <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
           <div>
-            <div style={labelStyle}>Type de depense</div>
+            <div style={labelStyle}>{t("expense.type")}</div>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {TYPES.map(([key, cfg]) => (
                 <button
@@ -81,24 +83,24 @@ export default function AddExpenseModal({ onClose, onSaved }: Props) {
           </div>
 
           <div>
-            <div style={labelStyle}>Montant ($) *</div>
+            <div style={labelStyle}>{t("expense.amount")}</div>
             <input type="number" step="0.01" min="0.01" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" style={inputStyle} />
           </div>
 
           <div>
-            <div style={labelStyle}>Description</div>
-            <input value={description} onChange={e => setDescription(e.target.value)} placeholder="Details de la depense..." style={inputStyle} />
+            <div style={labelStyle}>{t("expense.description")}</div>
+            <input value={description} onChange={e => setDescription(e.target.value)} placeholder={t("expense.details_placeholder")} style={inputStyle} />
           </div>
 
           <div>
-            <div style={labelStyle}>Reference document (optionnel)</div>
-            <input value={docRef} onChange={e => setDocRef(e.target.value)} placeholder="# ticket ou commande..." style={inputStyle} />
+            <div style={labelStyle}>{t("expense.doc_ref")}</div>
+            <input value={docRef} onChange={e => setDocRef(e.target.value)} placeholder={t("expense.doc_ref_placeholder")} style={inputStyle} />
           </div>
         </div>
 
         <div style={{ padding: "16px 24px", borderTop: `1px solid ${T.border}`, display: "flex", justifyContent: "flex-end", gap: 10 }}>
           <button onClick={onClose} style={{ background: T.cardAlt, color: T.textMid, border: `1px solid ${T.border}`, borderRadius: 8, padding: "10px 20px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
-            Annuler
+            {t("cancel")}
           </button>
           <button
             onClick={handleSave}
@@ -111,7 +113,7 @@ export default function AddExpenseModal({ onClose, onSaved }: Props) {
               cursor: parseFloat(amount) > 0 ? "pointer" : "not-allowed",
             }}
           >
-            {saving ? "Enregistrement..." : `Ajouter depense ${parseFloat(amount) > 0 ? fmt(parseFloat(amount)) : ""}`}
+            {saving ? t("expense.saving") : `${t("expense.add_button")} ${parseFloat(amount) > 0 ? fmt(parseFloat(amount)) : ""}`}
           </button>
         </div>
       </div>

@@ -7,31 +7,43 @@ import ReportAgentPerformance from './ReportAgentPerformance';
 import ReportFinancial from './ReportFinancial';
 import ReportCRMPipeline from './ReportCRMPipeline';
 import { T } from "../theme";
+import { useLanguage } from '../i18n/LanguageContext';
 
-const TABS = [
-  { key: 'sales', label: 'Ventes', icon: <BarChart3 size={14} /> },
-  { key: 'products', label: 'Produits', icon: <Package size={14} /> },
-  { key: 'clients', label: 'Clients', icon: <Users size={14} /> },
-  { key: 'agents', label: 'Agents', icon: <UserCheck size={14} /> },
-  { key: 'financial', label: 'Financier', icon: <DollarSign size={14} /> },
-  { key: 'pipeline', label: 'CRM Pipeline', icon: <GitBranch size={14} /> },
-];
+const TAB_KEYS = ['sales', 'products', 'clients', 'agents', 'financial', 'pipeline'] as const;
+const TAB_ICONS: Record<string, React.ReactNode> = {
+  sales: <BarChart3 size={14} />,
+  products: <Package size={14} />,
+  clients: <Users size={14} />,
+  agents: <UserCheck size={14} />,
+  financial: <DollarSign size={14} />,
+  pipeline: <GitBranch size={14} />,
+};
 
 export default function AdminReportsPage() {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('sales');
+
+  const TAB_LABELS: Record<string, string> = {
+    sales: t("reports.tab_sales", "Ventes"),
+    products: t("reports.tab_products", "Produits"),
+    clients: t("reports.tab_clients", "Clients"),
+    agents: t("reports.tab_agents", "Agents"),
+    financial: t("reports.tab_financial", "Financier"),
+    pipeline: "CRM Pipeline",
+  };
 
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
-        <h2 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 800, color: T.text }}>Rapports & Analytics</h2>
-        <p style={{ margin: 0, color: T.textMid, fontSize: 14 }}>Analysez la performance globale de votre entreprise</p>
+        <h2 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 800, color: T.text }}>{t("reports.title", "Rapports & Analytics")}</h2>
+        <p style={{ margin: 0, color: T.textMid, fontSize: 14 }}>{t("reports.subtitle", "Analysez la performance globale de votre entreprise")}</p>
       </div>
 
       <div style={{ display: 'flex', gap: 4, marginBottom: 24, overflowX: 'auto', paddingBottom: 4 }}>
-        {TABS.map(tab => (
+        {TAB_KEYS.map(key => (
           <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
+            key={key}
+            onClick={() => setActiveTab(key)}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -45,13 +57,13 @@ export default function AdminReportsPage() {
               fontFamily: 'inherit',
               whiteSpace: 'nowrap',
               transition: 'all 0.15s',
-              background: activeTab === tab.key ? T.main : T.card,
-              color: activeTab === tab.key ? '#fff' : T.textMid,
-              borderBottom: activeTab === tab.key ? 'none' : `1px solid ${T.border}`,
+              background: activeTab === key ? T.main : T.card,
+              color: activeTab === key ? '#fff' : T.textMid,
+              borderBottom: activeTab === key ? 'none' : `1px solid ${T.border}`,
             }}
           >
-            {tab.icon}
-            {tab.label}
+            {TAB_ICONS[key]}
+            {TAB_LABELS[key]}
           </button>
         ))}
       </div>

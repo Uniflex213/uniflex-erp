@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "../../supabaseClient";
 import { InvoiceDoc, InvoicePayment, T, fmt, fmtDate } from "./toInvoiceTypes";
 import { useCurrentAgent } from "../../hooks/useCurrentAgent";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   doc: InvoiceDoc;
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function PaymentRecordModal({ doc, onClose, onSaved }: Props) {
+  const { t } = useLanguage();
   const agent = useCurrentAgent();
   const [amount, setAmount] = useState("");
   const [reference, setReference] = useState("");
@@ -97,7 +99,7 @@ export default function PaymentRecordModal({ doc, onClose, onSaved }: Props) {
         <div style={{ padding: "20px 24px", borderBottom: `1px solid ${T.border}` }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
             <div>
-              <h2 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: T.text }}>Enregistrer un paiement</h2>
+              <h2 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: T.text }}>{t("payment.record_title")}</h2>
               <div style={{ fontSize: 12, color: T.textMid, marginTop: 3 }}>
                 {doc.document_number} — {doc.client_name}
               </div>
@@ -110,15 +112,15 @@ export default function PaymentRecordModal({ doc, onClose, onSaved }: Props) {
           <div style={{ background: T.cardAlt, borderRadius: 12, padding: 16, marginBottom: 20 }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 14 }}>
               <div>
-                <div style={labelStyle}>Total facture</div>
+                <div style={labelStyle}>{t("payment.invoice_total")}</div>
                 <div style={{ fontSize: 18, fontWeight: 800, color: T.text }}>{fmt(invoiceTotal)}</div>
               </div>
               <div>
-                <div style={labelStyle}>Deja paye</div>
+                <div style={labelStyle}>{t("payment.already_paid")}</div>
                 <div style={{ fontSize: 18, fontWeight: 800, color: currentPaid > 0 ? T.green : T.textLight }}>{fmt(currentPaid)}</div>
               </div>
               <div>
-                <div style={labelStyle}>Solde restant</div>
+                <div style={labelStyle}>{t("payment.remaining")}</div>
                 <div style={{ fontSize: 18, fontWeight: 800, color: remaining > 0 ? T.red : T.green }}>{fmt(remaining)}</div>
               </div>
             </div>
@@ -133,14 +135,14 @@ export default function PaymentRecordModal({ doc, onClose, onSaved }: Props) {
               }} />
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
-              <span style={{ fontSize: 10, color: T.textMid }}>{pct.toFixed(0)}% paye</span>
-              {parsedAmount > 0 && <span style={{ fontSize: 10, color: T.blue, fontWeight: 600 }}>{newPct.toFixed(0)}% apres ce paiement</span>}
+              <span style={{ fontSize: 10, color: T.textMid }}>{pct.toFixed(0)}% {t("payment.paid_pct")}</span>
+              {parsedAmount > 0 && <span style={{ fontSize: 10, color: T.blue, fontWeight: 600 }}>{newPct.toFixed(0)}% {t("payment.after_payment")}</span>}
             </div>
           </div>
 
           <div style={{ display: "grid", gap: 16, marginBottom: 20 }}>
             <div>
-              <div style={labelStyle}>Montant du paiement *</div>
+              <div style={labelStyle}>{t("payment.amount")}</div>
               <div style={{ display: "flex", gap: 8 }}>
                 <input
                   type="number"
@@ -161,33 +163,33 @@ export default function PaymentRecordModal({ doc, onClose, onSaved }: Props) {
                       cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap",
                     }}
                   >
-                    Payer tout ({fmt(remaining)})
+                    {t("payment.pay_all")} ({fmt(remaining)})
                   </button>
                 )}
               </div>
               {parsedAmount > remaining && remaining > 0 && (
                 <div style={{ fontSize: 11, color: T.red, marginTop: 4, fontWeight: 600 }}>
-                  Le montant depasse le solde restant de {fmt(remaining)}
+                  {t("payment.exceeds_balance")} {fmt(remaining)}
                 </div>
               )}
             </div>
 
             <div>
-              <div style={labelStyle}>Reference (cheque, virement, etc.)</div>
+              <div style={labelStyle}>{t("payment.reference")}</div>
               <input
                 value={reference}
                 onChange={e => setReference(e.target.value)}
-                placeholder="Numero de cheque, reference virement..."
+                placeholder={t("payment.reference_placeholder")}
                 style={inputStyle}
               />
             </div>
 
             <div>
-              <div style={labelStyle}>Notes</div>
+              <div style={labelStyle}>{t("payment.notes")}</div>
               <textarea
                 value={notes}
                 onChange={e => setNotes(e.target.value)}
-                placeholder="Notes optionnelles..."
+                placeholder={t("payment.notes_placeholder")}
                 rows={2}
                 style={{ ...inputStyle, resize: "vertical" }}
               />
@@ -196,12 +198,12 @@ export default function PaymentRecordModal({ doc, onClose, onSaved }: Props) {
 
           {payments.length > 0 && (
             <div style={{ marginBottom: 20 }}>
-              <div style={labelStyle}>Historique des paiements</div>
+              <div style={labelStyle}>{t("payment.history")}</div>
               <div style={{ background: T.cardAlt, borderRadius: 10, border: `1px solid ${T.border}`, overflow: "hidden" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
                   <thead>
                     <tr>
-                      {["Date", "Montant", "Reference", "Par"].map(h => (
+                      {[t("payment.date"), t("payment.amount_col"), t("payment.reference_col"), t("payment.by")].map(h => (
                         <th key={h} style={{ padding: "8px 10px", textAlign: "left", fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", borderBottom: `1px solid ${T.border}` }}>{h}</th>
                       ))}
                     </tr>
@@ -222,7 +224,7 @@ export default function PaymentRecordModal({ doc, onClose, onSaved }: Props) {
           )}
 
           {loadingPayments && (
-            <div style={{ textAlign: "center", padding: 10, color: T.textMid, fontSize: 12 }}>Chargement...</div>
+            <div style={{ textAlign: "center", padding: 10, color: T.textMid, fontSize: 12 }}>{t("loading_dots", "Chargement...")}</div>
           )}
         </div>
 
@@ -231,7 +233,7 @@ export default function PaymentRecordModal({ doc, onClose, onSaved }: Props) {
             onClick={onClose}
             style={{ background: T.cardAlt, color: T.textMid, border: `1px solid ${T.border}`, borderRadius: 8, padding: "10px 20px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
           >
-            Annuler
+            {t("cancel")}
           </button>
           <button
             onClick={handleSave}
@@ -244,7 +246,7 @@ export default function PaymentRecordModal({ doc, onClose, onSaved }: Props) {
               fontFamily: "inherit", display: "flex", alignItems: "center", gap: 6,
             }}
           >
-            {saving ? "Enregistrement..." : `Enregistrer ${parsedAmount > 0 ? fmt(parsedAmount) : ""}`}
+            {saving ? t("payment.saving") : `${t("payment.save")} ${parsedAmount > 0 ? fmt(parsedAmount) : ""}`}
           </button>
         </div>
       </div>

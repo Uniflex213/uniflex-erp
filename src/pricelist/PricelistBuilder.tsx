@@ -8,6 +8,7 @@ import PricelistPreviewModal from "./PricelistPreviewModal";
 import { generatePricelistPDF } from "./pdfGenerator";
 import { T } from "../theme";
 import AddressAutocomplete from "../components/AddressAutocomplete";
+import { useLanguage } from "../i18n/LanguageContext";
 
 
 const fmt = (n: number, currency = "CAD") =>
@@ -76,6 +77,7 @@ const defaultValidUntil = () => {
 };
 
 export default function PricelistBuilder({ onBack, onSave, prefill }: Props) {
+  const { t } = useLanguage();
   const { products: ctxProducts } = useApp();
   const availableProducts = ctxProducts
     .filter(p => p.is_active)
@@ -220,11 +222,11 @@ export default function PricelistBuilder({ onBack, onSave, prefill }: Props) {
           onClick={onBack}
           style={{ display: "flex", alignItems: "center", gap: 6, background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 13, color: T.textMid, fontFamily: "inherit" }}
         >
-          <BackIcon /> Retour
+          <BackIcon /> {t("pricelist.back")}
         </button>
         <div>
-          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>{prefill ? "Dupliquer une Pricelist" : "Nouvelle Pricelist"}</h2>
-          <p style={{ margin: 0, color: T.textMid, fontSize: 13 }}>Remplir les informations client puis construire la liste de prix</p>
+          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>{prefill ? t("pricelist.duplicate_title") : t("pricelist.new_title")}</h2>
+          <p style={{ margin: 0, color: T.textMid, fontSize: 13 }}>{t("pricelist.fill_info_desc")}</p>
         </div>
       </div>
 
@@ -242,7 +244,7 @@ export default function PricelistBuilder({ onBack, onSave, prefill }: Props) {
                 }
               </div>
               <div>
-                <div style={{ fontWeight: 800, fontSize: 15 }}>Informations du client</div>
+                <div style={{ fontWeight: 800, fontSize: 15 }}>{t("pricelist.client_info")}</div>
                 {step === "lines" && (
                   <div style={{ fontSize: 12, color: T.textMid, marginTop: 2 }}>
                     {clientForm.companyName} · {clientForm.clientType} · {clientForm.currency}
@@ -250,7 +252,7 @@ export default function PricelistBuilder({ onBack, onSave, prefill }: Props) {
                 )}
               </div>
             </div>
-            {step === "lines" && <span style={{ fontSize: 11, color: T.main, fontWeight: 700 }}>Modifier</span>}
+            {step === "lines" && <span style={{ fontSize: 11, color: T.main, fontWeight: 700 }}>{t("pricelist.modify")}</span>}
           </div>
 
           {step === "client" && (
@@ -258,11 +260,11 @@ export default function PricelistBuilder({ onBack, onSave, prefill }: Props) {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                   <div>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 6 }}>Nom de la compagnie *</div>
-                    <input value={clientForm.companyName} onChange={e => setClientForm(p => ({ ...p, companyName: e.target.value }))} placeholder="ex: Époxy Pro Montréal" style={inputStyle} />
+                    <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 6 }}>{t("pricelist.company_name")}</div>
+                    <input value={clientForm.companyName} onChange={e => setClientForm(p => ({ ...p, companyName: e.target.value }))} placeholder={t("pricelist.company_placeholder")} style={inputStyle} />
                   </div>
                   <div>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 6 }}>Adresse complète *</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 6 }}>{t("pricelist.full_address")}</div>
                     <div style={{ position: "relative" }} ref={addrRef}>
                       <AddressAutocomplete
                         style={inputStyle}
@@ -274,30 +276,30 @@ export default function PricelistBuilder({ onBack, onSave, prefill }: Props) {
                     </div>
                   </div>
                   <div>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 6 }}>Personne contact *</div>
-                    <input value={clientForm.contactName} onChange={e => setClientForm(p => ({ ...p, contactName: e.target.value }))} placeholder="Prénom Nom" style={inputStyle} />
+                    <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 6 }}>{t("pricelist.contact_person")}</div>
+                    <input value={clientForm.contactName} onChange={e => setClientForm(p => ({ ...p, contactName: e.target.value }))} placeholder={t("pricelist.contact_placeholder")} style={inputStyle} />
                   </div>
                   <div>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 6 }}>Email du client *</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 6 }}>{t("pricelist.client_email")}</div>
                     <input type="email" value={clientForm.clientEmail} onChange={e => setClientForm(p => ({ ...p, clientEmail: e.target.value }))} placeholder="contact@client.com" style={inputStyle} />
                   </div>
                   <div>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 6 }}>Téléphone *</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 6 }}>{t("pricelist.phone")}</div>
                     <input value={clientForm.clientPhone} onChange={e => setClientForm(p => ({ ...p, clientPhone: e.target.value }))} placeholder="514-555-0100" style={inputStyle} />
                   </div>
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                   <div>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 8 }}>Type de client *</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 8 }}>{t("pricelist.client_type")}</div>
                     {(["Installateur", "Distributeur", "Large Scale"] as ClientType[]).map(ct => radioOpt(ct, ct, "clientType"))}
                   </div>
                   <div>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 6 }}>Date de validité *</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 6 }}>{t("pricelist.validity_date")}</div>
                     <input type="date" value={clientForm.validUntil} onChange={e => setClientForm(p => ({ ...p, validUntil: e.target.value }))} style={inputStyle} />
                   </div>
                   <div>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 6 }}>Devise</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 6 }}>{t("pricelist.currency")}</div>
                     <select
                       value={clientForm.currency}
                       onChange={e => {
@@ -310,15 +312,15 @@ export default function PricelistBuilder({ onBack, onSave, prefill }: Props) {
                       }}
                       style={{ ...inputStyle, cursor: "pointer" }}
                     >
-                      <option value="CAD">CAD — Dollar canadien</option>
-                      <option value="USD">USD — Dollar américain</option>
-                      <option value="EUR">EUR — Euro</option>
+                      <option value="CAD">{t("pricelist.cad_label")}</option>
+                      <option value="USD">{t("pricelist.usd_label")}</option>
+                      <option value="EUR">{t("pricelist.eur_label")}</option>
                     </select>
                   </div>
                   {clientForm.currency !== "CAD" && (
                     <div>
                       <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 6 }}>
-                        Taux de change {clientForm.currency}/CAD
+                        {t("pricelist.exchange_rate")} {clientForm.currency}/CAD
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <input
@@ -337,11 +339,11 @@ export default function PricelistBuilder({ onBack, onSave, prefill }: Props) {
                   )}
                   <div>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4 }}>Notes internes</div>
-                      <span style={{ fontSize: 10, background: "#f3f4f6", color: T.textLight, padding: "2px 7px", borderRadius: 4, fontWeight: 600 }}>Non imprimé sur le PDF</span>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4 }}>{t("pricelist.internal_notes")}</div>
+                      <span style={{ fontSize: 10, background: "#f3f4f6", color: T.textLight, padding: "2px 7px", borderRadius: 4, fontWeight: 600 }}>{t("pricelist.not_printed_pdf")}</span>
                     </div>
                     <textarea value={clientForm.internalNotes} onChange={e => setClientForm(p => ({ ...p, internalNotes: e.target.value }))}
-                      placeholder="Notes de contexte réservées au vendeur..."
+                      placeholder={t("pricelist.notes_placeholder")}
                       rows={3}
                       style={{ ...inputStyle, resize: "vertical", lineHeight: 1.5 }}
                     />
@@ -372,28 +374,28 @@ export default function PricelistBuilder({ onBack, onSave, prefill }: Props) {
               <div style={{ width: 28, height: 28, borderRadius: "50%", background: `${T.main}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <span style={{ fontSize: 13, fontWeight: 800, color: T.main }}>2</span>
               </div>
-              <div style={{ fontWeight: 800, fontSize: 15 }}>Bâtir la liste de prix</div>
-              <span style={{ marginLeft: 4, fontSize: 11, color: T.textLight }}>Glissez pour réorganiser l'ordre</span>
+              <div style={{ fontWeight: 800, fontSize: 15 }}>{t("pricelist.build_pricelist")}</div>
+              <span style={{ marginLeft: 4, fontSize: 11, color: T.textLight }}>{t("pricelist.drag_reorder")}</span>
             </div>
 
             <div style={{ background: "#f8f9fb", borderRadius: 10, padding: 16, marginBottom: 20, border: `1px solid ${T.border}` }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 12 }}>Ajouter un produit</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 12 }}>{t("pricelist.add_product")}</div>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-end" }}>
                 <div style={{ flex: "2 1 160px" }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>Produit</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>{t("pricelist.product")}</div>
                   <select value={newRow.product} onChange={e => setNewRow(p => ({ ...p, product: e.target.value }))}
                     style={{ border: `1px solid ${T.border}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, fontFamily: "inherit", outline: "none", background: T.bgCard, color: newRow.product ? T.text : T.textLight, width: "100%", cursor: "pointer" }}>
-                    <option value="">Sélectionner...</option>
+                    <option value="">{t("pricelist.select")}</option>
                     {availableProducts.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
                   </select>
                 </div>
                 <div style={{ flex: "1 1 100px" }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>Qté min.</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>{t("pricelist.min_qty")}</div>
                   <input type="number" min="1" value={newRow.minQty} onChange={e => setNewRow(p => ({ ...p, minQty: e.target.value }))} placeholder="0"
                     style={{ border: `1px solid ${T.border}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, fontFamily: "inherit", outline: "none", background: T.bgCard, width: "100%", boxSizing: "border-box" as const }} />
                 </div>
                 <div style={{ flex: "1 1 130px" }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>Prix négocié</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>{t("pricelist.negotiated_price")}</div>
                   <div style={{ display: "flex", gap: 6 }}>
                     <input type="number" min="0" value={newRow.price} onChange={e => setNewRow(p => ({ ...p, price: e.target.value }))} placeholder="0.00"
                       style={{ border: `1px solid ${T.border}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, fontFamily: "inherit", outline: "none", background: T.bgCard, flex: 1, boxSizing: "border-box" as const }} />
@@ -405,10 +407,10 @@ export default function PricelistBuilder({ onBack, onSave, prefill }: Props) {
                   </div>
                 </div>
                 <div style={{ flex: "2 1 160px" }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>Format</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", marginBottom: 4 }}>{t("pricelist.format")}</div>
                   <select value={newRow.format} onChange={e => setNewRow(p => ({ ...p, format: e.target.value as PricelistFormat }))}
                     style={{ border: `1px solid ${T.border}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, fontFamily: "inherit", outline: "none", background: T.bgCard, color: newRow.format ? T.text : T.textLight, width: "100%", cursor: "pointer" }}>
-                    <option value="">Sélectionner...</option>
+                    <option value="">{t("pricelist.select")}</option>
                     {(["Common Kit (1GAL, 2GAL, 3GAL)", "Large Kit (5GAL, 10GAL, 15GAL)", "BARREL KIT (55 GAL per Barrel)", "TOTE KIT (250 GAL per Tote)", "SPECIAL (see with HO for options)"] as PricelistFormat[]).map(f => <option key={f} value={f}>{f}</option>)}
                   </select>
                 </div>
@@ -417,7 +419,7 @@ export default function PricelistBuilder({ onBack, onSave, prefill }: Props) {
                   disabled={!rowValid}
                   style={{ background: rowValid ? T.main : "#e5e7eb", color: rowValid ? "#fff" : "#9ca3af", border: "none", borderRadius: 8, padding: "10px 18px", fontSize: 13, fontWeight: 700, cursor: rowValid ? "pointer" : "not-allowed", fontFamily: "inherit", whiteSpace: "nowrap", transition: "all 0.2s" }}
                 >
-                  + AJOUTER
+                  {t("pricelist.add_btn")}
                 </button>
               </div>
             </div>
@@ -426,14 +428,14 @@ export default function PricelistBuilder({ onBack, onSave, prefill }: Props) {
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                 <thead>
                   <tr style={{ background: "#f8f9fb" }}>
-                    {["", "Produit", "Qté min.", "Prix négocié", "Unité", "Format", "Sous-total", ""].map(h => (
-                      <th key={h} style={{ padding: "10px 12px", textAlign: ["Qté min.", "Prix négocié", "Sous-total"].includes(h) ? "right" : "left", fontWeight: 700, fontSize: 11, textTransform: "uppercase", letterSpacing: 0.3, color: T.textLight, borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap" }}>{h}</th>
+                    {["", t("pricelist.product"), t("pricelist.min_qty"), t("pricelist.negotiated_price"), t("pricelist.unit"), t("pricelist.format"), t("pricelist.subtotal"), ""].map(h => (
+                      <th key={h} style={{ padding: "10px 12px", textAlign: [t("pricelist.min_qty"), t("pricelist.negotiated_price"), t("pricelist.subtotal")].includes(h) ? "right" : "left", fontWeight: 700, fontSize: 11, textTransform: "uppercase", letterSpacing: 0.3, color: T.textLight, borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap" }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {lines.length === 0 ? (
-                    <tr><td colSpan={8} style={{ padding: "32px 16px", textAlign: "center", color: T.textLight, fontSize: 13 }}>Aucun produit ajouté</td></tr>
+                    <tr><td colSpan={8} style={{ padding: "32px 16px", textAlign: "center", color: T.textLight, fontSize: 13 }}>{t("pricelist.no_product_added")}</td></tr>
                   ) : lines.map((line, i) => (
                     <tr
                       key={line.id}
@@ -514,7 +516,7 @@ export default function PricelistBuilder({ onBack, onSave, prefill }: Props) {
                   cursor: lines.length > 0 ? "pointer" : "not-allowed", fontFamily: "inherit", letterSpacing: 0.3,
                 }}
               >
-                PRÉVISUALISER
+                {t("pricelist.preview")}
               </button>
               <button
                 onClick={async () => {
@@ -538,7 +540,7 @@ export default function PricelistBuilder({ onBack, onSave, prefill }: Props) {
                   cursor: lines.length === 0 || generating ? "not-allowed" : "pointer", fontFamily: "inherit", letterSpacing: 0.3,
                 }}
               >
-                {generating ? "Génération..." : "GÉNÉRER PDF"}
+                {generating ? t("pricelist.generating") : t("pricelist.generate_pdf")}
               </button>
             </div>
           </div>

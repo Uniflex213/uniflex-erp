@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Download, GitBranch, Clock, Thermometer, Globe } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { T, fmtNum, fmtPct, exportToCsv, exportToPdf } from './reportUtils';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export default function ReportCRMPipeline() {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [funnel, setFunnel] = useState<{ stage: string; count: number; value: number }[]>([]);
   const [conversions, setConversions] = useState<{ from: string; to: string; rate: number }[]>([]);
@@ -70,7 +72,7 @@ export default function ReportCRMPipeline() {
     else exportToPdf('Rapport CRM Pipeline', headers, rows);
   };
 
-  if (loading) return <div style={{ textAlign: 'center', padding: 40, color: T.textLight }}>Chargement...</div>;
+  if (loading) return <div style={{ textAlign: 'center', padding: 40, color: T.textLight }}>{t("common.loading", "Chargement...")}</div>;
 
   return (
     <div>
@@ -85,29 +87,29 @@ export default function ReportCRMPipeline() {
             <div style={{ background: `${T.main}12`, borderRadius: 8, padding: 8, color: T.main, display: 'flex' }}><GitBranch size={18} /></div>
           </div>
           <div style={{ fontSize: 28, fontWeight: 800, color: T.text }}>{fmtNum(totalLeads)}</div>
-          <div style={{ fontSize: 12, color: T.textLight }}>Total leads actifs</div>
+          <div style={{ fontSize: 12, color: T.textLight }}>{t("report_crm.total_active_leads", "Total leads actifs")}</div>
         </div>
         <div style={{ flex: '1 1 200px', background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: '18px 20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
             <div style={{ background: `${T.green}18`, borderRadius: 8, padding: 8, color: T.green, display: 'flex' }}><Globe size={18} /></div>
           </div>
           <div style={{ fontSize: 28, fontWeight: 800, color: T.text }}>{funnel.find(f => f.stage === 'Ferme Gagne')?.count || 0}</div>
-          <div style={{ fontSize: 12, color: T.textLight }}>Leads gagnes</div>
+          <div style={{ fontSize: 12, color: T.textLight }}>{t("report_crm.leads_won", "Leads gagnés")}</div>
         </div>
         <div style={{ flex: '1 1 200px', background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: '18px 20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
             <div style={{ background: `${T.red}18`, borderRadius: 8, padding: 8, color: T.red, display: 'flex' }}><Thermometer size={18} /></div>
           </div>
           <div style={{ fontSize: 28, fontWeight: 800, color: T.text }}>{tempDist.find(t => t.temp === 'Chaud')?.count || 0}</div>
-          <div style={{ fontSize: 12, color: T.textLight }}>Leads chauds</div>
+          <div style={{ fontSize: 12, color: T.textLight }}>{t("report_crm.hot_leads", "Leads chauds")}</div>
         </div>
       </div>
 
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 20 }}>
         <div style={{ flex: '2 1 450px', background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: 20 }}>
-          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>Entonnoir de conversion</div>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>{t("report_crm.conversion_funnel", "Entonnoir de conversion")}</div>
           {funnel.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 32, color: T.textLight, fontSize: 13 }}>Aucun lead</div>
+            <div style={{ textAlign: 'center', padding: 32, color: T.textLight, fontSize: 13 }}>{t("report_crm.no_leads", "Aucun lead")}</div>
           ) : (
             funnel.map((f, i) => {
               const barWidth = (f.count / maxFunnel) * 100;
@@ -132,7 +134,7 @@ export default function ReportCRMPipeline() {
 
         <div style={{ flex: '1 1 280px', display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: 20 }}>
-            <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>Temperature des leads</div>
+            <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>{t("report_crm.lead_temperature", "Température des leads")}</div>
             {tempDist.map((t, i) => (
               <div key={t.temp} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0', borderBottom: i < tempDist.length - 1 ? `1px solid ${T.border}` : 'none' }}>
                 <div style={{ width: 10, height: 10, borderRadius: '50%', background: t.color }} />
@@ -144,9 +146,9 @@ export default function ReportCRMPipeline() {
           </div>
 
           <div style={{ background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: 20 }}>
-            <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>Leads par source</div>
+            <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>{t("report_crm.leads_by_source", "Leads par source")}</div>
             {sourceDist.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: 16, color: T.textLight, fontSize: 13 }}>Aucune donnee</div>
+              <div style={{ textAlign: 'center', padding: 16, color: T.textLight, fontSize: 13 }}>{t("common.no_data", "Aucune donnée")}</div>
             ) : (
               sourceDist.slice(0, 6).map((s, i) => (
                 <div key={s.source} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: i < Math.min(sourceDist.length, 6) - 1 ? `1px solid ${T.border}` : 'none' }}>
@@ -159,7 +161,7 @@ export default function ReportCRMPipeline() {
 
           {conversions.length > 0 && (
             <div style={{ background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: 20 }}>
-              <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>Taux de conversion</div>
+              <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>{t("report_crm.conversion_rate", "Taux de conversion")}</div>
               {conversions.map((c, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: i < conversions.length - 1 ? `1px solid ${T.border}` : 'none' }}>
                   <span style={{ fontSize: 11, color: T.textLight, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.from} → {c.to}</span>

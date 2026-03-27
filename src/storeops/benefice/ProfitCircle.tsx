@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { T, fmt, fmtPct } from "./beneficeTypes";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   profit: number;
@@ -14,6 +15,7 @@ export default function ProfitCircle({ profit, revenue, cost, expenses, opacity,
   const [animatedProfit, setAnimatedProfit] = useState(0);
   const [dashOffset, setDashOffset] = useState(283);
   const animRef = useRef<number>(0);
+  const { t } = useLanguage();
 
   const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
   const fillPct = Math.min(Math.max(margin / 100, 0), 1);
@@ -28,11 +30,11 @@ export default function ProfitCircle({ profit, revenue, cost, expenses, opacity,
 
     const animate = (now: number) => {
       const elapsed = now - start;
-      const t = Math.min(elapsed / duration, 1);
-      const ease = 1 - Math.pow(1 - t, 3);
+      const p = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
       setAnimatedProfit(from + (to - from) * ease);
       setDashOffset(fromDash + (toDash - fromDash) * ease);
-      if (t < 1) animRef.current = requestAnimationFrame(animate);
+      if (p < 1) animRef.current = requestAnimationFrame(animate);
     };
 
     animRef.current = requestAnimationFrame(animate);
@@ -65,29 +67,29 @@ export default function ProfitCircle({ profit, revenue, cost, expenses, opacity,
         </svg>
 
         <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 6 }}>Benefice Net</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 6 }}>{t("benefice.net_profit")}</div>
           <div style={{ fontSize: 36, fontWeight: 900, color: circleColor, lineHeight: 1, letterSpacing: -1 }}>
             {fmt(animatedProfit)}
           </div>
           <div style={{ fontSize: 13, fontWeight: 700, color: circleColor, marginTop: 4 }}>
-            {fmtPct(margin)} marge
+            {fmtPct(margin)} {t("benefice.margin")}
           </div>
         </div>
       </div>
 
       <div style={{ display: "flex", gap: 24, marginTop: 24 }}>
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.8 }}>Revenus</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.8 }}>{t("benefice.revenue")}</div>
           <div style={{ fontSize: 16, fontWeight: 800, color: T.text, marginTop: 2 }}>{fmt(revenue)}</div>
         </div>
         <div style={{ width: 1, background: T.border }} />
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.8 }}>Couts</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.8 }}>{t("benefice.costs")}</div>
           <div style={{ fontSize: 16, fontWeight: 800, color: T.red, marginTop: 2 }}>{fmt(cost)}</div>
         </div>
         <div style={{ width: 1, background: T.border }} />
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.8 }}>Depenses</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", letterSpacing: 0.8 }}>{t("benefice.expenses")}</div>
           <div style={{ fontSize: 16, fontWeight: 800, color: T.orange, marginTop: 2 }}>{fmt(expenses)}</div>
         </div>
       </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "../supabaseClient";
 import { Message, UserProfile, getInitials, ROLE_COLORS, ROLE_LABELS } from "./messagingTypes";
 import { T } from "../theme";
+import { useLanguage } from "../i18n/LanguageContext";
 
 interface Props {
   conversationId: string;
@@ -28,16 +29,17 @@ function groupByDate(msgs: Message[]): { date: string; messages: Message[] }[] {
   return Object.entries(groups).map(([date, messages]) => ({ date, messages }));
 }
 
-function fmtDateHeader(dateStr: string): string {
+function fmtDateHeader(dateStr: string, todayLabel: string, yesterdayLabel: string): string {
   const d = new Date(dateStr);
   const now = new Date();
-  if (d.toDateString() === now.toDateString()) return "Aujourd'hui";
+  if (d.toDateString() === now.toDateString()) return todayLabel;
   const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
-  if (d.toDateString() === yesterday.toDateString()) return "Hier";
+  if (d.toDateString() === yesterday.toDateString()) return yesterdayLabel;
   return d.toLocaleDateString("fr-CA", { weekday: "long", month: "long", day: "numeric" });
 }
 
 export default function MessageThread({ conversationId, currentUser, otherUser, onMarkRead }: Props) {
+  const { t } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -135,20 +137,20 @@ export default function MessageThread({ conversationId, currentUser, otherUser, 
 
       <div style={{ flex: 1, overflowY: "auto", padding: "16px 14px", display: "flex", flexDirection: "column", gap: 2 }}>
         {loading ? (
-          <div style={{ margin: "auto", color: T.textMid, fontSize: 13 }}>Chargement...</div>
+          <div style={{ margin: "auto", color: T.textMid, fontSize: 13 }}>{t("loading_dots")}</div>
         ) : messages.length === 0 ? (
           <div style={{ margin: "auto", textAlign: "center", color: T.textMid, fontSize: 13 }}>
             <div style={{ marginBottom: 8, opacity: 0.5 }}>
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
             </div>
-            Commencez la conversation avec {otherUser.full_name.split(" ")[0]}
+            {t("msg.start_conversation")} {otherUser.full_name.split(" ")[0]}
           </div>
         ) : (
           groups.map(group => (
             <React.Fragment key={group.date}>
               <div style={{ textAlign: "center", margin: "12px 0 8px" }}>
                 <span style={{ fontSize: 11, color: T.textMid, background: "rgba(0,0,0,0.04)", padding: "3px 10px", borderRadius: 10 }}>
-                  {fmtDateHeader(group.date)}
+                  {fmtDateHeader(group.date, t("msg.today"), t("msg.yesterday"))}
                 </span>
               </div>
               {group.messages.map((msg, i) => {
@@ -219,7 +221,7 @@ export default function MessageThread({ conversationId, currentUser, otherUser, 
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </button>
         </div>
-        <div style={{ fontSize: 10, color: T.textMid, marginTop: 5 }}>Entrée pour envoyer · Maj+Entrée pour nouvelle ligne</div>
+        <div style={{ fontSize: 10, color: T.textMid, marginTop: 5 }}>{t("msg.enter_to_send")}</div>
       </div>
     </div>
   );

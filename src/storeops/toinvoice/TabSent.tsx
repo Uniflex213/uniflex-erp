@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { InvoiceDoc, T, fmt, fmtDate, daysSince, PICKUP_STATUS_CONFIG } from "./toInvoiceTypes";
 import EmailToolModal from "./EmailToolModal";
 import ConfirmBilledModal from "./ConfirmBilledModal";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   docs: InvoiceDoc[];
@@ -69,6 +70,7 @@ function SentTable({
   onFollowup: (d: InvoiceDoc) => void;
   onConfirm: (d: InvoiceDoc) => void;
 }) {
+  const { t } = useLanguage();
   const thStyle: React.CSSProperties = {
     textAlign: "left", fontSize: 10, fontWeight: 700, color: T.textMid,
     textTransform: "uppercase", letterSpacing: 0.6, padding: "8px 12px 10px",
@@ -118,13 +120,13 @@ function SentTable({
                         onClick={() => onFollowup(d)}
                         style={{ background: T.cardAlt, color: T.text, border: `1px solid ${T.border}`, borderRadius: 6, padding: "5px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}
                       >
-                        Relancer SCI
+                        {t("sent.followup_sci")}
                       </button>
                       <button
                         onClick={() => onConfirm(d)}
                         style={{ background: T.greenBg, color: T.green, border: "none", borderRadius: 6, padding: "5px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}
                       >
-                        Confirmer facturé
+                        {t("sent.confirm_billed")}
                       </button>
                     </div>
                   </td>
@@ -139,6 +141,7 @@ function SentTable({
 }
 
 export default function TabSent({ docs, onRefresh, onDocClick }: Props) {
+  const { t } = useLanguage();
   const [followupDoc, setFollowupDoc] = useState<InvoiceDoc | null>(null);
   const [confirmDoc, setConfirmDoc] = useState<InvoiceDoc | null>(null);
 
@@ -148,8 +151,8 @@ export default function TabSent({ docs, onRefresh, onDocClick }: Props) {
   if (docs.length === 0) {
     return (
       <div style={{ background: T.card, borderRadius: 12, border: `1px solid ${T.border}`, padding: 40, textAlign: "center" }}>
-        <div style={{ fontSize: 15, fontWeight: 700, color: T.textMid, marginBottom: 4 }}>Aucun document en attente</div>
-        <div style={{ fontSize: 13, color: T.textLight }}>Tous les documents envoyés ont été confirmés par SCI.</div>
+        <div style={{ fontSize: 15, fontWeight: 700, color: T.textMid, marginBottom: 4 }}>{t("sent.no_docs")}</div>
+        <div style={{ fontSize: 13, color: T.textLight }}>{t("sent.all_confirmed")}</div>
       </div>
     );
   }
@@ -159,13 +162,13 @@ export default function TabSent({ docs, onRefresh, onDocClick }: Props) {
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
         {orderDocs.length > 0 && (
           <div>
-            <SectionHeader label="Commandes" count={orderDocs.length} color={T.green} />
+            <SectionHeader label={t("sent.orders")} count={orderDocs.length} color={T.green} />
             <SentTable docs={orderDocs} showOrderStatus={true} onDocClick={onDocClick} onFollowup={setFollowupDoc} onConfirm={setConfirmDoc} />
           </div>
         )}
         {pickupDocs.length > 0 && (
           <div>
-            <SectionHeader label="Pickup Tickets" count={pickupDocs.length} color={T.blue} />
+            <SectionHeader label={t("sent.pickup_tickets")} count={pickupDocs.length} color={T.blue} />
             <SentTable docs={pickupDocs} showOrderStatus={false} showPickupStatus={true} onDocClick={onDocClick} onFollowup={setFollowupDoc} onConfirm={setConfirmDoc} />
           </div>
         )}

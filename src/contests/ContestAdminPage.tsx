@@ -6,11 +6,13 @@ import { Contest, CONTEST_STATUSES } from './contestTypes';
 import ContestCreateModal from './ContestCreateModal';
 import ContestDetailPanel from './ContestDetailPanel';
 import { T } from '../theme';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const fmt = (n: number) =>
   new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 
 export default function ContestAdminPage() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const [contests, setContests] = useState<Contest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,14 +104,14 @@ export default function ContestAdminPage() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
         <div>
-          <h2 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 800, color: T.text }}>Gestion des concours</h2>
-          <p style={{ margin: 0, color: T.textMid, fontSize: 14 }}>Creez et gerez les concours pour votre equipe de vente</p>
+          <h2 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 800, color: T.text }}>{t("contest_admin.title", "Gestion des concours")}</h2>
+          <p style={{ margin: 0, color: T.textMid, fontSize: 14 }}>{t("contest_admin.subtitle", "Créez et gérez les concours pour votre équipe de vente")}</p>
         </div>
         <button
           onClick={() => setShowCreate(true)}
           style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 20px', borderRadius: 8, border: 'none', background: T.main, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
         >
-          <Plus size={16} /> Nouveau concours
+          <Plus size={16} /> {t("contest_admin.new_contest", "Nouveau concours")}
         </button>
       </div>
 
@@ -117,21 +119,21 @@ export default function ContestAdminPage() {
         <div style={{ flex: '1 1 180px', background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: '18px 20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
             <div style={{ background: '#ffd70020', borderRadius: 8, padding: 6, display: 'flex' }}><Trophy size={16} color="#ffd700" /></div>
-            <span style={{ fontSize: 12, color: T.textLight }}>Concours actifs</span>
+            <span style={{ fontSize: 12, color: T.textLight }}>{t("contest_admin.active_contests", "Concours actifs")}</span>
           </div>
           <div style={{ fontSize: 28, fontWeight: 800, color: T.text }}>{activeCount}</div>
         </div>
         <div style={{ flex: '1 1 180px', background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: '18px 20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
             <div style={{ background: `${T.main}12`, borderRadius: 8, padding: 6, display: 'flex' }}><Users size={16} color={T.main} /></div>
-            <span style={{ fontSize: 12, color: T.textLight }}>Total participants</span>
+            <span style={{ fontSize: 12, color: T.textLight }}>{t("contest_admin.total_participants", "Total participants")}</span>
           </div>
           <div style={{ fontSize: 28, fontWeight: 800, color: T.text }}>{totalParticipants}</div>
         </div>
         <div style={{ flex: '1 1 180px', background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: '18px 20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
             <div style={{ background: `${T.green}18`, borderRadius: 8, padding: 6, display: 'flex' }}><Target size={16} color={T.green} /></div>
-            <span style={{ fontSize: 12, color: T.textLight }}>Prix en jeu</span>
+            <span style={{ fontSize: 12, color: T.textLight }}>{t("contest_admin.prizes_at_stake", "Prix en jeu")}</span>
           </div>
           <div style={{ fontSize: 28, fontWeight: 800, color: T.text }}>{fmt(totalPrizeValue)}</div>
         </div>
@@ -139,7 +141,7 @@ export default function ContestAdminPage() {
 
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
         <div style={{ display: 'flex', gap: 2, background: '#f3f4f6', borderRadius: 8, padding: 3 }}>
-          {[{ key: 'all', label: 'Tous' }, ...CONTEST_STATUSES].map(s => (
+          {[{ key: 'all', label: t("common.all", "Tous") }, ...CONTEST_STATUSES].map(s => (
             <button
               key={s.key}
               onClick={() => setFilter(s.key)}
@@ -160,19 +162,19 @@ export default function ContestAdminPage() {
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Rechercher..."
+            placeholder={t("common.search", "Rechercher...")}
             style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: 13, width: '100%', fontFamily: 'inherit' }}
           />
         </div>
       </div>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: 40, color: T.textLight }}>Chargement...</div>
+        <div style={{ textAlign: 'center', padding: 40, color: T.textLight }}>{t("common.loading", "Chargement...")}</div>
       ) : filtered.length === 0 ? (
         <div style={{ textAlign: 'center', padding: 60, color: T.textLight }}>
           <Trophy size={40} style={{ opacity: 0.3, marginBottom: 12 }} />
-          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Aucun concours</div>
-          <div style={{ fontSize: 13 }}>Creez votre premier concours pour motiver votre equipe</div>
+          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>{t("contest_admin.no_contests", "Aucun concours")}</div>
+          <div style={{ fontSize: 13 }}>{t("contest_admin.create_first", "Créez votre premier concours pour motiver votre équipe")}</div>
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 }}>
@@ -221,7 +223,7 @@ export default function ContestAdminPage() {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: T.textLight }}>
                     <Users size={12} />
-                    {pCount} participants
+                    {pCount} {t("contest_admin.participants", "participants")}
                   </div>
                 </div>
 
@@ -229,12 +231,12 @@ export default function ContestAdminPage() {
                   {c.prize_description ? (
                     <div style={{ fontSize: 13, fontWeight: 700, color: T.main }}>{c.prize_description}</div>
                   ) : (
-                    <div style={{ fontSize: 12, color: T.textLight }}>Aucun prix defini</div>
+                    <div style={{ fontSize: 12, color: T.textLight }}>{t("contest_admin.no_prize_defined", "Aucun prix défini")}</div>
                   )}
                   {isActive && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, color: '#d97706' }}>
                       <Clock size={12} />
-                      {daysLeft}j restants
+                      {daysLeft}{t("contest_admin.days_left", "j restants")}
                     </div>
                   )}
                 </div>

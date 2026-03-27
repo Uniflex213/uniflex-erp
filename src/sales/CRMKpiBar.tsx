@@ -13,6 +13,7 @@ import {
   RemindersRetardModal,
   KpiModalType,
 } from "./CRMKpiModals";
+import { useLanguage } from "../i18n/LanguageContext";
 import { T } from "../theme";
 const fmt = (n: number) => new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 
@@ -95,6 +96,7 @@ function KpiCard({
 }
 
 export default function CRMKpiBar({ leads, samples = [], onSelectLead }: Props) {
+  const { t } = useLanguage();
   const [activeModal, setActiveModal] = useState<KpiModalType | "samples" | null>(null);
 
   const activeLeads = leads.filter(l => l.stage !== "Fermé Gagné" && l.stage !== "Fermé Perdu" && !l.archived);
@@ -149,74 +151,73 @@ export default function CRMKpiBar({ leads, samples = [], onSelectLead }: Props) 
       <div style={{ overflowX: "auto", paddingBottom: 2 }}>
         <div style={{ display: "flex", gap: 12, minWidth: "max-content" }}>
           <KpiCard
-            label="Leads actifs"
+            label={t("crm.leads_active", "Leads actifs")}
             value={activeLeads.length.toString()}
-            sub={`${leads.filter(l => l.stage !== "Fermé Gagné" && l.stage !== "Fermé Perdu").length} dans le pipeline`}
+            sub={`${leads.filter(l => l.stage !== "Fermé Gagné" && l.stage !== "Fermé Perdu").length} ${t("crm.in_pipeline", "dans le pipeline")}`}
             color={T.main}
             icon="◎"
             onClick={() => setActiveModal("leads_actifs")}
           />
           <KpiCard
-            label="Valeur du pipeline"
+            label={t("crm.pipeline_value", "Valeur du pipeline")}
             value={fmt(pipelineValue)}
-            sub={`${activeLeads.length} opportunités actives`}
+            sub={`${activeLeads.length} ${t("crm.opportunities_active", "opportunités actives")}`}
             color={T.main}
             icon="💼"
             onClick={() => setActiveModal("valeur_pipeline")}
           />
           <KpiCard
-            label="Pipeline pondéré"
+            label={t("crm.pipeline_pondere", "Pipeline pondéré")}
             value={fmt(weightedPipeline)}
-            sub="Revenu probable"
+            sub={t("crm.probable_revenue", "Revenu probable")}
             color="#0891b2"
             icon="⚖️"
             tooltip
             tooltipContent={
               <>
-                <strong>Pipeline pondéré</strong><br />
-                Σ (Valeur estimée × Probabilité %)<br />
-                pour chaque lead actif<br />
-                <span style={{ color: "#aaa" }}>Représente le revenu "probable"</span>
+                <strong>{t("crm.pipeline_pondere", "Pipeline pondéré")}</strong><br />
+                {t("crm.weighted_pipeline_formula", "Σ (Valeur estimée × Probabilité %)")}<br />
+                {t("crm.probable_revenue", "Revenu probable")}
               </>
             }
             onClick={() => setActiveModal("pipeline_pondere")}
           />
           <KpiCard
-            label="Leads Hot 🔥"
+            label={`${t("crm.hot_leads", "Leads Hot")} 🔥`}
             value={hotLeads.toString()}
-            sub={`sur ${activeLeads.length} leads actifs`}
+            sub={`sur ${activeLeads.length} ${t("crm.leads_active", "leads actifs")}`}
             color={T.red}
             icon="🔥"
             onClick={() => setActiveModal("leads_hot")}
           />
           <KpiCard
-            label="Taux de conversion"
+            label={t("crm.conversion_rate", "Taux de conversion")}
             value={`${convRate.toFixed(1)}%`}
-            sub={`${wonLeads} gagnés / ${totalLeads} total`}
+            sub={`${wonLeads} ${t("crm.won_total", "gagnés")} / ${totalLeads} total`}
             color={convColor}
             icon="🎯"
             onClick={() => setActiveModal("taux_conversion")}
           />
           <KpiCard
-            label="Temps moyen closing"
+            label={t("crm.temps_closing_avg", "Temps moyen closing")}
             value={avgClosingDays > 0 ? `${avgClosingDays}j` : "—"}
-            sub="6 derniers mois"
+            sub={t("crm.last_6_months", "6 derniers mois")}
             color={T.textMid}
             icon="⏱️"
             onClick={() => setActiveModal("temps_closing")}
           />
           <KpiCard
-            label="Deals fermés ce mois"
+            label={t("crm.deals_closed_month", "Deals fermés ce mois")}
             value={dealsThisMonth.length.toString()}
-            sub={dealsThisMonth.length > 0 ? fmt(dealsThisMonthValue) : "Aucun encore"}
+            sub={dealsThisMonth.length > 0 ? fmt(dealsThisMonthValue) : t("crm.none_yet", "Aucun encore")}
             color={T.green}
             icon="✅"
             onClick={() => setActiveModal("deals_fermes")}
           />
           <KpiCard
-            label="Reminders en retard"
+            label={t("crm.reminders_overdue", "Reminders en retard")}
             value={overdueReminders.toString()}
-            sub={overdueReminders > 0 ? "Action requise!" : "Tout est à jour"}
+            sub={overdueReminders > 0 ? t("crm.action_required", "Action requise!") : t("crm.all_up_to_date", "Tout est à jour")}
             color={overdueReminders > 0 ? T.red : T.green}
             icon="🔔"
             pulse={overdueReminders > 0}
@@ -271,6 +272,7 @@ export default function CRMKpiBar({ leads, samples = [], onSelectLead }: Props) 
 function SamplesKpiCard({ activeSamples, samplesEnAttente, samplesEnvoyes, samplesFollowUpRequired, onClick }: {
   activeSamples: number; samplesEnAttente: number; samplesEnvoyes: number; samplesFollowUpRequired: number; onClick: () => void;
 }) {
+  const { t } = useLanguage();
   const [hovered, setHovered] = useState(false);
   return (
     <div
@@ -306,16 +308,16 @@ function SamplesKpiCard({ activeSamples, samplesEnAttente, samplesEnvoyes, sampl
         <span style={{ position: "absolute", top: 8, right: 10, fontSize: 12, color: T.gold, opacity: 0.7, fontWeight: 700 }}>→</span>
       )}
       <div style={{ fontSize: 10, fontWeight: 600, color: T.gold, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>
-        📦 Samples en circulation
+        📦 {t("crm.samples_circulation", "Samples en circulation")}
       </div>
       <div style={{ fontSize: 22, fontWeight: 800, color: T.gold, lineHeight: 1.1, marginBottom: 4 }}>
         {activeSamples}
       </div>
       <div style={{ fontSize: 11 }}>
-        <span style={{ color: "#8e8e93" }}>{samplesEnAttente} attente</span>
-        <span style={{ color: "#8e8e93" }}> · {samplesEnvoyes} envoyés</span>
+        <span style={{ color: "#8e8e93" }}>{samplesEnAttente} {t("crm.waiting_label", "attente")}</span>
+        <span style={{ color: "#8e8e93" }}> · {samplesEnvoyes} {t("crm.sent_label", "envoyés")}</span>
         {samplesFollowUpRequired > 0 && (
-          <span style={{ color: "#ef4444", fontWeight: 700, animation: "pulse 1.5s infinite" }}> · {samplesFollowUpRequired} FU requis</span>
+          <span style={{ color: "#ef4444", fontWeight: 700, animation: "pulse 1.5s infinite" }}> · {samplesFollowUpRequired} FU {t("crm.required_label", "requis")}</span>
         )}
       </div>
     </div>

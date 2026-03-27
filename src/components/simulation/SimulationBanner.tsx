@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSimulation } from '../../contexts/SimulationContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 const ROLE_LABELS: Record<string, string> = {
   god_admin: 'God Admin', admin: 'Admin', vendeur: 'Vendeur',
@@ -10,6 +11,7 @@ const ROLE_LABELS: Record<string, string> = {
 export default function SimulationBanner() {
   const { isSimulating, simulatedProfile, stopSimulation } = useSimulation();
   const { realProfile } = useAuth();
+  const { t } = useLanguage();
 
   if (!isSimulating || !simulatedProfile) return null;
 
@@ -28,13 +30,13 @@ export default function SimulationBanner() {
           borderRadius: 6, fontSize: 11, fontWeight: 800, letterSpacing: 1,
           textTransform: 'uppercase',
         }}>
-          MODE SIMULATION
+          {t("simulation.mode")}
         </span>
         <span>
-          Vous simulez le compte de{' '}
+          {t("simulation.simulating_account")}{' '}
           <strong>{simulatedProfile.full_name}</strong>
           {' '}({ROLE_LABELS[simulatedProfile.role] ?? simulatedProfile.role})
-          {' '}— connecté en tant que{' '}
+          {' '}&mdash; {t("simulation.logged_in_as")}{' '}
           <strong>{realProfile?.full_name}</strong>
         </span>
       </div>
@@ -49,7 +51,7 @@ export default function SimulationBanner() {
         onMouseOver={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.4)')}
         onMouseOut={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.25)')}
       >
-        Arreter la simulation
+        {t("simulation.stop")}
       </button>
     </div>
   );

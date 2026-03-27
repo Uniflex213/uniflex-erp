@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Plus, Trash2, Trophy } from 'lucide-react';
 import { SCORING_RULES } from './contestTypes';
 import { T } from '../theme';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface PrizeTier {
   rank_from: number;
@@ -26,6 +27,7 @@ interface Props {
 }
 
 export default function ContestCreateModal({ onClose, onSave }: Props) {
+  const { t } = useLanguage();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [prizeDescription, setPrizeDescription] = useState('');
@@ -54,9 +56,9 @@ export default function ContestCreateModal({ onClose, onSave }: Props) {
   };
 
   const handleSave = async () => {
-    if (!title.trim()) { setError('Le titre est requis'); return; }
-    if (!startDate || !endDate) { setError('Les dates sont requises'); return; }
-    if (new Date(endDate) <= new Date(startDate)) { setError('La date de fin doit etre apres la date de debut'); return; }
+    if (!title.trim()) { setError(t("contest_create.error_title_required", "Le titre est requis")); return; }
+    if (!startDate || !endDate) { setError(t("contest_create.error_dates_required", "Les dates sont requises")); return; }
+    if (new Date(endDate) <= new Date(startDate)) { setError(t("contest_create.error_end_after_start", "La date de fin doit être après la date de début")); return; }
 
     setSaving(true);
     setError('');
@@ -73,7 +75,7 @@ export default function ContestCreateModal({ onClose, onSave }: Props) {
         prizes: prizes.filter(p => p.prize_description.trim()),
       });
     } catch {
-      setError('Erreur lors de la creation');
+      setError(t("contest_create.error_creation", "Erreur lors de la création"));
     } finally {
       setSaving(false);
     }
@@ -107,8 +109,8 @@ export default function ContestCreateModal({ onClose, onSave }: Props) {
               <Trophy size={18} color="#000" />
             </div>
             <div>
-              <div style={{ fontWeight: 800, fontSize: 16, color: T.text }}>Nouveau concours</div>
-              <div style={{ fontSize: 12, color: T.textLight }}>Configurez les details du concours</div>
+              <div style={{ fontWeight: 800, fontSize: 16, color: T.text }}>{t("contest_create.title", "Nouveau concours")}</div>
+              <div style={{ fontSize: 12, color: T.textLight }}>{t("contest_create.subtitle", "Configurez les détails du concours")}</div>
             </div>
           </div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: T.textMid }}>
@@ -118,55 +120,55 @@ export default function ContestCreateModal({ onClose, onSave }: Props) {
 
         <div style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
           <div style={{ marginBottom: 16 }}>
-            <label style={labelStyle}>Titre *</label>
+            <label style={labelStyle}>{t("contest_create.field_title", "Titre")} *</label>
             <input style={inputStyle} value={title} onChange={e => setTitle(e.target.value)} placeholder="ex: Concours Q1 2026 - Top Seller" />
           </div>
 
           <div style={{ marginBottom: 16 }}>
-            <label style={labelStyle}>Description</label>
-            <textarea style={{ ...inputStyle, minHeight: 80, resize: 'vertical' }} value={description} onChange={e => setDescription(e.target.value)} placeholder="Regles et details du concours..." />
+            <label style={labelStyle}>{t("contest_create.field_description", "Description")}</label>
+            <textarea style={{ ...inputStyle, minHeight: 80, resize: 'vertical' }} value={description} onChange={e => setDescription(e.target.value)} placeholder={t("contest_create.description_placeholder", "Règles et détails du concours...")} />
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
             <div>
-              <label style={labelStyle}>Date de debut *</label>
+              <label style={labelStyle}>{t("contest_create.start_date", "Date de début")} *</label>
               <input type="date" style={inputStyle} value={startDate} onChange={e => setStartDate(e.target.value)} />
             </div>
             <div>
-              <label style={labelStyle}>Date de fin *</label>
+              <label style={labelStyle}>{t("contest_create.end_date", "Date de fin")} *</label>
               <input type="date" style={inputStyle} value={endDate} onChange={e => setEndDate(e.target.value)} />
             </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
             <div>
-              <label style={labelStyle}>Regle de pointage</label>
+              <label style={labelStyle}>{t("contest_create.scoring_rule", "Règle de pointage")}</label>
               <select style={inputStyle} value={scoringRule} onChange={e => setScoringRule(e.target.value)}>
                 {SCORING_RULES.map(r => <option key={r.key} value={r.key}>{r.label}</option>)}
               </select>
             </div>
             <div>
-              <label style={labelStyle}>Participants minimum</label>
+              <label style={labelStyle}>{t("contest_create.min_participants", "Participants minimum")}</label>
               <input type="number" style={inputStyle} value={minParticipants} onChange={e => setMinParticipants(Number(e.target.value))} min={0} />
             </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
             <div>
-              <label style={labelStyle}>Prix principal (description)</label>
+              <label style={labelStyle}>{t("contest_create.main_prize", "Prix principal (description)")}</label>
               <input style={inputStyle} value={prizeDescription} onChange={e => setPrizeDescription(e.target.value)} placeholder="ex: 5 000 $ bonus" />
             </div>
             <div>
-              <label style={labelStyle}>Valeur du prix ($)</label>
+              <label style={labelStyle}>{t("contest_create.prize_value", "Valeur du prix ($)")}</label>
               <input type="number" style={inputStyle} value={prizeValue} onChange={e => setPrizeValue(Number(e.target.value))} min={0} />
             </div>
           </div>
 
           <div style={{ marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <label style={{ ...labelStyle, marginBottom: 0 }}>Niveaux de prix</label>
+              <label style={{ ...labelStyle, marginBottom: 0 }}>{t("contest_create.prize_tiers", "Niveaux de prix")}</label>
               <button onClick={addPrize} style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: `1px solid ${T.main}`, color: T.main, borderRadius: 6, padding: '4px 10px', fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
-                <Plus size={12} /> Ajouter
+                <Plus size={12} /> {t("contest_create.add", "Ajouter")}
               </button>
             </div>
 
@@ -188,10 +190,10 @@ export default function ContestCreateModal({ onClose, onSave }: Props) {
 
         <div style={{ display: 'flex', gap: 12, padding: '16px 24px', borderTop: `1px solid ${T.border}`, justifyContent: 'flex-end' }}>
           <button onClick={onClose} style={{ padding: '10px 20px', borderRadius: 8, border: `1px solid ${T.border}`, background: '#fff', color: T.textMid, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
-            Annuler
+            {t("common.cancel", "Annuler")}
           </button>
           <button onClick={handleSave} disabled={saving} style={{ padding: '10px 24px', borderRadius: 8, border: 'none', background: T.main, color: '#fff', fontSize: 13, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', fontFamily: 'inherit', opacity: saving ? 0.6 : 1 }}>
-            {saving ? 'Creation...' : 'Creer le concours'}
+            {saving ? t("common.creating", "Création...") : t("contest_create.create_contest", "Créer le concours")}
           </button>
         </div>
       </div>

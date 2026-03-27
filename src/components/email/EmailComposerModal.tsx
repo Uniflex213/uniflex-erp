@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { useEmailSender } from "../../hooks/useEmailSender";
 import { supabase } from "../../supabaseClient";
 import { T } from "../../theme";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Attachment {
   filename: string;
@@ -72,6 +73,7 @@ export default function EmailComposerModal({
   attachmentLabel, onGetAttachment, onSent,
 }: Props) {
   const { sendEmail, sending } = useEmailSender();
+  const { t } = useLanguage();
 
   const [toChips, setToChips] = useState<string[]>(() => defaultTo ? [defaultTo] : []);
   const [showCc, setShowCc] = useState(!!defaultCc);
@@ -122,7 +124,7 @@ export default function EmailComposerModal({
   };
 
   const handleSend = async () => {
-    if (toChips.length === 0) { setSendError("Veuillez ajouter au moins un destinataire."); return; }
+    if (toChips.length === 0) { setSendError(t("emailcomp.add_recipient")); return; }
     setSendError(null);
 
     let attachments: { filename: string; base64Content: string; mimeType: string }[] = [];
@@ -147,7 +149,7 @@ export default function EmailComposerModal({
       onSent?.();
       setTimeout(() => onClose(), 1800);
     } else {
-      setSendError(result.error ?? "Erreur lors de l'envoi.");
+      setSendError(result.error ?? t("emailcomp.send_error"));
     }
   };
 
@@ -165,7 +167,7 @@ export default function EmailComposerModal({
             <div style={{ width: 34, height: 34, borderRadius: 9, background: "#e8f0fe", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={T.main} strokeWidth="2.5"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,4 12,13 2,4"/></svg>
             </div>
-            <h2 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: T.text }}>Envoyer par email</h2>
+            <h2 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: T.text }}>{t("emailcomp.send_by_email")}</h2>
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: T.textLight, display: "flex", padding: 4 }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -177,8 +179,8 @@ export default function EmailComposerModal({
             <div style={{ width: 60, height: 60, borderRadius: "50%", background: T.greenBg, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={T.green} strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
-            <div style={{ fontSize: 17, fontWeight: 800, color: T.green, marginBottom: 5 }}>Email envoyé !</div>
-            <div style={{ fontSize: 13, color: T.textMid }}>Votre message a été transmis avec succès.</div>
+            <div style={{ fontSize: 17, fontWeight: 800, color: T.green, marginBottom: 5 }}>{t("emailcomp.email_sent")}</div>
+            <div style={{ fontSize: 13, color: T.textMid }}>{t("emailcomp.sent_success")}</div>
           </div>
         ) : (
           <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 14 }}>
@@ -188,30 +190,30 @@ export default function EmailComposerModal({
               </div>
             )}
 
-            <ChipInput label="À" chips={toChips} onAdd={v => setToChips(p => [...p, v])} onRemove={i => setToChips(p => p.filter((_, j) => j !== i))} />
+            <ChipInput label={t("emailcomp.to_label")} chips={toChips} onAdd={v => setToChips(p => [...p, v])} onRemove={i => setToChips(p => p.filter((_, j) => j !== i))} />
 
             {showCc ? (
-              <ChipInput label="CC" chips={ccChips} onAdd={v => setCcChips(p => [...p, v])} onRemove={i => setCcChips(p => p.filter((_, j) => j !== i))} placeholder="Ajouter en copie..." />
+              <ChipInput label={t("emailcomp.cc_label")} chips={ccChips} onAdd={v => setCcChips(p => [...p, v])} onRemove={i => setCcChips(p => p.filter((_, j) => j !== i))} placeholder={t("emailcomp.cc_placeholder")} />
             ) : (
               <button onClick={() => setShowCc(true)} style={{ alignSelf: "flex-start", background: "none", border: "none", cursor: "pointer", fontSize: 12, color: T.main, fontWeight: 700, fontFamily: "inherit", padding: 0, display: "flex", alignItems: "center", gap: 4 }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Ajouter CC
+                {t("emailcomp.add_cc")}
               </button>
             )}
 
             <div>
-              <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, letterSpacing: 0.6, textTransform: "uppercase", display: "block", marginBottom: 5 }}>Objet</label>
+              <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, letterSpacing: 0.6, textTransform: "uppercase", display: "block", marginBottom: 5 }}>{t("emailcomp.subject_label")}</label>
               <input value={subject} onChange={e => setSubject(e.target.value)} style={inputStyle} />
             </div>
 
             <div>
-              <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, letterSpacing: 0.6, textTransform: "uppercase", display: "block", marginBottom: 5 }}>Message</label>
+              <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, letterSpacing: 0.6, textTransform: "uppercase", display: "block", marginBottom: 5 }}>{t("emailcomp.message_label")}</label>
               <textarea value={body} onChange={e => setBody(e.target.value)} rows={8} style={{ ...inputStyle, resize: "vertical", lineHeight: 1.6 }} />
             </div>
 
             {attachmentLabel && (
               <div>
-                <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, letterSpacing: 0.6, textTransform: "uppercase", display: "block", marginBottom: 5 }}>Pièce jointe</label>
+                <label style={{ fontSize: 11, fontWeight: 700, color: T.textMid, letterSpacing: 0.6, textTransform: "uppercase", display: "block", marginBottom: 5 }}>{t("emailcomp.attachment_label")}</label>
                 {attachmentIncluded ? (
                   <div style={{ display: "inline-flex", alignItems: "center", gap: 7, background: T.cardAlt, border: `1px solid ${T.border}`, borderRadius: 7, padding: "6px 12px", fontSize: 12, fontWeight: 600, color: T.text }}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={T.main} strokeWidth="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
@@ -221,19 +223,19 @@ export default function EmailComposerModal({
                     </button>
                   </div>
                 ) : (
-                  <span style={{ fontSize: 12, color: T.textLight, fontStyle: "italic" }}>Pièce jointe retirée</span>
+                  <span style={{ fontSize: 12, color: T.textLight, fontStyle: "italic" }}>{t("emailcomp.attachment_removed")}</span>
                 )}
               </div>
             )}
 
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, paddingTop: 6, borderTop: `1px solid ${T.border}`, marginTop: 4 }}>
               <button onClick={onClose} style={{ background: "none", border: `1px solid ${T.border}`, borderRadius: 8, padding: "10px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer", color: T.textMid, fontFamily: "inherit" }}>
-                Annuler
+                {t("emailcomp.cancel")}
               </button>
               <button onClick={handleSend} disabled={sending} style={{ background: T.main, color: "#fff", border: "none", borderRadius: 8, padding: "10px 22px", fontSize: 13, fontWeight: 700, cursor: sending ? "not-allowed" : "pointer", fontFamily: "inherit", opacity: sending ? 0.7 : 1, display: "flex", alignItems: "center", gap: 8 }}>
                 {sending && <span style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", borderRadius: "50%", display: "inline-block", animation: "email-spin 0.7s linear infinite" }} />}
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                {sending ? "Envoi..." : "Envoyer"}
+                {sending ? t("emailcomp.sending") : t("emailcomp.send")}
               </button>
             </div>
           </div>

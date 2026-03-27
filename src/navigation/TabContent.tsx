@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import { TabItem, useApp } from "../AppContext";
 import ErrorBoundary from "../components/ErrorBoundary";
+import { useLanguage } from "../i18n/LanguageContext";
 
 type Props = {
   tabs: TabItem[];
@@ -12,6 +13,7 @@ type Props = {
 
 export default function TabContent({ tabs, activeTabIndex, renderPage, isMobile, onClickOutside }: Props) {
   const { saveScrollPosition } = useApp();
+  const { t } = useLanguage();
   const containerRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const scrollRestoredRef = useRef<Set<string>>(new Set());
 
@@ -64,7 +66,7 @@ export default function TabContent({ tabs, activeTabIndex, renderPage, isMobile,
             }}
           >
             <div style={{ maxWidth: isMobile ? "100%" : 1400, margin: "0 auto" }}>
-              <ErrorBoundary fallbackLabel={`Erreur dans l'onglet "${tab.label}"`}>
+              <ErrorBoundary fallbackLabel={`${t("nav.tab_error")} "${tab.label}"`}>
                 {renderPage(tab.pageKey, tab.id)}
               </ErrorBoundary>
             </div>

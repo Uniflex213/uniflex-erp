@@ -1,5 +1,6 @@
 import React from "react";
 import { BilledDoc, T, fmt, fmtDate, fmtPct, EXPENSE_TYPES } from "./beneficeTypes";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   doc: BilledDoc;
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export default function ProfitDetailModal({ doc, onClose }: Props) {
+  const { t } = useLanguage();
   const labelStyle: React.CSSProperties = {
     fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase",
     letterSpacing: 0.8, marginBottom: 4,
@@ -28,10 +30,10 @@ export default function ProfitDetailModal({ doc, onClose }: Props) {
           <div>
             <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 4 }}>
               <span style={{ background: isPickup ? T.blueBg : T.greenBg, color: isPickup ? T.blue : T.green, padding: "2px 8px", borderRadius: 5, fontSize: 10, fontWeight: 700 }}>
-                {isPickup ? "Pickup" : "Commande"}
+                {isPickup ? t("benefice.pickup") : t("benefice.order")}
               </span>
               <span style={{ background: profitColor === T.green ? T.greenBg : T.redBg, color: profitColor, padding: "2px 8px", borderRadius: 5, fontSize: 10, fontWeight: 700 }}>
-                {doc.profit >= 0 ? "Profitable" : "Perte"}
+                {doc.profit >= 0 ? t("benefice.profitable") : t("benefice.loss")}
               </span>
             </div>
             <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: T.text }}>{doc.document_number}</h2>
@@ -43,32 +45,32 @@ export default function ProfitDetailModal({ doc, onClose }: Props) {
         <div style={{ padding: "16px 24px" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12, marginBottom: 20 }}>
             <div>
-              <div style={labelStyle}>Vente</div>
+              <div style={labelStyle}>{t("benefice.sale")}</div>
               <div style={{ fontSize: 18, fontWeight: 800, color: T.text }}>{fmt(doc.selling_price)}</div>
             </div>
             <div>
-              <div style={labelStyle}>Cout</div>
+              <div style={labelStyle}>{t("benefice.cost")}</div>
               <div style={{ fontSize: 18, fontWeight: 800, color: T.red }}>{fmt(doc.cost_total)}</div>
             </div>
             <div>
-              <div style={labelStyle}>Depenses</div>
+              <div style={labelStyle}>{t("benefice.expenses")}</div>
               <div style={{ fontSize: 18, fontWeight: 800, color: T.orange }}>{fmt(doc.expenses_total)}</div>
             </div>
             <div>
-              <div style={labelStyle}>Benefice</div>
+              <div style={labelStyle}>{t("benefice.profit")}</div>
               <div style={{ fontSize: 18, fontWeight: 800, color: profitColor }}>{fmt(doc.profit)}</div>
-              <div style={{ fontSize: 11, color: profitColor, fontWeight: 600 }}>{fmtPct(doc.margin_pct)} marge</div>
+              <div style={{ fontSize: 11, color: profitColor, fontWeight: 600 }}>{fmtPct(doc.margin_pct)} {t("benefice.margin")}</div>
             </div>
           </div>
 
           {doc.items.length > 0 && (
             <div style={{ marginBottom: 18 }}>
-              <div style={labelStyle}>Articles</div>
+              <div style={labelStyle}>{t("benefice.articles")}</div>
               <div style={{ background: T.cardAlt, borderRadius: 10, border: `1px solid ${T.border}`, overflow: "hidden" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
                   <thead>
                     <tr>
-                      {["Produit", "Qte", "Prix unit.", "Cout unit.", "Sous-total", "Benefice"].map(h => (
+                      {[t("benefice.product"), t("benefice.qty"), t("benefice.unit_price"), t("benefice.cost_unit"), t("benefice.subtotal"), t("benefice.profit")].map(h => (
                         <th key={h} style={{ padding: "8px 10px", textAlign: "left", fontSize: 10, fontWeight: 700, color: T.textMid, textTransform: "uppercase", borderBottom: `1px solid ${T.border}` }}>{h}</th>
                       ))}
                     </tr>
@@ -92,7 +94,7 @@ export default function ProfitDetailModal({ doc, onClose }: Props) {
 
           {doc.expenses.length > 0 && (
             <div style={{ marginBottom: 18 }}>
-              <div style={labelStyle}>Depenses deduites</div>
+              <div style={labelStyle}>{t("benefice.deducted_expenses")}</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {doc.expenses.map(exp => {
                   const cfg = EXPENSE_TYPES[exp.expense_type] || EXPENSE_TYPES.other;
@@ -113,22 +115,22 @@ export default function ProfitDetailModal({ doc, onClose }: Props) {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             {doc.sci_invoice_number && (
               <div>
-                <div style={labelStyle}># Facture SCI</div>
+                <div style={labelStyle}>{t("benefice.sci_invoice")}</div>
                 <div style={{ fontSize: 13, color: T.text }}>{doc.sci_invoice_number}</div>
               </div>
             )}
             {doc.sci_billed_amount > 0 && (
               <div>
-                <div style={labelStyle}>Montant facture SCI</div>
+                <div style={labelStyle}>{t("benefice.sci_amount")}</div>
                 <div style={{ fontSize: 13, color: T.text }}>{fmt(doc.sci_billed_amount)}</div>
               </div>
             )}
             <div>
-              <div style={labelStyle}>Statut paiement</div>
+              <div style={labelStyle}>{t("benefice.payment_status")}</div>
               <div style={{ fontSize: 13, color: T.text }}>{doc.payment_status}</div>
             </div>
             <div>
-              <div style={labelStyle}>Montant paye</div>
+              <div style={labelStyle}>{t("benefice.paid_amount")}</div>
               <div style={{ fontSize: 13, color: T.text }}>{fmt(doc.paid_amount)}</div>
             </div>
           </div>
@@ -136,7 +138,7 @@ export default function ProfitDetailModal({ doc, onClose }: Props) {
 
         <div style={{ padding: "14px 24px", borderTop: `1px solid ${T.border}`, display: "flex", justifyContent: "flex-end" }}>
           <button onClick={onClose} style={{ background: T.cardAlt, color: T.text, border: `1px solid ${T.border}`, borderRadius: 8, padding: "9px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
-            Fermer
+            {t("benefice.close")}
           </button>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { CRMLead } from "../crmTypes";
 import { T } from "./workstationTypes";
 import { useCurrentAgent } from "../../hooks/useCurrentAgent";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   leads: CRMLead[];
@@ -14,6 +15,7 @@ const PRIORITY_COLORS: Record<string, string> = {
 };
 
 export default function WidgetCalendar({ leads }: Props) {
+  const { t, lang } = useLanguage();
   const agent = useCurrentAgent();
   const now = new Date();
   const todayStr = now.toDateString();
@@ -30,7 +32,7 @@ export default function WidgetCalendar({ leads }: Props) {
     (l.reminders || []).filter(r => !r.completed && new Date(r.reminder_at) < now)
   ).length;
 
-  const dateLabel = now.toLocaleDateString("fr-CA", { weekday: "long", month: "long", day: "numeric" });
+  const dateLabel = now.toLocaleDateString(lang === "en" ? "en-CA" : "fr-CA", { weekday: "long", month: "long", day: "numeric" });
 
   return (
     <div style={{
@@ -40,24 +42,24 @@ export default function WidgetCalendar({ leads }: Props) {
     }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
         <div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: T.main, textTransform: "uppercase", letterSpacing: 0.5 }}>📅 Mon calendrier du jour</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: T.main, textTransform: "uppercase", letterSpacing: 0.5 }}>📅 {t("ws.cal.title", "Mon calendrier du jour")}</div>
           <div style={{ fontSize: 11, color: T.textLight, marginTop: 2, textTransform: "capitalize" }}>{dateLabel}</div>
         </div>
         <div style={{ textAlign: "right" }}>
           <div style={{ fontSize: 22, fontWeight: 900, color: T.main }}>{todayEvents.length}</div>
-          <div style={{ fontSize: 10, color: T.textLight }}>événement{todayEvents.length !== 1 ? "s" : ""}</div>
+          <div style={{ fontSize: 10, color: T.textLight }}>{t("ws.cal.events", "événement(s)")}</div>
         </div>
       </div>
 
       {overdueCount > 0 && (
         <div style={{ background: "rgba(239,68,68,0.07)", borderRadius: 8, padding: "6px 10px", marginBottom: 10, fontSize: 12, color: T.red, fontWeight: 600 }}>
-          ⚠️ {overdueCount} reminder{overdueCount !== 1 ? "s" : ""} en retard
+          ⚠️ {overdueCount} {t("ws.cal.overdue", "reminder(s) en retard")}
         </div>
       )}
 
       {todayEvents.length === 0 ? (
         <div style={{ fontSize: 12, color: T.textLight, textAlign: "center", padding: "16px 0", background: T.cardAlt, borderRadius: 8 }}>
-          🎉 Journée libre — aucun événement aujourd'hui
+          🎉 {t("ws.cal.free_day", "Journée libre — aucun événement aujourd'hui")}
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -84,7 +86,7 @@ export default function WidgetCalendar({ leads }: Props) {
             );
           })}
           {todayEvents.length > 5 && (
-            <div style={{ fontSize: 11, color: T.textLight, textAlign: "center" }}>+{todayEvents.length - 5} autres</div>
+            <div style={{ fontSize: 11, color: T.textLight, textAlign: "center" }}>+{todayEvents.length - 5} {t("ws.cal.others", "autres")}</div>
           )}
         </div>
       )}

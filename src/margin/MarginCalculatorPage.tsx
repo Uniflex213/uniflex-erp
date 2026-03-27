@@ -8,6 +8,7 @@ import { useApp } from "../AppContext";
 import { supabase } from "../supabaseClient";
 import { useAuth } from "../contexts/AuthContext";
 import { T } from "../theme";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const mkId = () => Math.random().toString(36).slice(2, 9);
 
@@ -146,6 +147,7 @@ type SimulatorProps = {
 };
 
 function SimulatorPanel({ line, sc, onClose }: SimulatorProps) {
+  const { t } = useLanguage();
   const [simPrice, setSimPrice] = useState(line.sellingPriceUnit);
   const minPrice = line.cogsUnit * 0.5;
   const maxPrice = line.cogsUnit * 3;
@@ -160,14 +162,14 @@ function SimulatorPanel({ line, sc, onClose }: SimulatorProps) {
     }}>
       <div style={{ padding: "20px 24px 16px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
-          <div style={{ fontWeight: 800, fontSize: 16 }}>Simulateur de prix</div>
+          <div style={{ fontWeight: 800, fontSize: 16 }}>{t("margin.simulator_title")}</div>
           <div style={{ color: T.textMid, fontSize: 12, marginTop: 2 }}>{line.productName}</div>
         </div>
         <button onClick={onClose} style={{ border: "none", background: "none", cursor: "pointer", fontSize: 20, color: T.textMid }}>×</button>
       </div>
       <div style={{ flex: 1, padding: 24, overflowY: "auto" }}>
         <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 }}>Prix de vente cible</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 }}>{t("margin.target_price")}</div>
           <div style={{ fontSize: 32, fontWeight: 900, color: T.text, marginBottom: 4 }}>{fmtC(simPrice, sc.saleCurrency)}</div>
           <input
             type="range"
@@ -183,7 +185,7 @@ function SimulatorPanel({ line, sc, onClose }: SimulatorProps) {
         </div>
 
         <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, marginBottom: 12, textTransform: "uppercase", letterSpacing: 0.5 }}>Marge résultante</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: T.textMid, marginBottom: 12, textTransform: "uppercase", letterSpacing: 0.5 }}>{t("margin.resulting_margin")}</div>
           <div style={{ textAlign: "center", padding: "24px 0" }}>
             <svg width="160" height="90" viewBox="0 0 160 90">
               <defs>
@@ -211,21 +213,21 @@ function SimulatorPanel({ line, sc, onClose }: SimulatorProps) {
 
         <div style={{ background: T.cardAlt, borderRadius: 10, padding: 16, fontSize: 13 }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-            <span style={{ color: T.textMid }}>COGS unitaire</span>
+            <span style={{ color: T.textMid }}>{t("margin.cogs_unit")}</span>
             <span style={{ fontWeight: 700 }}>{fmtC(line.cogsUnit)}</span>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-            <span style={{ color: T.textMid }}>Prix simulé</span>
+            <span style={{ color: T.textMid }}>{t("margin.simulated_price")}</span>
             <span style={{ fontWeight: 700, color: T.main }}>{fmtC(simPrice, sc.saleCurrency)}</span>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, borderTop: `1px solid ${T.border}`, paddingTop: 8 }}>
-            <span style={{ color: T.textMid }}>GP unitaire</span>
+            <span style={{ color: T.textMid }}>{t("margin.gp_unit")}</span>
             <span style={{ fontWeight: 800, color: simPrice > line.cogsUnit ? T.green : T.red }}>
               {fmtC(simPrice - line.cogsUnit, sc.saleCurrency)}
             </span>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <span style={{ color: T.textMid }}>GP total (×{line.quantity})</span>
+            <span style={{ color: T.textMid }}>{t("margin.gp_total")} (×{line.quantity})</span>
             <span style={{ fontWeight: 800, color: simPrice > line.cogsUnit ? T.green : T.red }}>
               {fmtC((simPrice - line.cogsUnit) * line.quantity, sc.saleCurrency)}
             </span>
@@ -234,16 +236,16 @@ function SimulatorPanel({ line, sc, onClose }: SimulatorProps) {
 
         <div style={{ marginTop: 16, padding: 12, background: `${color}11`, border: `1px solid ${color}33`, borderRadius: 8 }}>
           <div style={{ fontSize: 12, fontWeight: 700, color, marginBottom: 4 }}>
-            {margin < 10 ? "Prix de vente trop bas" : margin < 25 ? "Marge serrée" : margin < 40 ? "Marge acceptable" : "Excellente marge"}
+            {margin < 10 ? t("margin.price_too_low") : margin < 25 ? t("margin.tight_margin") : margin < 40 ? t("margin.acceptable_margin") : t("margin.excellent_margin")}
           </div>
           <div style={{ fontSize: 11, color: T.textMid, lineHeight: 1.5 }}>
             {margin < 10
-              ? "Ce prix ne couvre pas les coûts opérationnels. Augmentez le prix de vente."
+              ? t("margin.price_too_low_desc")
               : margin < 25
-              ? "Envisagez un minimum de 25% avant commissions."
+              ? t("margin.tight_margin_desc")
               : margin < 40
-              ? "Bonne marge. Vérifiez l'impact de la commission."
-              : "Marge optimale. Vous avez de la flexibilité pour négocier."}
+              ? t("margin.acceptable_margin_desc")
+              : t("margin.excellent_margin_desc")}
           </div>
         </div>
       </div>
@@ -256,6 +258,7 @@ type CompareScenario = { label: string; scenario: MarginScenario };
 function ComparePanel({
   baseScenario, onClose,
 }: { baseScenario: MarginScenario; onClose: () => void }) {
+  const { t } = useLanguage();
   const [scenarios, setScenarios] = useState<CompareScenario[]>([
     { label: "Scénario A", scenario: baseScenario },
     { label: "Scénario B", scenario: { ...baseScenario, lines: baseScenario.lines.map(l => ({ ...l, id: mkId() })) } },
@@ -281,8 +284,8 @@ function ComparePanel({
       <div style={{ background: T.card, borderRadius: 16, width: "min(96vw, 900px)", maxHeight: "90vh", overflowY: "auto", padding: 32, position: "relative" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
           <div>
-            <div style={{ fontWeight: 800, fontSize: 18 }}>Comparaison de scénarios</div>
-            <div style={{ color: T.textMid, fontSize: 13 }}>Modifiez les prix dans le Scénario B pour comparer</div>
+            <div style={{ fontWeight: 800, fontSize: 18 }}>{t("margin.compare_title")}</div>
+            <div style={{ color: T.textMid, fontSize: 13 }}>{t("margin.compare_subtitle")}</div>
           </div>
           <button onClick={onClose} style={{ border: "none", background: "#f4f5f9", cursor: "pointer", fontSize: 18, color: T.text, borderRadius: 8, width: 36, height: 36 }}>×</button>
         </div>
@@ -299,9 +302,9 @@ function ComparePanel({
                   <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, marginBottom: 16 }}>
                     <thead>
                       <tr style={{ background: T.cardAlt }}>
-                        <th style={{ padding: "6px 8px", textAlign: "left", color: T.textLight, fontWeight: 700 }}>Produit</th>
-                        <th style={{ padding: "6px 8px", textAlign: "right", color: T.textLight, fontWeight: 700 }}>Prix vente</th>
-                        <th style={{ padding: "6px 8px", textAlign: "right", color: T.textLight, fontWeight: 700 }}>Marge%</th>
+                        <th style={{ padding: "6px 8px", textAlign: "left", color: T.textLight, fontWeight: 700 }}>{t("margin.product_col")}</th>
+                        <th style={{ padding: "6px 8px", textAlign: "right", color: T.textLight, fontWeight: 700 }}>{t("margin.selling_price_col")}</th>
+                        <th style={{ padding: "6px 8px", textAlign: "right", color: T.textLight, fontWeight: 700 }}>{t("margin.margin_pct_col")}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -329,15 +332,15 @@ function ComparePanel({
 
                   <div style={{ fontSize: 13, borderTop: `1px solid ${T.border}`, paddingTop: 12 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                      <span style={{ color: T.textMid }}>Revenu net</span>
+                      <span style={{ color: T.textMid }}>{t("margin.net_revenue")}</span>
                       <span style={{ fontWeight: 700 }}>{fmtC(calc.netRevenue)}</span>
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                      <span style={{ color: T.textMid }}>Marge brute</span>
+                      <span style={{ color: T.textMid }}>{t("margin.gross_margin")}</span>
                       <span style={{ fontWeight: 700, color: getMarginColor(calc.grossMarginPct) }}>{fmtPct(calc.grossMarginPct)}</span>
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between" }}>
-                      <span style={{ color: T.textMid }}>Marge nette</span>
+                      <span style={{ color: T.textMid }}>{t("margin.net_margin")}</span>
                       <span style={{ fontWeight: 800, color: getMarginColor(calc.netMarginPct) }}>{fmtPct(calc.netMarginPct)}</span>
                     </div>
                   </div>
@@ -348,7 +351,7 @@ function ComparePanel({
         </div>
 
         <div style={{ marginTop: 20, padding: 16, background: T.cardAlt, borderRadius: 10 }}>
-          <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 10 }}>Comparaison directe</div>
+          <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 10 }}>{t("margin.direct_compare")}</div>
           {(() => {
             const a = computeAnalysis(scenarios[0].scenario);
             const b = computeAnalysis(scenarios[1].scenario);
@@ -356,11 +359,11 @@ function ComparePanel({
             return (
               <div style={{ display: "flex", gap: 24, fontSize: 13 }}>
                 <div>
-                  <span style={{ color: T.textMid }}>Différence marge nette: </span>
+                  <span style={{ color: T.textMid }}>{t("margin.net_margin_diff")}: </span>
                   <span style={{ fontWeight: 800, color: diff >= 0 ? T.green : T.red }}>{diff >= 0 ? "+" : ""}{fmtPct(diff)}</span>
                 </div>
                 <div>
-                  <span style={{ color: T.textMid }}>Différence revenu net: </span>
+                  <span style={{ color: T.textMid }}>{t("margin.net_revenue_diff")}: </span>
                   <span style={{ fontWeight: 800, color: b.netRevenue >= a.netRevenue ? T.green : T.red }}>
                     {b.netRevenue >= a.netRevenue ? "+" : ""}{fmtC(b.netRevenue - a.netRevenue)}
                   </span>
@@ -377,6 +380,7 @@ function ComparePanel({
 export default function MarginCalculatorPage() {
   const { products: ctxProducts } = useApp();
   const { profile, realProfile } = useAuth();
+  const { t } = useLanguage();
   const ownerId = realProfile?.id ?? profile?.id ?? null;
   const availableProducts = ctxProducts.filter(p => p.is_active).map(p => ({ name: p.name, description: "" })).sort((a, b) => a.name.localeCompare(b.name));
   const [sc, setSc] = useState<MarginScenario>(DEFAULT_SCENARIO);
@@ -424,7 +428,7 @@ export default function MarginCalculatorPage() {
     setSaving(true);
     const analysis: SavedAnalysis = {
       id: `MA-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`,
-      reference: sc.reference || "Sans référence",
+      reference: sc.reference || t("margin.no_reference"),
       clientName: sc.clientName || "—",
       createdAt: new Date().toISOString().split("T")[0],
       scenario: { ...sc },
@@ -555,25 +559,25 @@ export default function MarginCalculatorPage() {
 
   const alerts: { type: "red" | "orange" | "blue"; msg: string }[] = [];
   if (sc.lines.length > 0) {
-    if (calc.netMarginPct < 10) alerts.push({ type: "red", msg: "Marge nette critique — ce deal pourrait ne pas être rentable après déductions." });
-    else if (calc.netMarginPct < 20) alerts.push({ type: "orange", msg: "Marge serrée — vérifiez si le volume justifie ce pricing." });
+    if (calc.netMarginPct < 10) alerts.push({ type: "red", msg: t("margin.alert_critical") });
+    else if (calc.netMarginPct < 20) alerts.push({ type: "orange", msg: t("margin.alert_tight") });
     if (calc.netRevenue > 0 && sc.transportCost / calc.netRevenue > 0.15)
-      alerts.push({ type: "orange", msg: `Les frais de transport représentent ${((sc.transportCost / calc.netRevenue) * 100).toFixed(1)}% du revenu — considérez un ajustement.` });
+      alerts.push({ type: "orange", msg: `${t("margin.alert_transport")} ${((sc.transportCost / calc.netRevenue) * 100).toFixed(1)}% ${t("margin.alert_transport_suffix")}` });
     sc.lines.forEach(l => {
       if (l.sellingPriceUnit > 0 && l.sellingPriceUnit < l.cogsUnit)
-        alerts.push({ type: "red", msg: `Le produit "${l.productName}" est vendu à perte.` });
+        alerts.push({ type: "red", msg: `"${l.productName}" ${t("margin.alert_sold_at_loss")}` });
     });
     if (sc.saleCurrency === "USD") {
       const withoutRate = computeAnalysis({ ...sc, exchangeRate: 1 });
       const diff = calc.netMarginPct - withoutRate.netMarginPct;
       if (Math.abs(diff) > 1)
-        alerts.push({ type: "blue", msg: `Le taux de change USD/CAD (${sc.exchangeRate}) impacte votre marge de ${Math.abs(diff).toFixed(1)} points.` });
+        alerts.push({ type: "blue", msg: `USD/CAD (${sc.exchangeRate}) ${t("margin.alert_exchange_impact")} ${Math.abs(diff).toFixed(1)} ${t("margin.alert_exchange_points")}` });
     }
     if (sc.saleCurrency === "EUR") {
       const withoutRate = computeAnalysis({ ...sc, eurExchangeRate: 1 });
       const diff = calc.netMarginPct - withoutRate.netMarginPct;
       if (Math.abs(diff) > 1)
-        alerts.push({ type: "blue", msg: `Le taux de change EUR/CAD (${sc.eurExchangeRate}) impacte votre marge de ${Math.abs(diff).toFixed(1)} points.` });
+        alerts.push({ type: "blue", msg: `EUR/CAD (${sc.eurExchangeRate}) ${t("margin.alert_exchange_impact")} ${Math.abs(diff).toFixed(1)} ${t("margin.alert_exchange_points")}` });
     }
   }
 
@@ -613,7 +617,7 @@ export default function MarginCalculatorPage() {
         <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div style={{ background: T.card, borderRadius: 16, width: "min(90vw, 700px)", maxHeight: "80vh", overflow: "hidden", display: "flex", flexDirection: "column" }}>
             <div style={{ padding: "20px 24px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ fontWeight: 800, fontSize: 16 }}>Analyses sauvegardées</div>
+              <div style={{ fontWeight: 800, fontSize: 16 }}>{t("margin.saved_analyses_title")}</div>
               <button onClick={() => setShowHistory(false)} style={{ border: "none", background: "#f4f5f9", borderRadius: 8, width: 32, height: 32, cursor: "pointer", fontSize: 16 }}>×</button>
             </div>
             <div style={{ overflowY: "auto", flex: 1 }}>
@@ -627,9 +631,9 @@ export default function MarginCalculatorPage() {
                       <span style={{ fontWeight: 800, fontSize: 14 }}>{a.reference}</span>
                       <span style={{ fontSize: 11, color: T.textLight }}>{a.createdAt}</span>
                     </div>
-                    <div style={{ fontSize: 12, color: T.textMid, marginBottom: 6 }}>{a.clientName} · {a.scenario.lines.length} produit(s)</div>
+                    <div style={{ fontSize: 12, color: T.textMid, marginBottom: 6 }}>{a.clientName} · {a.scenario.lines.length} {t("margin.products_count")}</div>
                     <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                      <span style={{ fontSize: 12 }}>Marge nette: <strong style={{ color: getMarginColor(c.netMarginPct) }}>{fmtPct(c.netMarginPct)}</strong></span>
+                      <span style={{ fontSize: 12 }}>{t("margin.net_margin_label")}: <strong style={{ color: getMarginColor(c.netMarginPct) }}>{fmtPct(c.netMarginPct)}</strong></span>
                       <StatusBadge pct={c.netMarginPct} />
                     </div>
                   </div>
@@ -642,14 +646,14 @@ export default function MarginCalculatorPage() {
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
         <div>
-          <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 800 }}>Analyse de rentabilité multi-produits</h2>
-          <p style={{ margin: 0, color: T.textMid, fontSize: 14 }}>Calculez vos marges en temps réel avant de finaliser un deal</p>
+          <h2 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 800 }}>{t("margin.title")}</h2>
+          <p style={{ margin: 0, color: T.textMid, fontSize: 14 }}>{t("margin.subtitle")}</p>
         </div>
         <button
           onClick={() => setShowHistory(true)}
           style={{ background: T.card, border: `1.5px solid ${T.border}`, borderRadius: 10, padding: "9px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", color: T.text }}
         >
-          Analyses sauvegardées ({savedAnalyses.length})
+          {t("margin.saved_analyses")} ({savedAnalyses.length})
         </button>
       </div>
 
@@ -670,10 +674,10 @@ export default function MarginCalculatorPage() {
       )}
 
       <div style={{ ...cardStyle, marginBottom: 20 }}>
-        <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 16 }}>Paramètres du deal</div>
+        <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 16 }}>{t("margin.deal_params")}</div>
         <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "flex-end" }}>
           <div>
-            <div style={sectionLabelStyle}>Référence / Soumission</div>
+            <div style={sectionLabelStyle}>{t("margin.reference")}</div>
             <input
               style={{ ...inputStyle, width: 160 }}
               placeholder="Ex: CMD-2026-001"
@@ -682,7 +686,7 @@ export default function MarginCalculatorPage() {
             />
           </div>
           <div>
-            <div style={sectionLabelStyle}>Client</div>
+            <div style={sectionLabelStyle}>{t("margin.client")}</div>
             <input
               style={{ ...inputStyle, width: 160 }}
               placeholder="Nom du client"
@@ -691,15 +695,15 @@ export default function MarginCalculatorPage() {
             />
           </div>
           <div>
-            <div style={sectionLabelStyle}>Commission %</div>
+            <div style={sectionLabelStyle}>{t("margin.commission")} %</div>
             <NumInput value={sc.commissionPct} onChange={v => upSc({ commissionPct: v })} suffix="%" step={0.5} />
           </div>
           <div>
-            <div style={sectionLabelStyle}>Rabais global %</div>
+            <div style={sectionLabelStyle}>{t("margin.global_discount")} %</div>
             <NumInput value={sc.globalDiscountPct} onChange={v => upSc({ globalDiscountPct: v })} suffix="%" step={0.5} />
           </div>
           <div>
-            <div style={sectionLabelStyle}>Devise de vente</div>
+            <div style={sectionLabelStyle}>{t("margin.sale_currency")}</div>
             <select
               value={sc.saleCurrency}
               onChange={e => {
@@ -715,19 +719,19 @@ export default function MarginCalculatorPage() {
           </div>
           {sc.saleCurrency === "USD" && (
             <div>
-              <div style={sectionLabelStyle}>Taux USD/CAD</div>
+              <div style={sectionLabelStyle}>{t("margin.usd_cad_rate")}</div>
               <NumInput value={sc.exchangeRate} onChange={v => upSc({ exchangeRate: v })} step={0.01} min={0.5} />
             </div>
           )}
           {sc.saleCurrency === "EUR" && (
             <div>
-              <div style={sectionLabelStyle}>Taux EUR/CAD</div>
+              <div style={sectionLabelStyle}>{t("margin.eur_cad_rate")}</div>
               <NumInput value={sc.eurExchangeRate} onChange={v => upSc({ eurExchangeRate: v })} step={0.01} min={0.5} />
             </div>
           )}
           <div>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-              <div style={sectionLabelStyle}>Transport $</div>
+              <div style={sectionLabelStyle}>{t("margin.transport_dollar")}</div>
               <div style={{ display: "flex", alignItems: "center", background: "rgba(0,0,0,0.04)", borderRadius: 20, padding: "2px 3px" }}>
                 <button onClick={() => upSc({ transportIsUsd: false })} style={{ fontSize: 9, fontWeight: 800, padding: "2px 8px", borderRadius: 14, border: "none", cursor: "pointer", background: !sc.transportIsUsd ? T.main : "transparent", color: !sc.transportIsUsd ? "#fff" : T.textMid, transition: "all 0.15s", fontFamily: "inherit", lineHeight: 1.4 }}>CAD</button>
                 <button onClick={() => upSc({ transportIsUsd: true })} style={{ fontSize: 9, fontWeight: 800, padding: "2px 8px", borderRadius: 14, border: "none", cursor: "pointer", background: sc.transportIsUsd ? "#16a34a" : "transparent", color: sc.transportIsUsd ? "#fff" : T.textMid, transition: "all 0.15s", fontFamily: "inherit", lineHeight: 1.4 }}>USD</button>
@@ -737,7 +741,7 @@ export default function MarginCalculatorPage() {
           </div>
           <div>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-              <div style={sectionLabelStyle}>Frais extra $</div>
+              <div style={sectionLabelStyle}>{t("margin.extra_fees_dollar")}</div>
               <div style={{ display: "flex", alignItems: "center", background: "rgba(0,0,0,0.04)", borderRadius: 20, padding: "2px 3px" }}>
                 <button onClick={() => upSc({ extraIsUsd: false })} style={{ fontSize: 9, fontWeight: 800, padding: "2px 8px", borderRadius: 14, border: "none", cursor: "pointer", background: !sc.extraIsUsd ? T.main : "transparent", color: !sc.extraIsUsd ? "#fff" : T.textMid, transition: "all 0.15s", fontFamily: "inherit", lineHeight: 1.4 }}>CAD</button>
                 <button onClick={() => upSc({ extraIsUsd: true })} style={{ fontSize: 9, fontWeight: 800, padding: "2px 8px", borderRadius: 14, border: "none", cursor: "pointer", background: sc.extraIsUsd ? "#16a34a" : "transparent", color: sc.extraIsUsd ? "#fff" : T.textMid, transition: "all 0.15s", fontFamily: "inherit", lineHeight: 1.4 }}>USD</button>
@@ -747,7 +751,7 @@ export default function MarginCalculatorPage() {
           </div>
           {(sc.transportIsUsd || sc.extraIsUsd) && sc.saleCurrency !== "USD" && (
             <div>
-              <div style={sectionLabelStyle}>Taux USD/CAD (transport)</div>
+              <div style={sectionLabelStyle}>{t("margin.usd_cad_transport")}</div>
               <NumInput value={sc.exchangeRate} onChange={v => upSc({ exchangeRate: v })} step={0.01} min={0.5} />
             </div>
           )}
@@ -756,30 +760,30 @@ export default function MarginCalculatorPage() {
 
       <div style={{ ...cardStyle, marginBottom: 20 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <div style={{ fontWeight: 800, fontSize: 14 }}>Produits de la commande</div>
+          <div style={{ fontWeight: 800, fontSize: 14 }}>{t("margin.order_products")}</div>
           <button
             onClick={addLine}
             style={{ background: T.main, color: "#fff", border: "none", borderRadius: 9, padding: "8px 16px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", letterSpacing: 0.3 }}
           >
-            + Ajouter un produit
+            {t("margin.add_product")}
           </button>
         </div>
 
         {sc.lines.length === 0 ? (
           <div style={{ textAlign: "center", padding: "32px 0", color: T.textLight, fontSize: 14 }}>
-            Aucun produit ajouté. Cliquez sur "+ Ajouter un produit" pour commencer.
+            {t("margin.no_products")}
           </div>
         ) : (
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 980 }}>
               <thead>
                 <tr style={{ background: T.cardAlt }}>
-                  {["#", "Produit", "Format"].map(h => (
+                  {["#", t("margin.product_col"), t("margin.format_col")].map(h => (
                     <th key={h} style={{ padding: "9px 10px", textAlign: "left", fontSize: 10, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.3, borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap" }}>{h}</th>
                   ))}
                   {[
-                    { label: "COGS unit.", isUsd: cogsInputUsd, setUsd: setCogsInputUsd },
-                    { label: "Prix vente", isUsd: priceInputUsd, setUsd: setPriceInputUsd },
+                    { label: t("margin.cogs_unit_col"), isUsd: cogsInputUsd, setUsd: setCogsInputUsd },
+                    { label: t("margin.selling_price"), isUsd: priceInputUsd, setUsd: setPriceInputUsd },
                   ].map(({ label, isUsd, setUsd }) => (
                     <th key={label} style={{ padding: "5px 8px", textAlign: "right", borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap" }}>
                       <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
@@ -792,21 +796,21 @@ export default function MarginCalculatorPage() {
                     </th>
                   ))}
                   <th style={{ padding: "5px 8px", textAlign: "left", borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap" }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.3 }}>Qté / Unité</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.3 }}>{t("margin.qty_unit")}</span>
                   </th>
-                  <th style={{ padding: "9px 10px", textAlign: "right", fontSize: 10, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.3, borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap" }}>COGS Total</th>
-                  <th style={{ padding: "9px 10px", textAlign: "right", fontSize: 10, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.3, borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap" }}>Revenu</th>
+                  <th style={{ padding: "9px 10px", textAlign: "right", fontSize: 10, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.3, borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap" }}>{t("margin.cogs_total_col")}</th>
+                  <th style={{ padding: "9px 10px", textAlign: "right", fontSize: 10, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.3, borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap" }}>{t("margin.revenue_col")}</th>
                   <th style={{ padding: "5px 8px", textAlign: "right", borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap" }}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
-                      <span style={{ fontSize: 10, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.3 }}>Marge $</span>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.3 }}>{t("margin.margin_dollar")}</span>
                       <div style={{ display: "flex", alignItems: "center", background: "rgba(0,0,0,0.04)", borderRadius: 20, padding: "2px 3px" }}>
                         <button onClick={() => setMarginInputUsd(false)} style={{ fontSize: 9, fontWeight: 800, padding: "2px 8px", borderRadius: 14, border: "none", cursor: "pointer", background: !marginInputUsd ? T.main : "transparent", color: !marginInputUsd ? "#fff" : T.textMid, transition: "all 0.15s", fontFamily: "inherit", lineHeight: 1.4 }}>CAD</button>
                         <button onClick={() => setMarginInputUsd(true)} style={{ fontSize: 9, fontWeight: 800, padding: "2px 8px", borderRadius: 14, border: "none", cursor: "pointer", background: marginInputUsd ? "#16a34a" : "transparent", color: marginInputUsd ? "#fff" : T.textMid, transition: "all 0.15s", fontFamily: "inherit", lineHeight: 1.4 }}>USD</button>
                       </div>
                     </div>
                   </th>
-                  {["Marge %", "Statut", ""].map(h => (
-                    <th key={h} style={{ padding: "9px 10px", textAlign: h === "Marge %" ? "right" : "left", fontSize: 10, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.3, borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap" }}>{h}</th>
+                  {[t("margin.margin_pct"), t("margin.status_col"), ""].map(h => (
+                    <th key={h} style={{ padding: "9px 10px", textAlign: h === t("margin.margin_pct") ? "right" : "left", fontSize: 10, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.3, borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap" }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -828,7 +832,7 @@ export default function MarginCalculatorPage() {
                           onChange={e => selectProduct(line.id, e.target.value)}
                           style={{ ...inputStyle, width: 140, height: 32, padding: "0 6px", fontSize: 12 }}
                         >
-                          <option value="">Sélectionner...</option>
+                          <option value="">{t("margin.select_product")}</option>
                           {availableProducts.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
                         </select>
                       </td>
@@ -910,7 +914,7 @@ export default function MarginCalculatorPage() {
                 return (
                   <tfoot>
                     <tr style={{ background: `${T.main}08`, borderTop: `2px solid ${T.main}33` }}>
-                      <td colSpan={6} style={{ padding: "12px 10px", fontWeight: 800, fontSize: 12, color: T.main, textTransform: "uppercase", letterSpacing: 0.5 }}>Total général</td>
+                      <td colSpan={6} style={{ padding: "12px 10px", fontWeight: 800, fontSize: 12, color: T.main, textTransform: "uppercase", letterSpacing: 0.5 }}>{t("margin.grand_total")}</td>
                       <td style={{ padding: "12px 10px", textAlign: "right", fontWeight: 700, fontSize: 13 }}>{fmtC(totCogs)}</td>
                       <td style={{ padding: "12px 10px", textAlign: "right", fontWeight: 800, fontSize: 13 }}>{fmtC(totRev, sc.saleCurrency)}</td>
                       <td style={{ padding: "12px 10px", textAlign: "right", fontWeight: 800, fontSize: 13, color: totGp >= 0 ? T.text : T.red }}>
@@ -943,13 +947,13 @@ export default function MarginCalculatorPage() {
       {sc.lines.length > 0 && (
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1.1fr", gap: 20, marginBottom: 20, alignItems: "start" }}>
           <div style={cardStyle}>
-            <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 18, color: T.main }}>État des Profits & Pertes</div>
+            <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 18, color: T.main }}>{t("margin.pnl_title")}</div>
 
-            <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>Revenus</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>{t("margin.revenues")}</div>
             {[
-              ["Revenu brut", fmtC(calc.grossRevenue, sc.saleCurrency), false],
-              [`Rabais global (${sc.globalDiscountPct}%)`, `-${fmtC(calc.discountAmt, sc.saleCurrency)}`, true],
-              ["Revenu net", fmtC(calc.netRevenue, sc.saleCurrency), false, true],
+              [t("margin.gross_revenue"), fmtC(calc.grossRevenue, sc.saleCurrency), false],
+              [`${t("margin.global_discount")} (${sc.globalDiscountPct}%)`, `-${fmtC(calc.discountAmt, sc.saleCurrency)}`, true],
+              [t("margin.net_revenue"), fmtC(calc.netRevenue, sc.saleCurrency), false, true],
             ].map(([l, v, neg, bold], i) => (
               <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: i === 2 ? `2px solid ${T.border}` : "none", marginBottom: i === 2 ? 12 : 0 }}>
                 <span style={{ fontSize: 13, color: T.textMid, fontWeight: bold ? 700 : 400 }}>{l}</span>
@@ -957,12 +961,12 @@ export default function MarginCalculatorPage() {
               </div>
             ))}
 
-            <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>COGS</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>{t("margin.cogs_section")}</div>
             {[
-              ["COGS base", fmtC(calc.cogsBase), false],
-              ["Transport", fmtC(sc.transportCost), false],
-              ["Frais extra", fmtC(sc.extraFees), false],
-              ["COGS ajusté", fmtC(calc.adjustedCogs), false, true],
+              [t("margin.cogs_base"), fmtC(calc.cogsBase), false],
+              [t("margin.transport"), fmtC(sc.transportCost), false],
+              [t("margin.extra_fees"), fmtC(sc.extraFees), false],
+              [t("margin.adjusted_cogs"), fmtC(calc.adjustedCogs), false, true],
             ].map(([l, v, neg, bold], i) => (
               <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: i === 3 ? `2px solid ${T.border}` : "none", marginBottom: i === 3 ? 12 : 0 }}>
                 <span style={{ fontSize: 13, color: T.textMid, fontWeight: bold ? 700 : 400 }}>{l}</span>
@@ -971,23 +975,23 @@ export default function MarginCalculatorPage() {
             ))}
 
             <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 12px", background: `${getMarginColor(calc.grossMarginPct)}15`, borderRadius: 8, marginBottom: 16 }}>
-              <span style={{ fontSize: 13, fontWeight: 700 }}>Marge brute</span>
+              <span style={{ fontSize: 13, fontWeight: 700 }}>{t("margin.gross_margin")}</span>
               <div style={{ textAlign: "right" }}>
                 <div style={{ fontWeight: 800, fontSize: 14, color: getMarginColor(calc.grossMarginPct) }}>{fmtC(calc.grossProfit, sc.saleCurrency)}</div>
-                <div style={{ fontSize: 11, color: T.textMid }}>{fmtPct(calc.grossMarginPct)} du revenu net</div>
+                <div style={{ fontSize: 11, color: T.textMid }}>{fmtPct(calc.grossMarginPct)} {t("margin.of_net_revenue")}</div>
               </div>
             </div>
 
-            <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>Déductions</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>{t("margin.deductions")}</div>
             <div style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", marginBottom: 12 }}>
-              <span style={{ fontSize: 13, color: T.textMid }}>Commission ({sc.commissionPct}%)</span>
+              <span style={{ fontSize: 13, color: T.textMid }}>{t("margin.commission")} ({sc.commissionPct}%)</span>
               <span style={{ fontSize: 13, fontWeight: 600, color: T.red }}>-{fmtC(calc.commissionAmt, sc.saleCurrency)}</span>
             </div>
 
             <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 12px", background: `${getMarginColor(calc.netMarginPct)}15`, border: `2px solid ${getMarginColor(calc.netMarginPct)}33`, borderRadius: 10 }}>
               <div>
-                <div style={{ fontWeight: 800, fontSize: 14 }}>MARGE NETTE</div>
-                <div style={{ fontSize: 11, color: T.textMid, marginTop: 2 }}>{fmtPct(calc.netMarginPct)} du revenu net</div>
+                <div style={{ fontWeight: 800, fontSize: 14 }}>{t("margin.net_margin_upper")}</div>
+                <div style={{ fontSize: 11, color: T.textMid, marginTop: 2 }}>{fmtPct(calc.netMarginPct)} {t("margin.of_net_revenue")}</div>
               </div>
               <div style={{ textAlign: "right" }}>
                 <div style={{ fontWeight: 900, fontSize: 18, color: getMarginColor(calc.netMarginPct) }}>{fmtC(calc.netProfit, sc.saleCurrency)}</div>
@@ -1002,14 +1006,14 @@ export default function MarginCalculatorPage() {
                 border: sc.saleCurrency === "EUR" ? "1px solid #fde68a" : "1px solid #bfdbfe",
               }}>
                 <div style={{ fontWeight: 700, color: sc.saleCurrency === "EUR" ? "#92400e" : "#1e40af", marginBottom: 6 }}>
-                  En {sc.saleCurrency} (taux: {sc.saleCurrency === "EUR" ? sc.eurExchangeRate : sc.exchangeRate})
+                  {t("margin.in_currency")} {sc.saleCurrency} ({sc.saleCurrency === "EUR" ? sc.eurExchangeRate : sc.exchangeRate})
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                  <span style={{ color: T.textMid }}>Revenu net {sc.saleCurrency}</span>
+                  <span style={{ color: T.textMid }}>{t("margin.net_revenue_fx")} {sc.saleCurrency}</span>
                   <span style={{ fontWeight: 700 }}>{fmtC(calc.netRevenueFx, sc.saleCurrency)}</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ color: T.textMid }}>Marge nette {sc.saleCurrency}</span>
+                  <span style={{ color: T.textMid }}>{t("margin.net_margin_fx")} {sc.saleCurrency}</span>
                   <span style={{ fontWeight: 800, color: getMarginColor(calc.netMarginPct) }}>{fmtC(calc.netProfitFx, sc.saleCurrency)}</span>
                 </div>
               </div>
@@ -1019,8 +1023,8 @@ export default function MarginCalculatorPage() {
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               {[
-                { label: "MARGE BRUTE", pct: calc.grossMarginPct, amt: calc.grossProfit, main: false },
-                { label: "MARGE NETTE", pct: calc.netMarginPct, amt: calc.netProfit, main: true },
+                { label: t("margin.gross_margin_upper"), pct: calc.grossMarginPct, amt: calc.grossProfit, main: false },
+                { label: t("margin.net_margin_upper"), pct: calc.netMarginPct, amt: calc.netProfit, main: true },
               ].map(({ label, pct, amt, main }) => (
                 <div key={label} style={{
                   ...cardStyle,
@@ -1029,7 +1033,7 @@ export default function MarginCalculatorPage() {
                   boxShadow: main ? `0 4px 20px ${getMarginColor(pct)}22` : "0 2px 12px rgba(0,0,0,0.06)",
                 }}>
                   <div style={{ fontSize: 10, fontWeight: 700, color: T.textLight, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 }}>
-                    {label} {main && <span style={{ color: T.main, fontSize: 9 }}>★ CLEF</span>}
+                    {label} {main && <span style={{ color: T.main, fontSize: 9 }}>★ {t("margin.key_indicator")}</span>}
                   </div>
                   <div style={{ fontSize: 36, fontWeight: 900, color: getMarginColor(pct), lineHeight: 1, marginBottom: 4 }}>
                     {fmtPct(pct)}
@@ -1042,7 +1046,7 @@ export default function MarginCalculatorPage() {
             </div>
 
             <div style={cardStyle}>
-              <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 14 }}>Ventilation par produit</div>
+              <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 14 }}>{t("margin.product_breakdown")}</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {sc.lines.map(line => {
                   const rev = line.sellingPriceUnit * line.quantity;
@@ -1084,40 +1088,40 @@ export default function MarginCalculatorPage() {
       )}
 
       <div style={{ ...cardStyle, display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-        <div style={{ fontWeight: 700, fontSize: 13, color: T.textMid, marginRight: 4 }}>Outils :</div>
+        <div style={{ fontWeight: 700, fontSize: 13, color: T.textMid, marginRight: 4 }}>{t("margin.tools")} :</div>
         <button
           onClick={() => sc.lines.length > 0 ? setSimulatorLine(sc.lines[0]) : null}
           disabled={sc.lines.length === 0}
           style={{ background: sc.lines.length > 0 ? "#eff6ff" : T.cardAlt, color: sc.lines.length > 0 ? T.main : T.textLight, border: `1.5px solid ${sc.lines.length > 0 ? T.main + "44" : T.border}`, borderRadius: 9, padding: "9px 18px", fontSize: 12, fontWeight: 700, cursor: sc.lines.length > 0 ? "pointer" : "not-allowed", fontFamily: "inherit" }}
         >
-          ⚡ Simulateur
+          ⚡ {t("margin.simulator")}
         </button>
         <button
           onClick={() => sc.lines.length > 0 ? setShowCompare(true) : null}
           disabled={sc.lines.length === 0}
           style={{ background: sc.lines.length > 0 ? "#fff7ed" : T.cardAlt, color: sc.lines.length > 0 ? T.orange : T.textLight, border: `1.5px solid ${sc.lines.length > 0 ? T.orange + "44" : T.border}`, borderRadius: 9, padding: "9px 18px", fontSize: 12, fontWeight: 700, cursor: sc.lines.length > 0 ? "pointer" : "not-allowed", fontFamily: "inherit" }}
         >
-          ⇄ Comparer scénarios
+          ⇄ {t("margin.compare_scenarios")}
         </button>
         <button
           onClick={() => sc.lines.length > 0 ? handleExportPdf() : null}
           disabled={sc.lines.length === 0}
           style={{ background: sc.lines.length > 0 ? "#f0fdf4" : T.cardAlt, color: sc.lines.length > 0 ? T.greenDark : T.textLight, border: `1.5px solid ${sc.lines.length > 0 ? T.greenDark + "44" : T.border}`, borderRadius: 9, padding: "9px 18px", fontSize: 12, fontWeight: 700, cursor: sc.lines.length > 0 ? "pointer" : "not-allowed", fontFamily: "inherit" }}
         >
-          Exporter PDF
+          {t("margin.export_pdf")}
         </button>
         <button
           onClick={() => sc.lines.length > 0 ? handleSave() : null}
           disabled={sc.lines.length === 0 || saving}
           style={{ background: sc.lines.length > 0 ? T.main : T.cardAlt, color: sc.lines.length > 0 ? "#fff" : T.textLight, border: "none", borderRadius: 9, padding: "9px 18px", fontSize: 12, fontWeight: 700, cursor: sc.lines.length > 0 && !saving ? "pointer" : "not-allowed", fontFamily: "inherit", transition: "opacity 0.2s", opacity: saving ? 0.7 : 1 }}
         >
-          {saving ? "Sauvegarde..." : savedFlash ? "Sauvegardé ✓" : "Sauvegarder"}
+          {saving ? t("margin.saving") : savedFlash ? t("margin.saved") : t("margin.save")}
         </button>
         <button
           onClick={() => { setSc(DEFAULT_SCENARIO); }}
           style={{ background: T.bgCard, color: T.red, border: `1.5px solid ${T.red}33`, borderRadius: 9, padding: "9px 18px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", marginLeft: "auto" }}
         >
-          Réinitialiser
+          {t("margin.reset")}
         </button>
       </div>
     </div>

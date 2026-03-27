@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Download, Users, UserPlus, MapPin } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { T, fmt, fmtNum, exportToCsv, exportToPdf } from './reportUtils';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export default function ReportClientAnalytics() {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [totalClients, setTotalClients] = useState(0);
   const [newClientsThisMonth, setNewClientsThisMonth] = useState(0);
@@ -63,7 +65,7 @@ export default function ReportClientAnalytics() {
     else exportToPdf('Rapport Clients', headers, rows);
   };
 
-  if (loading) return <div style={{ textAlign: 'center', padding: 40, color: T.textLight }}>Chargement...</div>;
+  if (loading) return <div style={{ textAlign: 'center', padding: 40, color: T.textLight }}>{t("common.loading", "Chargement...")}</div>;
 
   return (
     <div>
@@ -78,29 +80,29 @@ export default function ReportClientAnalytics() {
             <div style={{ background: `${T.main}12`, borderRadius: 8, padding: 8, color: T.main, display: 'flex' }}><Users size={18} /></div>
           </div>
           <div style={{ fontSize: 28, fontWeight: 800, color: T.text }}>{fmtNum(totalClients)}</div>
-          <div style={{ fontSize: 12, color: T.textLight }}>Total clients</div>
+          <div style={{ fontSize: 12, color: T.textLight }}>{t("report_clients.total_clients", "Total clients")}</div>
         </div>
         <div style={{ flex: '1 1 200px', background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: '18px 20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
             <div style={{ background: `${T.green}18`, borderRadius: 8, padding: 8, color: T.green, display: 'flex' }}><UserPlus size={18} /></div>
           </div>
           <div style={{ fontSize: 28, fontWeight: 800, color: T.text }}>{newClientsThisMonth}</div>
-          <div style={{ fontSize: 12, color: T.textLight }}>Nouveaux ce mois</div>
+          <div style={{ fontSize: 12, color: T.textLight }}>{t("report_clients.new_this_month", "Nouveaux ce mois")}</div>
         </div>
         <div style={{ flex: '1 1 200px', background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: '18px 20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
             <div style={{ background: `${T.blue}18`, borderRadius: 8, padding: 8, color: T.blue, display: 'flex' }}><MapPin size={18} /></div>
           </div>
           <div style={{ fontSize: 28, fontWeight: 800, color: T.text }}>{regionData.length}</div>
-          <div style={{ fontSize: 12, color: T.textLight }}>Regions couvertes</div>
+          <div style={{ fontSize: 12, color: T.textLight }}>{t("report_clients.regions_covered", "Régions couvertes")}</div>
         </div>
       </div>
 
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 20 }}>
         <div style={{ flex: '1 1 400px', background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: 20 }}>
-          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>Top clients par revenu</div>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>{t("report_clients.top_clients_by_revenue", "Top clients par revenu")}</div>
           {topClients.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 32, color: T.textLight, fontSize: 13 }}>Aucune donnee</div>
+            <div style={{ textAlign: 'center', padding: 32, color: T.textLight, fontSize: 13 }}>{t("common.no_data", "Aucune donnée")}</div>
           ) : (
             topClients.map(c => (
               <div key={c.name} style={{ marginBottom: 12 }}>
@@ -118,9 +120,9 @@ export default function ReportClientAnalytics() {
 
         <div style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: 20 }}>
-            <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>Entonnoir CRM</div>
+            <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>{t("report_clients.crm_funnel", "Entonnoir CRM")}</div>
             {funnel.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: 20, color: T.textLight, fontSize: 13 }}>Aucun lead</div>
+              <div style={{ textAlign: 'center', padding: 20, color: T.textLight, fontSize: 13 }}>{t("report_crm.no_leads", "Aucun lead")}</div>
             ) : (
               funnel.map((f, i) => (
                 <div key={f.stage} style={{ marginBottom: i < funnel.length - 1 ? 10 : 0 }}>
@@ -137,7 +139,7 @@ export default function ReportClientAnalytics() {
           </div>
 
           <div style={{ background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: 20 }}>
-            <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>Distribution par region</div>
+            <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>{t("report_clients.distribution_by_region", "Distribution par région")}</div>
             {regionData.slice(0, 8).map((r, i) => (
               <div key={r.region} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: i < Math.min(regionData.length, 8) - 1 ? `1px solid ${T.border}` : 'none' }}>
                 <span style={{ fontSize: 13, color: T.text }}>{r.region}</span>

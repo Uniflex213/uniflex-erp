@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { CRMLead, ACTIVITY_ICONS, ActivityType } from "../crmTypes";
 import { T, timeAgo, isToday } from "./workstationTypes";
 import { useCurrentAgent } from "../../hooks/useCurrentAgent";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   leads: CRMLead[];
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export default function WidgetActivite({ leads, onOpenLead }: Props) {
+  const { t } = useLanguage();
   const agent = useCurrentAgent();
   const myLeads = useMemo(() => leads.filter(l => l.assigned_agent_id === agent.id), [leads, agent.id]);
 
@@ -109,22 +111,22 @@ export default function WidgetActivite({ leads, onOpenLead }: Props) {
   return (
     <div style={{ background: T.card, borderRadius: 16, border: `1px solid ${T.border}`, padding: 24, boxShadow: "0 2px 12px rgba(0,0,0,0.06)", height: "100%" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-        <div style={{ fontWeight: 800, fontSize: 15, color: T.text }}>Activité récente</div>
-        <span style={{ fontSize: 11, color: T.textLight, fontWeight: 600 }}>{allActivities.length} activités</span>
+        <div style={{ fontWeight: 800, fontSize: 15, color: T.text }}>{t("ws.activity.title", "Activité récente")}</div>
+        <span style={{ fontSize: 11, color: T.textLight, fontWeight: 600 }}>{allActivities.length} {t("ws.activity.activities", "activités")}</span>
       </div>
       <div style={{ fontSize: 12, color: T.textMid, marginBottom: 12 }}>
-        Vos dernières actions tous leads confondus
+        {t("ws.activity.subtitle", "Vos dernières actions tous leads confondus")}
       </div>
       <div style={{ maxHeight: 400, overflowY: "auto" }}>
         {allActivities.length === 0 ? (
           <div style={{ color: T.textLight, fontSize: 13, fontStyle: "italic", textAlign: "center", padding: "32px 0" }}>
-            Aucune activité enregistrée
+            {t("ws.activity.none", "Aucune activité enregistrée")}
           </div>
         ) : (
           <>
-            {renderGroup("Aujourd'hui", grouped.today)}
-            {renderGroup("Hier", grouped.yesterday)}
-            {renderGroup("Cette semaine / Plus tôt", grouped.older)}
+            {renderGroup(t("ws.activity.today", "Aujourd'hui"), grouped.today)}
+            {renderGroup(t("ws.activity.yesterday", "Hier"), grouped.yesterday)}
+            {renderGroup(t("ws.activity.earlier", "Cette semaine / Plus tôt"), grouped.older)}
           </>
         )}
       </div>

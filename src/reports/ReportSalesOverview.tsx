@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Download, TrendingUp, ShoppingCart, DollarSign, BarChart3 } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { T, fmt, fmtNum, getDateRanges, exportToCsv, exportToPdf } from './reportUtils';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export default function ReportSalesOverview() {
+  const { t } = useLanguage();
   const ranges = getDateRanges();
   const [rangeKey, setRangeKey] = useState('this_month');
   const [loading, setLoading] = useState(true);
@@ -64,7 +66,7 @@ export default function ReportSalesOverview() {
     exportToPdf('Rapport Ventes', ['Commande', 'Client', 'Total', 'Statut', 'Date'], topOrders.map(o => [o.order_number || o.id, o.client_name || '', fmt(o.total), o.status || '', new Date(o.created_at).toLocaleDateString('fr-CA')]));
   };
 
-  if (loading) return <div style={{ textAlign: 'center', padding: 40, color: T.textLight }}>Chargement...</div>;
+  if (loading) return <div style={{ textAlign: 'center', padding: 40, color: T.textLight }}>{t("common.loading", "Chargement...")}</div>;
 
   return (
     <div>
@@ -87,10 +89,10 @@ export default function ReportSalesOverview() {
 
       <div style={{ display: 'flex', gap: 14, marginBottom: 20, flexWrap: 'wrap' }}>
         {[
-          { icon: <DollarSign size={18} />, label: 'Revenu total', value: fmt(kpis.totalRevenue), trend: growth !== 0 ? `${growth > 0 ? '+' : ''}${growth.toFixed(1)}%` : null, up: growth > 0 },
-          { icon: <ShoppingCart size={18} />, label: 'Commandes', value: fmtNum(kpis.totalOrders), trend: null, up: false },
-          { icon: <BarChart3 size={18} />, label: 'Valeur moyenne', value: fmt(kpis.avgOrderValue), trend: null, up: false },
-          { icon: <TrendingUp size={18} />, label: 'Periode precedente', value: fmt(kpis.prevRevenue), trend: null, up: false },
+          { icon: <DollarSign size={18} />, label: t("report_sales.total_revenue", "Revenu total"), value: fmt(kpis.totalRevenue), trend: growth !== 0 ? `${growth > 0 ? '+' : ''}${growth.toFixed(1)}%` : null, up: growth > 0 },
+          { icon: <ShoppingCart size={18} />, label: t("report_sales.orders", "Commandes"), value: fmtNum(kpis.totalOrders), trend: null, up: false },
+          { icon: <BarChart3 size={18} />, label: t("report_sales.avg_value", "Valeur moyenne"), value: fmt(kpis.avgOrderValue), trend: null, up: false },
+          { icon: <TrendingUp size={18} />, label: t("report_sales.previous_period", "Période précédente"), value: fmt(kpis.prevRevenue), trend: null, up: false },
         ].map((kpi, i) => (
           <div key={i} style={{ flex: '1 1 200px', background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: '18px 20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
@@ -105,9 +107,9 @@ export default function ReportSalesOverview() {
 
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 20 }}>
         <div style={{ flex: '2 1 400px', background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: 20 }}>
-          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>Revenu par mois</div>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>{t("report_sales.revenue_by_month", "Revenu par mois")}</div>
           {monthlyData.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 32, color: T.textLight, fontSize: 13 }}>Aucune donnee pour cette periode</div>
+            <div style={{ textAlign: 'center', padding: 32, color: T.textLight, fontSize: 13 }}>{t("report_sales.no_data_period", "Aucune donnée pour cette période")}</div>
           ) : (
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 180, padding: '8px 0' }}>
               {monthlyData.map((d, i) => (
@@ -122,9 +124,9 @@ export default function ReportSalesOverview() {
         </div>
 
         <div style={{ flex: '1 1 320px', background: T.card, borderRadius: 10, border: `1px solid ${T.border}`, padding: 20 }}>
-          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>Top 10 commandes</div>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16 }}>{t("report_sales.top_10_orders", "Top 10 commandes")}</div>
           {topOrders.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 32, color: T.textLight, fontSize: 13 }}>Aucune commande</div>
+            <div style={{ textAlign: 'center', padding: 32, color: T.textLight, fontSize: 13 }}>{t("report_sales.no_orders", "Aucune commande")}</div>
           ) : (
             topOrders.map((o, i) => (
               <div key={o.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: i < topOrders.length - 1 ? `1px solid ${T.border}` : 'none' }}>

@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { T, WidgetId, WIDGET_LABELS, WIDGET_ICONS } from "./workstationTypes";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface WidgetShellProps {
   id: WidgetId;
@@ -16,6 +17,7 @@ export default function WidgetShell({
   id, children, onExpand, isDragging = false,
   onDragStart, onDragOver, onDragEnd, dragOverId,
 }: WidgetShellProps) {
+  const { t } = useLanguage();
   const [hovered, setHovered] = useState(false);
 
   return (
@@ -50,7 +52,7 @@ export default function WidgetShell({
           transition: "opacity 0.2s",
           background: hovered ? "rgba(99,102,241,0.04)" : "transparent",
         }}
-        title="Maintenir pour déplacer le widget"
+        title={t("ws.shell.drag", "Maintenir pour déplacer le widget")}
       >
         {[...Array(6)].map((_, i) => (
           <div key={i} style={{ width: 4, height: 4, borderRadius: "50%", background: T.textLight }} />
@@ -59,7 +61,7 @@ export default function WidgetShell({
 
       <button
         onClick={e => { e.stopPropagation(); onExpand(); }}
-        title="Voir en détail"
+        title={t("ws.shell.detail", "Voir en détail")}
         style={{
           position: "absolute",
           top: 16, right: 20,

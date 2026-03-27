@@ -2,6 +2,7 @@ import React from "react";
 import { T } from "../../theme";
 import { CalendarEvent } from "./calendarTypes";
 import { getNextDayEvents, getLabelColor, MONTHS_FR, DAYS_FR } from "./calendarUtils";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   events: CalendarEvent[];
@@ -9,14 +10,15 @@ interface Props {
 }
 
 export default function AgendaView({ events, onEventClick }: Props) {
+  const { t } = useLanguage();
   const groups = getNextDayEvents(events, 60);
 
   if (groups.length === 0) {
     return (
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, color: T.textLight }}>
         <div style={{ fontSize: 40 }}>📅</div>
-        <div style={{ fontSize: 14, fontWeight: 600 }}>Aucun événement à venir</div>
-        <div style={{ fontSize: 12 }}>Cliquez sur "Nouvel événement" pour en créer un</div>
+        <div style={{ fontSize: 14, fontWeight: 600 }}>{t("cal.agenda.no_events", "Aucun événement à venir")}</div>
+        <div style={{ fontSize: 12 }}>{t("cal.agenda.create_hint", "Cliquez sur \"Nouvel événement\" pour en créer un")}</div>
       </div>
     );
   }
@@ -52,10 +54,10 @@ export default function AgendaView({ events, onEventClick }: Props) {
               </div>
               <div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: isToday ? T.main : T.text }}>
-                  {isToday ? "Aujourd'hui" : `${dayName} ${date.getDate()} ${monthName}`}
+                  {isToday ? t("cal.agenda.today", "Aujourd'hui") : `${dayName} ${date.getDate()} ${monthName}`}
                 </div>
                 <div style={{ fontSize: 11, color: T.textLight }}>
-                  {dayEvents.length} événement{dayEvents.length > 1 ? "s" : ""}
+                  {dayEvents.length} {t("cal.agenda.events", "événement(s)")}
                 </div>
               </div>
             </div>
@@ -85,7 +87,7 @@ export default function AgendaView({ events, onEventClick }: Props) {
                     <div style={{ width: 46, flexShrink: 0, textAlign: "center" }}>
                       {ev.all_day ? (
                         <div style={{ fontSize: 10, fontWeight: 700, color: T.textLight, background: T.bg, borderRadius: 4, padding: "2px 4px" }}>
-                          Journée
+                          {t("cal.agenda.all_day", "Journée")}
                         </div>
                       ) : (
                         <>
@@ -105,7 +107,7 @@ export default function AgendaView({ events, onEventClick }: Props) {
                           {ev.title}
                         </span>
                         {ev.importance === "Haute" && (
-                          <span style={{ fontSize: 10, color: T.red, fontWeight: 700 }}>▲ URGENT</span>
+                          <span style={{ fontSize: 10, color: T.red, fontWeight: 700 }}>▲ {t("cal.agenda.urgent", "URGENT")}</span>
                         )}
                         {ev.source === "google" && (
                           <span style={{ fontSize: 9, color: "#ea4335", fontWeight: 700, background: "#fef2f2", borderRadius: 3, padding: "1px 4px" }}>G</span>

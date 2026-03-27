@@ -4,6 +4,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { T } from "../../theme";
 import { Team, AVATAR_COLORS } from "./teamTypes";
 import { getInitials, generateTeamCode } from "./teamUtils";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface Props {
   currentUser: string;
@@ -15,6 +16,7 @@ function RequestModal({ onClose, onSuccess, currentUser }: {
   onSuccess: () => void;
   currentUser: string;
 }) {
+  const { t } = useLanguage();
   const [reason, setReason] = useState("");
   const [members, setMembers] = useState("");
   const [region, setRegion] = useState("");
@@ -45,18 +47,18 @@ function RequestModal({ onClose, onSuccess, currentUser }: {
         style={{ background: T.bgCard, borderRadius: 16, width: "100%", maxWidth: 480, boxShadow: "0 24px 80px rgba(0,0,0,0.2)" }}
       >
         <div style={{ padding: "20px 24px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: T.text }}>Demander la création d'une équipe</h3>
+          <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: T.text }}>{t("no_team.request_creation", "Demander la création d'une équipe")}</h3>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 18, color: T.textLight }}>✕</button>
         </div>
         {done ? (
           <div style={{ padding: "36px 24px", textAlign: "center" }}>
             <div style={{ fontSize: 40, marginBottom: 14 }}>✅</div>
-            <h4 style={{ margin: "0 0 8px", fontSize: 15, fontWeight: 800, color: T.green }}>Demande envoyée !</h4>
+            <h4 style={{ margin: "0 0 8px", fontSize: 15, fontWeight: 800, color: T.green }}>{t("no_team.request_sent", "Demande envoyée !")}</h4>
             <p style={{ fontSize: 13, color: T.textLight, margin: "0 0 20px" }}>
-              Votre demande a été envoyée aux administrateurs. Vous recevrez un code d'équipe sous peu.
+              {t("no_team.request_sent_desc", "Votre demande a été envoyée aux administrateurs. Vous recevrez un code d'équipe sous peu.")}
             </p>
             <button onClick={onClose} style={{ padding: "10px 24px", borderRadius: 10, border: "none", background: T.main, color: "#fff", cursor: "pointer", fontFamily: "inherit", fontSize: 13, fontWeight: 700 }}>
-              Fermer
+              {t("common.close", "Fermer")}
             </button>
           </div>
         ) : (
@@ -64,40 +66,40 @@ function RequestModal({ onClose, onSuccess, currentUser }: {
             <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
               <div>
                 <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 5 }}>
-                  Raison de la demande <span style={{ color: T.red }}>*</span>
+                  {t("no_team.request_reason", "Raison de la demande")} <span style={{ color: T.red }}>*</span>
                 </label>
                 <textarea
                   value={reason}
                   onChange={e => setReason(e.target.value)}
-                  placeholder="Ex: Je veux structurer mon réseau de vendeurs dans la région de Montréal..."
+                  placeholder={t("no_team.request_reason_placeholder", "Ex: Je veux structurer mon réseau de vendeurs dans la région de Montréal...")}
                   style={{ width: "100%", height: 80, padding: 10, borderRadius: 8, border: `1px solid ${T.border}`, fontSize: 13, fontFamily: "inherit", resize: "none", outline: "none", boxSizing: "border-box" }}
                 />
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 5 }}>Nombre estimé de membres</label>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 5 }}>{t("no_team.estimated_members", "Nombre estimé de membres")}</label>
                   <input
                     type="number" value={members} onChange={e => setMembers(e.target.value)} min={1} max={50}
                     style={{ width: "100%", height: 36, borderRadius: 8, border: `1px solid ${T.border}`, padding: "0 10px", fontSize: 13, fontFamily: "inherit", outline: "none", boxSizing: "border-box" }}
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 5 }}>Région cible</label>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: T.textLight, display: "block", marginBottom: 5 }}>{t("no_team.target_region", "Région cible")}</label>
                   <input
-                    value={region} onChange={e => setRegion(e.target.value)} placeholder="Ex: Montréal, Rive-Sud..."
+                    value={region} onChange={e => setRegion(e.target.value)} placeholder={t("no_team.region_placeholder", "Ex: Montréal, Rive-Sud...")}
                     style={{ width: "100%", height: 36, borderRadius: 8, border: `1px solid ${T.border}`, padding: "0 10px", fontSize: 13, fontFamily: "inherit", outline: "none", boxSizing: "border-box" }}
                   />
                 </div>
               </div>
             </div>
             <div style={{ padding: "14px 24px", borderTop: `1px solid ${T.border}`, display: "flex", gap: 10, justifyContent: "flex-end" }}>
-              <button onClick={onClose} style={{ padding: "9px 18px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 13 }}>Annuler</button>
+              <button onClick={onClose} style={{ padding: "9px 18px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, cursor: "pointer", fontFamily: "inherit", fontSize: 13 }}>{t("common.cancel", "Annuler")}</button>
               <button
                 onClick={handleSend}
                 disabled={!reason.trim() || loading}
                 style={{ padding: "9px 22px", borderRadius: 8, border: "none", background: reason.trim() ? T.main : "#e5e7eb", color: reason.trim() ? "#fff" : T.textLight, cursor: reason.trim() ? "pointer" : "not-allowed", fontFamily: "inherit", fontSize: 13, fontWeight: 700 }}
               >
-                {loading ? "Envoi..." : "Envoyer la demande"}
+                {loading ? t("common.sending", "Envoi...") : t("no_team.send_request", "Envoyer la demande")}
               </button>
             </div>
           </>
@@ -108,6 +110,7 @@ function RequestModal({ onClose, onSuccess, currentUser }: {
 }
 
 export default function NoTeamView({ currentUser, onJoined }: Props) {
+  const { t } = useLanguage();
   const { profile, reloadProfile } = useAuth();
   const [showModal, setShowModal] = useState(false);
   const [code, setCode] = useState("");
@@ -129,7 +132,7 @@ export default function NoTeamView({ currentUser, onJoined }: Props) {
 
     if (error || !team) {
       console.error("team lookup error:", error, "code:", code.trim().toUpperCase());
-      setCodeError("Code invalide. Vérifiez avec votre chef d'équipe.");
+      setCodeError(t("no_team.invalid_code", "Code invalide. Vérifiez avec votre chef d'équipe."));
       setJoining(false);
       return;
     }
@@ -170,7 +173,7 @@ export default function NoTeamView({ currentUser, onJoined }: Props) {
 
       if (memberErr || !newMember) {
         console.error("team_members insert error:", memberErr);
-        setCodeError(`Erreur lors de la connexion à l'équipe: ${memberErr?.message ?? "no data returned"}`);
+        setCodeError(`${t("no_team.join_error", "Erreur lors de la connexion à l'équipe")}: ${memberErr?.message ?? "no data returned"}`);
         setJoining(false);
         return;
       }
@@ -206,8 +209,8 @@ export default function NoTeamView({ currentUser, onJoined }: Props) {
   return (
     <div style={{ minHeight: "100vh", background: T.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 16px" }}>
       <div style={{ textAlign: "center", marginBottom: 40 }}>
-        <div style={{ fontSize: 42, fontWeight: 900, color: T.text, letterSpacing: -1 }}>Mon Équipe</div>
-        <p style={{ fontSize: 14, color: T.textLight, marginTop: 8 }}>Rejoignez une équipe de vente ou créez la vôtre</p>
+        <div style={{ fontSize: 42, fontWeight: 900, color: T.text, letterSpacing: -1 }}>{t("no_team.my_team", "Mon Équipe")}</div>
+        <p style={{ fontSize: 14, color: T.textLight, marginTop: 8 }}>{t("no_team.subtitle", "Rejoignez une équipe de vente ou créez la vôtre")}</p>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20, width: "100%", maxWidth: 700 }}>
@@ -215,13 +218,13 @@ export default function NoTeamView({ currentUser, onJoined }: Props) {
           <div style={{ width: 56, height: 56, borderRadius: 16, background: `${T.main}15`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 18, fontSize: 26 }}>
             👥
           </div>
-          <h3 style={{ margin: "0 0 8px", fontSize: 17, fontWeight: 800, color: T.text }}>Créer une nouvelle équipe</h3>
+          <h3 style={{ margin: "0 0 8px", fontSize: 17, fontWeight: 800, color: T.text }}>{t("no_team.create_new_team", "Créer une nouvelle équipe")}</h3>
           <p style={{ margin: "0 0 24px", fontSize: 13, color: T.textLight, lineHeight: 1.6 }}>
-            Demandez la création d'une équipe de vente aux administrateurs. Vous recevrez un code unique pour inviter vos membres.
+            {t("no_team.create_team_desc", "Demandez la création d'une équipe de vente aux administrateurs. Vous recevrez un code unique pour inviter vos membres.")}
           </p>
           {requestDone ? (
             <div style={{ padding: "12px 16px", background: "#f0fdf4", border: `1px solid #bbf7d0`, borderRadius: 10, fontSize: 12, color: T.green, fontWeight: 600 }}>
-              ✅ Demande envoyée aux administrateurs
+              {t("no_team.request_sent_to_admins", "✅ Demande envoyée aux administrateurs")}
             </div>
           ) : (
             <button
@@ -232,7 +235,7 @@ export default function NoTeamView({ currentUser, onJoined }: Props) {
                 fontFamily: "inherit", fontSize: 13, fontWeight: 800,
               }}
             >
-              Demander la création d'une équipe
+              {t("no_team.request_creation", "Demander la création d'une équipe")}
             </button>
           )}
         </div>
@@ -241,9 +244,9 @@ export default function NoTeamView({ currentUser, onJoined }: Props) {
           <div style={{ width: 56, height: 56, borderRadius: 16, background: "#fef3c715", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 18, fontSize: 26 }}>
             🔑
           </div>
-          <h3 style={{ margin: "0 0 8px", fontSize: 17, fontWeight: 800, color: T.text }}>Rejoindre une équipe existante</h3>
+          <h3 style={{ margin: "0 0 8px", fontSize: 17, fontWeight: 800, color: T.text }}>{t("no_team.join_existing", "Rejoindre une équipe existante")}</h3>
           <p style={{ margin: "0 0 18px", fontSize: 13, color: T.textLight, lineHeight: 1.6 }}>
-            Entrez le code d'équipe fourni par votre chef d'équipe pour rejoindre l'équipe.
+            {t("no_team.join_existing_desc", "Entrez le code d'équipe fourni par votre chef d'équipe pour rejoindre l'équipe.")}
           </p>
           <div style={{ position: "relative", marginBottom: 10 }}>
             <input
@@ -277,7 +280,7 @@ export default function NoTeamView({ currentUser, onJoined }: Props) {
               fontFamily: "inherit", fontSize: 13, fontWeight: 800,
             }}
           >
-            {joining ? "Vérification..." : "Rejoindre l'équipe"}
+            {joining ? t("no_team.verifying", "Vérification...") : t("no_team.join_team", "Rejoindre l'équipe")}
           </button>
         </div>
       </div>
