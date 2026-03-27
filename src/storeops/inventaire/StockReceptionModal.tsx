@@ -28,6 +28,13 @@ function newItem(): ReceptionItem {
   return { tempId: Math.random().toString(36).slice(2), product_id: "", product_name: "", quantity_received: 1, format: "", batch_number: "", condition: "good", quantity_damaged: 0, damage_description: "", quantity_ok: 1 };
 }
 
+const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  <div>
+    <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 5 }}>{label}</label>
+    {children}
+  </div>
+);
+
 interface Props {
   prefillProduct?: { id: string; name: string };
   onClose: () => void;
@@ -196,13 +203,6 @@ export default function StockReceptionModal({ prefillProduct, onClose, onDone }:
       setSaving(false);
     }
   }
-
-  const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
-    <div>
-      <label style={{ fontSize: 12, fontWeight: 600, color: T.textMid, display: "block", marginBottom: 5 }}>{label}</label>
-      {children}
-    </div>
-  );
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(230,228,224,0.35)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", display: "flex", alignItems: "flex-start", justifyContent: "center", zIndex: 1500, padding: 20, overflowY: "auto" }} onClick={onClose}>
