@@ -133,15 +133,18 @@ export default function EmailComposerModal({
       if (att) attachments = [{ filename: att.filename, base64Content: att.base64, mimeType: att.mimeType }];
     }
 
+    const smtpKey = module === "orders" ? "commandes" : module === "samples" ? "samples" : module === "pricelist" ? "pricelist" : module === "pickups" ? "pickups" : "commandes";
     const result = await sendEmail({
+      smtp_config_key: smtpKey,
       to: toChips,
       cc: ccChips,
       subject,
-      htmlBody: buildHtml(),
-      textBody: body,
-      module,
-      referenceIds: referenceId ? [referenceId] : [],
-      attachments,
+      html: buildHtml(),
+      text: body,
+      template_key: `${module}_confirmation`,
+      reference_type: module,
+      reference_id: referenceId,
+      attachments: attachments.map(a => ({ filename: a.filename, base64Content: a.base64, mimeType: a.mimeType })),
     });
 
     if (result.success) {
