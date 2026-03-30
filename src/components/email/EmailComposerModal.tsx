@@ -144,7 +144,7 @@ export default function EmailComposerModal({
       template_key: `${module}_confirmation`,
       reference_type: module,
       reference_id: referenceId,
-      attachments: attachments.map(a => ({ filename: a.filename, base64Content: a.base64, mimeType: a.mimeType })),
+      attachments,
     });
 
     if (result.success) {
