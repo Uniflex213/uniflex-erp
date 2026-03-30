@@ -4,6 +4,7 @@ import EditOrderModal from "./EditOrderModal";
 import ChangeLogPanel from "../shared/ChangeLogPanel";
 import { supabase } from "../supabaseClient";
 import EmailComposerModal from "../components/email/EmailComposerModal";
+import { generateOrderPDFBase64 } from "./orderPDF";
 import { T } from "../theme";
 import { useLanguage } from "../i18n/LanguageContext";
 
@@ -482,6 +483,10 @@ export default function OrderDetailView({ order: initialOrder, onBack, onUpdateO
         module="orders"
         referenceId={order.id}
         attachmentLabel={`${t("orders.order_confirmation", "Confirmation de commande")} ${order.id}`}
+        onGetAttachment={async () => {
+          const result = await generateOrderPDFBase64(order);
+          return result;
+        }}
         onSent={() => setShowEmailModal(false)}
       />
     </div>
