@@ -247,10 +247,12 @@ export default function ClientDetailPage({
   const [historyRefresh, setHistoryRefresh] = useState(0);
 
   const handleSaveEdit = async (data: Omit<Client, "id" | "created_at" | "updated_at">) => {
-    const updated = { ...client, ...data, updated_at: new Date().toISOString() };
-    const { error } = await supabase.from("clients").update({ ...data, updated_at: new Date().toISOString() }).eq("id", client.id);
+    // Strip nested relation arrays — PostgREST rejects unknown columns (PGRST204)
+    const { client_notes: _cn, client_credit_notes: _ccn, client_disputes: _cd, client_pickup_tickets: _cpt, ...cleanData } = data as any;
+    const updated = { ...client, ...cleanData, updated_at: new Date().toISOString() };
+    const { error } = await supabase.from("clients").update({ ...cleanData, updated_at: new Date().toISOString() }).eq("id", client.id);
     if (!error) {
-      const diffs = diffFields(client as unknown as Record<string, unknown>, data as unknown as Record<string, unknown>, [
+      const diffs = diffFields(client as unknown as Record<string, unknown>, cleanData as unknown as Record<string, unknown>, [
         { key: "company_name", label: "Nom de la compagnie" },
         { key: "contact_first_name", label: "Prénom du contact" },
         { key: "contact_last_name", label: "Nom du contact" },
