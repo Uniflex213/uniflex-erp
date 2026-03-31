@@ -163,42 +163,19 @@ export function AppProvider({ children }: Props) {
   }, [profile?.id, profile?.team_id, isAdmin]);
 
   const reloadLeads = useCallback(async () => {
-    let query = supabase
+    const { data, error } = await supabase
       .from("crm_leads")
       .select("*, crm_activities(*), crm_reminders(*), crm_files(*)")
       .eq("archived", false)
       .order("created_at", { ascending: false });
-
-    // Scope by team members (or self) for non-admins
-    const memberIds = teamMemberIdsRef.current;
-    if (memberIds) {
-      query = query.or(
-        memberIds.map(id => `assigned_agent_id.eq.${id}`).join(",")
-        + "," + memberIds.map(id => `owner_id.eq.${id}`).join(",")
-        + ",assigned_agent_id.eq.,assigned_agent_id.is.null"
-      );
-    }
-
-    const { data, error } = await query;
     if (!error && data) setLeads(data.map(mapLead));
   }, []);
 
   const reloadSamples = useCallback(async () => {
-    let query = supabase
+    const { data, error } = await supabase
       .from("sample_requests")
       .select("*, sample_items(*), sample_activities(*)")
       .order("created_at", { ascending: false });
-
-    // Scope by team members (or self) for non-admins
-    const memberIds = teamMemberIdsRef.current;
-    if (memberIds) {
-      query = query.or(
-        memberIds.map(id => `agent_id.eq.${id}`).join(",")
-        + "," + memberIds.map(id => `owner_id.eq.${id}`).join(",")
-      );
-    }
-
-    const { data, error } = await query;
     if (!error && data) {
       setSamples(data.map((s: any) => ({
         ...s,

@@ -115,18 +115,13 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
 
   const reloadOrders = useCallback(async () => {
     setLoading(true);
-    let query = supabase
+    const { data, error } = await supabase
       .from("orders")
       .select("*")
       .order("created_at", { ascending: false });
-    // Vendeurs only see their own orders; admin/god_admin see all
-    if (!isAdmin && ownerId) {
-      query = query.eq("owner_id", ownerId);
-    }
-    const { data, error } = await query;
     if (!error && data) setOrders(data.map(mapRow));
     setLoading(false);
-  }, [isAdmin, ownerId]);
+  }, []);
 
   useEffect(() => {
     reloadOrders();

@@ -49,7 +49,6 @@ export default function MyClientsPage() {
     const { data, error } = await supabase
       .from("clients")
       .select("*, client_notes(*), client_credit_notes(*), client_disputes(*), client_pickup_tickets(*)")
-      .eq("agent_id", agent.id)
       .order("created_at", { ascending: false });
     if (!error && data) setClients(data as Client[]);
     setLoading(false);
